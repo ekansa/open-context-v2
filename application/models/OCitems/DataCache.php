@@ -45,6 +45,20 @@ class OCitems_DataCache {
         return $output;
     }
     
+	 //make an array of the content after getting it
+	 function getContentArrayByUUID($uuid){
+		  $output = false;
+		  $cacheRes = $this->getByUUID($uuid);
+		  if(is_array($cacheRes)){
+				$output = json_decode($this->content, true);
+				if(!is_array($output)){
+					 $output = false;
+				}
+		  }
+		  return $output;
+	 }
+	 
+	 
 	 //checks to see if an item exists
 	 function getItemExists($uuid){
 		  $data = false;

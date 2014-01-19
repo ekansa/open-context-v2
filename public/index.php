@@ -42,18 +42,23 @@ $frontController->registerPlugin(new Zend_Controller_Plugin_ErrorHandler(array(
 $router = $frontController->getRouter();
 
 
-$geoparseBatchViewRoute = new Zend_Controller_Router_Route('geoparse/batch/:batchID', array('controller' => 'geoparse', 'action' => 'batch'));
+$subjectsViewRoute = new Zend_Controller_Router_Route('subjects/:uuid', array('controller' => 'subjects', 'action' => 'view'));
 // Add it to the router
-$router->addRoute('geoparseBatch', $geoparseBatchViewRoute); // 'subjects refers to a unique route name
+$router->addRoute('subjectView', $subjectsViewRoute); // html representation
 
-
-//A given book, JSON format
-$geoparseBatchJSONRoute = new Zend_Controller_Router_Route_Regex('geoparse/batch/(.*)\.json',
-                                                        array('controller' => 'geoparse', 'action' => 'batchjson'),
-                                                        array(1 => 'batchID'), 'geoparse/batch/%s/');
+//A longer version
+$subjectsJSONlongRoute = new Zend_Controller_Router_Route_Regex('subjects/(.*)\.json',
+                                                        array('controller' => 'subjects', 'action' => 'json-long'),
+                                                        array(1 => 'uuid'), 'subjects/%s/');
 // Add it to the router
-$router->addRoute('geoparseBatchJSON', $geoparseBatchJSONRoute ); // A given book, JSON format
+$router->addRoute('subjectsJSONlong', $subjectsJSONlongRoute ); // long JSON representation
 
+//A short, more normalized version
+$subjectsJSONterseRoute = new Zend_Controller_Router_Route_Regex('subjects/(.*)\/short.json',
+                                                        array('controller' => 'subjects', 'action' => 'json-short'),
+                                                        array(1 => 'uuid'), 'subjects/%s/');
+// Add it to the router
+$router->addRoute('subjectsJSONterse', $subjectsJSONterseRoute ); // terse JSON representation
 
 
 

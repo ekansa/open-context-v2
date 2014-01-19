@@ -19,6 +19,11 @@ class OCitems_General {
 												"tables" => "table"
 												);
 	 
+	 //convert an array into a well-formatted JSON string
+	 function JSONoutputString($array){
+		  return json_encode($array, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+		  //return json_encode($array, 0);
+	 }
 	 
 	 //get the item UUID from a URI
 	 function itemUUIDfromURI($uri){
