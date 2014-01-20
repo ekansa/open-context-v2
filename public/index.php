@@ -60,7 +60,12 @@ $subjectsJSONterseRoute = new Zend_Controller_Router_Route_Regex('subjects/(.*)\
 // Add it to the router
 $router->addRoute('subjectsJSONterse', $subjectsJSONterseRoute ); // terse JSON representation
 
-
+//A short, more normalized version
+$subjectsJSONgenTerseRoute = new Zend_Controller_Router_Route_Regex('subjects/(.*)\/gen-short.json',
+                                                        array('controller' => 'subjects', 'action' => 'json-gen-short'),
+                                                        array(1 => 'uuid'), 'subjects/%s/');
+// Add it to the router
+$router->addRoute('subjectsJSONgenTerse', $subjectsJSONgenTerseRoute ); // terse JSON representation
 
 
 

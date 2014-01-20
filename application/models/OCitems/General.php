@@ -1,11 +1,13 @@
 <?php
 
 
-//this class interacts with the database for accessing and changing Predicates
-//predicates are defined in different projects
+//this class has generally used functions
+
 class OCitems_General {
     
 	 public $db;
+	 public $localBaseURI; //the base uri for this local instance used for development and testing 
+	 public $canonicalBaseURI; //the cannonical URI for the live deployment
 	 
 	 public $URIabbreviations = array("http://opencontext.org/vocabularies/oc-general/" => "oc-gen");
 	 
@@ -43,6 +45,54 @@ class OCitems_General {
 		  return $output;
 	 }
 	 
+	 //makes an item's URI based on it's type
+	 function generateItemURI($uuid, $type, $cannonical = true){
+		  $output = false;
+		  if($cannonical){
+				$baseURI = $this->getCanonicalBaseURI();
+		  }
+		  else{
+				$baseURI = $this->getLocalBaseURI();
+		  }
+		  
+		  foreach($this->typeURImappings as $uriTypeKey => $typeValue){
+				if($typeValue == $type){
+					 $output = $baseURI.$uriTypeKey."/".$uuid;
+					 break;
+				}
+		  }
+		  
+		  return $output;
+	 }
+	 
+
+	 //use the configuration file to get the base local URI
+	 function getLocalBaseURI(){
+		  if(!$this->localBaseURI){
+				$registry = Zend_Registry::getInstance();
+				$this->localBaseURI = $registry->config->uri->config->localBaseURI;
+		  }
+		  return $this->localBaseURI;
+	 }
+	 
+	 //use the configuration file to get the base cannonical URI
+	 function getCanonicalBaseURI(){
+		  if(!$this->canonicalBaseURI){
+				$registry = Zend_Registry::getInstance();
+				$this->canonicalBaseURI = $registry->config->uri->config->canonicalBaseURI;
+		  }
+		  return $this->canonicalBaseURI;
+	 }
+	 
+	 //converts cannonical to local URIs
+	 function cannonicalToLocalURI($string){
+		  $this->getLocalBaseURI();
+		  $this->getCanonicalBaseURI();
+		  if($this->canonicalBaseURI != $this->localBaseURI){
+				$string = str_replace($this->canonicalBaseURI, $this->localBaseURI, $string);
+		  }
+		  return $string;
+	 }
 	 
 	 //convert common URIs to common prefixs
 	 function abbreviateURI($uri, $prefixDelim = ":"){

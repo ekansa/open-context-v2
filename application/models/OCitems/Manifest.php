@@ -63,6 +63,18 @@ class OCitems_Manifest {
     }
     
 	 
+	 function addViewCount(){
+		  
+		  if($this->uuid){
+				$db = $this->startDB();
+				$where = "uuid = '".$this->uuid."' ";
+				$data = array("views" => $this->views + 1);
+				$db->update("oc_manifest", $data, $where);
+		  }
+		  
+	 }
+	 
+	 
 	 
 	 //adds an item to the database, returns its uuid if successful
 	 function createRecord($data){

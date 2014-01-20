@@ -34,5 +34,28 @@ class SubjectsController extends Zend_Controller_Action
 		  echo $genObj->JSONoutputString($itemObj->shortJSON);
 	 }
    
+	
+	 public function jsonGenShortAction(){
+		  
+		  $requestParams =  $this->_request->getParams();
+		  $this->_helper->viewRenderer->setNoRender();
+		  
+		  Zend_Loader::loadClass('OCitems_Item');
+		  Zend_Loader::loadClass('OCitems_Manifest');
+		  Zend_Loader::loadClass('OCitems_DataCache');
+		  
+		  if(isset($requestParams["uuid"])){
+				$uuid = $requestParams["uuid"];
+		  }
+		  
+		  $genObj = new OCitems_General;
+		  $itemObj = new OCitems_Item;
+		  $generatedShortJSON = $itemObj->generateShortByUUID($uuid);
+		  
+		  header('Content-Type: application/json; charset=utf8');
+		  
+		  echo $genObj->JSONoutputString($generatedShortJSON);
+	 }
+	 
 }
 
