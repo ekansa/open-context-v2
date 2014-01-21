@@ -51,14 +51,33 @@ class OCitems_Item {
 	 public $surname; //person's last name
 	 public $givenName; //persons first name
 
+	 public $assertions; //raw array of assertions made on an item
 	 public $contexts; //context array (for subjects)
 	 public $children; //children array (for subjects)
 	 public $observations; //observation array (has observation metadata, properties, notes, links, and linked data)
 	 public $geospace; //array of geospatial data for the item
 	 public $chronology; //array of chronological information for the item
 	 
-	 
+	 const Predicate_hasContextPath = "oc-gen:has-context-path";
+	 const Predicate_hasPathItems = "oc-gen:has-path-items";
+	 const Predicate_pathDes = "oc-gen:path-des";
+	 const contextPathNodePrefix = "context-path-"; 
    
+	 const Predicate_hasContents = "oc-gen:has-contents";
+	 const Predicate_contains = "oc-gen:contains";
+	
+	 const Predicate_hasObs = "oc-gen:has-obs";
+	 const Predicate_sourceID = "oc-gen:sourceID";
+	 const Predicate_obsStatus= "oc-gen:obsStatus";
+	 const Predicate_hasNote = "oc-gen:has-note";
+	 
+	 const stringLiteral = "xsd:string"; 
+	 const integerLiteral = "xsd:integer"; //numeric
+	 const decimalLiteral = "xsd:decimal"; //numeric
+	 const booleanLiteral = "xsd:boolean"; //numeric
+	 const dateLiteral = "xsd:date";
+	 
+	 
     //get data from database
     function getShortByUUID($uuid){
         
@@ -111,11 +130,224 @@ class OCitems_Item {
 				$JSON_LD["id"] = $this->uri;
 				$JSON_LD["label"] = $this->label;
 				$JSON_LD["uuid"] = $this->uuid;
+				if($this->itemClassURI){
+					 $JSON_LD["rdfs:type"][] = array("id" => $this->itemClassURI);
+				}
+				
+				
+				$assertionsObj = new OCitems_Assertions;
+				$assertionsObj->getParentsByChildUUID($uuid);
+				$this->contexts = $assertionsObj->contexts; //array of containing contexts, if present
+				$this->assertions = $assertionsObj->getByUUID($uuid);
+				unset($assertionsObj);
+				
+				//$JSON_LD["rawcontexts"] = $this->contexts;
+				$JSON_LD = $this->addContextsJSON($JSON_LD); //parent items (if any)
+				$JSON_LD = $this->addContentsJSON($JSON_LD); //child items (if any)
+				$JSON_LD = $this->addObservationsJSON($JSON_LD); //child items (if any)
+				//$JSON_LD["assertions"] = $this->assertions;
+				
+				
 				
 				$output = $JSON_LD;
 		  }
 		  
 		  return $output;
+	 }
+	 
+	 
+	 //make the JSON for describing the item's context
+	 function addContextsJSON($JSON_LD){
+		  if(is_array($this->contexts)){
+				foreach($this->contexts as $treeNodeID => $parentURIs){
+					 $treeNodeEx = explode("-", $treeNodeID );
+					 $treeNumber = $treeNodeEx[count($treeNodeEx)-1];
+					 $contextNodeID = self::contextPathNodePrefix.$treeNumber;
+					 if($treeNumber == 1){
+						  $pathDes = "default";
+					 }
+					 else{
+						  $pathDes = "alternate";
+					 }
+					 
+					 $actContextArray = array("id" => $contextNodeID,
+													  self::Predicate_pathDes => $pathDes);
+					 
+					 foreach($parentURIs as $parentURI){
+						  $actContextArray[self::Predicate_hasPathItems][] = array("id" => $parentURI);
+					 }
+					 
+					 $JSON_LD[self::Predicate_hasContextPath][] = $actContextArray;
+				}
+		  }
+		  return $JSON_LD;
+	 }
+	 
+	 //make the JSON for describing the item's contents
+	 function addContentsJSON($JSON_LD){
+		  
+		  if(is_array($this->assertions)){
+				$ocGenObj = new OCitems_General;
+				$contents = array();
+				foreach($this->assertions as $row){
+					 if($row["predicateUUID"] == self::Predicate_contains){
+						  $actContentsNodeID = $row["obsNode"];
+						  $childURI = $ocGenObj->generateItemURI($row["objectUUID"], $row["objectType"]);
+						  $contents[$actContentsNodeID][] = $childURI;
+					 }
+				}
+				if($contents > 0){
+					 foreach($contents as $treeNodeID => $childrenURIs){
+						  
+						  $treeNodeEx = explode("-", $treeNodeID );
+						  $treeNumber = $treeNodeEx[count($treeNodeEx)-1];
+						  if($treeNumber == 1){
+								$pathDes = "default";
+						  }
+						  else{
+								$pathDes = "alternate";
+						  }
+					 
+						  $actContentArray = array("id" => $treeNodeID,
+													  self::Predicate_pathDes => $pathDes);
+					 
+						  foreach($childrenURIs as $childURI){
+								$actContentArray[self::Predicate_contains][] = array("id" => $childURI);
+						  }	
+					 
+						  $JSON_LD[self::Predicate_hasContents][] = $actContentArray;
+					 }
+				}
+	 
+		  }
+		  
+		  return $JSON_LD;
+	 }
+	 
+	 
+	 //make the JSON for the item's observations
+	 function addObservationsJSON($JSON_LD){
+		  
+		  if(is_array($this->assertions)){
+				$ocGenObj = new OCitems_General;
+				$stringObj = new OCitems_String;
+				
+				$vars = array();
+				$links = array();
+				$obsArray = array();
+				
+				foreach($this->assertions as $row){
+					 if($row["predicateUUID"] != self::Predicate_contains){
+						  $obsNodeID = $row["obsNode"];
+						  
+						  if(!array_key_exists($obsNodeID, $obsArray)){
+								if($row["obsNum"]>0){
+									 $obsStatus = "active";
+								}
+								else{
+									 $obsStatus = "inactive";
+								}
+								
+								$obsArray[$obsNodeID] = array("id" => $obsNodeID,
+																		self::Predicate_sourceID => $row["source_id"],
+																		self::Predicate_obsStatus => $obsStatus);
+						  }
+						  
+						  
+						  $objectURI = false;
+						  $predicateURI = false;
+						  $predicateShort = false;
+						  if($row["predicateUUID"] == self::Predicate_hasNote){
+								$predicateURI = self::Predicate_hasNote;
+								$predicateShort = self::Predicate_hasNote;
+								$actType = $row["objectType"];
+						  }
+						  else{
+								$objectURI = $ocGenObj->generateItemURI($row["objectUUID"], $row["objectType"]);
+								if(!$objectURI){
+									 $actType = $row["objectType"];
+								}
+								else{
+									 $actType = "@id";
+								}
+								$predicateURI = $ocGenObj->generateItemURI($row["predicateUUID"], "predicate");
+								if($ocGenObj->classifyPredicateTypeFromObjectType($row["objectType"]) == "variable"){
+									 if(!array_key_exists($predicateURI, $vars)){
+										  $actVarNumber = count($vars) + 1;
+										  $predicateShort = "var-".$actVarNumber;
+										  $vars[$predicateURI] = array("type" => $actType, "abrev" => $predicateShort);
+									 }
+									 else{
+										  $predicateShort = $vars[$predicateURI]["abrev"];
+									 }
+								}
+								else{
+									 if(!array_key_exists($predicateURI, $links)){
+										  $actLinkNumber = count($links) + 1;
+										  $predicateShort = "link-".$actLinkNumber;
+										  $links[$predicateURI] = array("type" => $actType, "abrev" => $predicateShort);
+									 }
+									 else{
+										  $predicateShort = $links[$predicateURI]["abrev"];
+									 }
+								}
+						  }
+						  if(!$objectURI){
+								/*
+								if($actType == self::stringLiteral){
+									 $stringObj->getByUUID($row["objectUUID"]); //look up the string associated with this value
+									 $actValue = $stringObj->content;
+								}
+								elseif($actType == self::dateLiteral){
+									 $actValue = $row["dataDate"]; //use the date literal
+								}
+								else{
+									 $actValue = $row["dataNum"]+0; //use a numeric literal
+								}
+								*/
+								
+								if($actType == self::stringLiteral){
+									 $stringObj->getByUUID($row["objectUUID"]); //look up the string associated with this value
+									 $actValue = $stringObj->content;
+									 $obsArray[$obsNodeID][$predicateShort][] = array("id" => "#string-".$row["objectUUID"], $actType => $actValue);
+								}
+								else{
+									 if($actType == self::dateLiteral){
+										  $actValue = $row["dataDate"]; //use the date literal
+									 }
+									 else{
+										  $actValue = $row["dataNum"]+0; //use a numeric literal
+									 }
+									 $obsArray[$obsNodeID][$predicateShort][] = $actValue;
+								}
+						  }
+						  else{
+								$obsArray[$obsNodeID][$predicateShort][] = array("id" => $objectURI);
+						  }
+					 }
+				}
+				
+				if(count($vars)>0){
+					 foreach($vars as $predicateURIkey => $predArray){
+						  $predicateShort = $predArray["abrev"];
+						  $JSON_LD["@context"][$predicateShort] = array("@id" => $predicateURIkey, "@type" => $predArray["type"]);
+					 }
+				}
+				if(count($links)>0){
+					 foreach($links as $predicateURIkey => $predArray){
+						  $predicateShort = $predArray["abrev"];
+						  $JSON_LD["@context"][$predicateShort] = array("@id" => $predicateURIkey, "@type" => $predArray["type"]);
+					 }
+				}
+				
+				if(count($obsArray)>0){
+					 foreach($obsArray as $obsNodeKey => $observationData){
+						  $JSON_LD[self::Predicate_hasObs][] = $observationData;
+					 }
+				}
+		  }
+		  
+		  return $JSON_LD;
 	 }
 	 
 	 

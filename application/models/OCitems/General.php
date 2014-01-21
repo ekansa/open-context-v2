@@ -21,6 +21,22 @@ class OCitems_General {
 												"tables" => "table"
 												);
 	 
+	 public $objectTypePredicateTypeMappings = array("subject" => "link",
+																	 "media" => "link",
+																	 "document" => "link",
+																	 "person" => "link",
+																	 "project" => "link",
+																	 "table" => "link",
+																	 "property" => "variable",
+																	 "xsd:integer" => "variable",
+																	 "xsd:decimal" => "variable",
+																	 "xsd:boolean" => "variable",
+																	 "xsd:date" => "variable",
+																	 "xsd:string" => "variable"
+																	 );
+	 
+	 
+	 
 	 //convert an array into a well-formatted JSON string
 	 function JSONoutputString($array){
 		  return json_encode($array, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
@@ -64,6 +80,17 @@ class OCitems_General {
 		  
 		  return $output;
 	 }
+	 
+	 function classifyPredicateTypeFromObjectType($objectType){
+		  $output = false;
+		  $objectTypePredicateTypeMappings = $this->objectTypePredicateTypeMappings;
+		  if(array_key_exists($objectType, $objectTypePredicateTypeMappings)){
+				$output = $objectTypePredicateTypeMappings[$objectType];
+		  }
+		  return $output;
+	 }
+	 
+	 
 	 
 
 	 //use the configuration file to get the base local URI

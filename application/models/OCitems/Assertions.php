@@ -6,6 +6,10 @@
 class OCitems_Assertions {
     
 	 public $db;
+	 public $contexts; //array of parent items
+	 public $recurseCount = 0;
+	 
+	 const containsPredicate = "oc-gen:contains";
 	 
 	 
     //get data from database
@@ -29,6 +33,85 @@ class OCitems_Assertions {
         return $output;
     }
     
+	 
+	 
+	 //make an array of parent items from the database, defaults to making URIs of these
+    function getParentsByChildUUID($uuid, $recursive = true, $makeURIs = true){
+        
+		  $ocGenObj = new OCitems_General;
+		  $this->recurseCount++;
+        $uuid = $this->security_check($uuid);
+        $db = $this->startDB();
+        
+        $sql = 'SELECT uuid AS parentUUID, subjectType, obsNode
+                FROM oc_assertions
+                WHERE objectUUID = "'.$uuid.'" AND predicateUUID = "'.self::containsPredicate.'"
+					 ORDER BY sort;
+                ';
+		
+        $result = $db->fetchAll($sql, 2);
+        if($result){
+				$oldContain = $this->contexts;
+            $newContain = array();
+            $i = 1;
+            foreach($result as $row){
+                $newParentUUID = $row["parentUUID"];
+					 if($makeURIs){
+						  $newParent = $ocGenObj->generateItemURI($newParentUUID, $row["subjectType"]);
+					 }
+					 else{
+						  $newParent = $newParentUUID;
+						  
+					 }
+                $treeName = $row["obsNode"];
+					 if(is_array($oldContain)){
+						  foreach($oldContain as $treeNameKey => $treeItems){
+								if($treeNameKey == $treeName){
+									 $newContain[$treeName][0] =  $newParent;
+									 $j = 1;
+									 foreach($treeItems as $olderParentItem){
+										  $newContain[$treeName][$j] = $olderParentItem;
+										  $j++;
+									 }
+								}
+								else{
+									 $newContain[$treeNameKey] =  $treeItems;
+								}
+						  }
+					 }
+					 else{
+						  $newContain[$treeName][0] =  $newParent;
+					 } 
+					 
+					 $this->contexts = $newContain;
+					 if($this->recurseCount > 20){
+						  die;
+					 }
+					 else{
+						  $this->getParentsByChildUUID($newParentUUID, $recursive, $makeURIs);
+					 }
+					 
+					 $i++;
+            }
+		  }
+        
+    }
+	 
+	 //purge assertions that say something is contained within itself
+	 function cleanSpaceHierarchy(){
+		  $db = $this->startDB();
+		  $sql = 'DELETE FROM oc_assertions WHERE uuid = objectUUID AND predicateUUID = "'.self::containsPredicate.'"; ';
+		  $db->query($sql);
+	 }
+	 
+	 //purge assertions that say something is contained within itself
+	 function cleanMissingPredicates(){
+		  $db = $this->startDB();
+		  $sql = 'DELETE FROM oc_assertions WHERE predicateUUID = ""; ';
+		  $db->query($sql);
+	 }
+	 
+	 
 	 //generate a hashID for the item
 	 function makeHashID($uuid, $obsNum, $predicateUUID, $objectUUID, $dataNum = false, $dataDate = false){
 		  return sha1($uuid." ".$obsNum." ".$predicateUUID." ".$objectUUID." ".$dataNum." ".$dataDate);
