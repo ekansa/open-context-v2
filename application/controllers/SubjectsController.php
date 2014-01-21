@@ -45,6 +45,8 @@ class SubjectsController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('OCitems_DataCache');
 		  Zend_Loader::loadClass('OCitems_Assertions');
 		  Zend_Loader::loadClass('OCitems_String');
+		  Zend_Loader::loadClass('OCitems_Geodata');
+		  Zend_Loader::loadClass('OCitems_Chronodata');
 		  
 		  if(isset($requestParams["uuid"])){
 				$uuid = $requestParams["uuid"];

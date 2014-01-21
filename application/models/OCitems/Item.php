@@ -58,18 +58,21 @@ class OCitems_Item {
 	 public $geospace; //array of geospatial data for the item
 	 public $chronology; //array of chronological information for the item
 	 
-	 const Predicate_hasContextPath = "oc-gen:has-context-path";
-	 const Predicate_hasPathItems = "oc-gen:has-path-items";
-	 const Predicate_pathDes = "oc-gen:path-des";
-	 const contextPathNodePrefix = "context-path-"; 
+	 const Predicate_hasContextPath = "oc-gen:has-context-path"; //has context
+	 const Predicate_hasPathItems = "oc-gen:has-path-items"; //has parent context items
+	 const Predicate_pathDes = "oc-gen:path-des"; //path has a description 
+	 const contextPathNodePrefix = "context-path-"; //prefix for naming context path nodes
    
-	 const Predicate_hasContents = "oc-gen:has-contents";
-	 const Predicate_contains = "oc-gen:contains";
+	 const Predicate_hasContents = "oc-gen:has-contents"; //has children items
+	 const Predicate_contains = "oc-gen:contains"; //contains (list of child items)
 	
-	 const Predicate_hasObs = "oc-gen:has-obs";
-	 const Predicate_sourceID = "oc-gen:sourceID";
-	 const Predicate_obsStatus= "oc-gen:obsStatus";
-	 const Predicate_hasNote = "oc-gen:has-note";
+	 const Predicate_locationRef = "oc-gen:locationRef"; //location reference, points to URI of item (or parent context) providing locational data
+	 const Predicate_chronoRef = "oc-gen:chronoRef"; //chronological reference, points to URI of item (or parent context) providing chronology data
+	
+	 const Predicate_hasObs = "oc-gen:has-obs"; //item has observations
+	 const Predicate_sourceID = "oc-gen:sourceID"; //identifier for the observation source
+	 const Predicate_obsStatus= "oc-gen:obsStatus"; //if the observation is current or deprecated
+	 const Predicate_hasNote = "oc-gen:has-note"; //note about the observation
 	 
 	 const stringLiteral = "xsd:string"; 
 	 const integerLiteral = "xsd:integer"; //numeric
@@ -147,7 +150,8 @@ class OCitems_Item {
 				$JSON_LD = $this->addObservationsJSON($JSON_LD); //child items (if any)
 				//$JSON_LD["assertions"] = $this->assertions;
 				
-				
+				$JSON_LD = $this->addSpaceOrTimeRefJSON($JSON_LD, true); //location reference
+				$JSON_LD = $this->addSpaceOrTimeRefJSON($JSON_LD, false); //chronology reference
 				
 				$output = $JSON_LD;
 		  }
@@ -182,6 +186,67 @@ class OCitems_Item {
 		  }
 		  return $JSON_LD;
 	 }
+	 
+	 
+	 //make the JSON for describing the item's context
+	 function addSpaceOrTimeRefJSON($JSON_LD, $doSpace = true){
+		  $geoUse = false;
+		  $chronoUse = false;
+		  $ocGenObj = new OCitems_General;
+		  $geoObj = new OCitems_Geodata;
+		  $chronoObj = new OCitems_Chronodata;
+		 
+		  if($doSpace){
+				$res = $geoObj->getByUUID($this->uuid);
+				$resArray[$this->uuid] = $res;
+				if(is_array($res)){
+					 $geoUse = array("id" => $this->uri);
+					 $JSON_LD[self::Predicate_locationRef][] = $geoUse;
+				}
+		  }
+		  else{
+				$res = $chronoObj->getByUUID($this->uuid);
+				$resArray[$this->uuid] = $res;
+				if(is_array($res)){
+					 $chronoUse = array("id" => $this->uri);
+					 $JSON_LD[self::Predicate_chronoRef][] = $chronoUse;
+				}
+		  }
+		  
+		  if(!$geoUse && !$chronoUse && is_array($this->contexts)){
+				foreach($this->contexts as $treeNodeID => $parentURIs){
+					 foreach($parentURIs as $parentURI){
+						  $parentUUID = $ocGenObj->itemUUIDfromURI($parentURI);
+						  if($doSpace){
+								$res = $geoObj->getByUUID($parentUUID);
+								$resArray[$parentUUID] = $res;
+								if(is_array($res)){
+									 $geoUse = array("id" => $parentURI);
+								}
+						  }
+						  else{
+								$res = $chronoObj->getByUUID($parentUUID);
+								$resArray[$parentUUID] = $res;
+								if(is_array($res)){
+									 $chronoUse = array("id" => $parentURI);
+								}
+						  }
+					 }
+					 
+					 if($doSpace && is_array($geoUse)){
+						  $JSON_LD[self::Predicate_locationRef][] = $geoUse;
+						  break;
+					 }
+					 if(!$doSpace && is_array($chronoUse)){
+						  $JSON_LD[self::Predicate_chronoRef][] = $chronoUse;
+						  break;
+					 }
+				}
+		  }
+		  
+		  return $JSON_LD;
+	 }
+	 
 	 
 	 //make the JSON for describing the item's contents
 	 function addContentsJSON($JSON_LD){
@@ -293,23 +358,11 @@ class OCitems_Item {
 								}
 						  }
 						  if(!$objectURI){
-								/*
-								if($actType == self::stringLiteral){
-									 $stringObj->getByUUID($row["objectUUID"]); //look up the string associated with this value
-									 $actValue = $stringObj->content;
-								}
-								elseif($actType == self::dateLiteral){
-									 $actValue = $row["dataDate"]; //use the date literal
-								}
-								else{
-									 $actValue = $row["dataNum"]+0; //use a numeric literal
-								}
-								*/
 								
 								if($actType == self::stringLiteral){
 									 $stringObj->getByUUID($row["objectUUID"]); //look up the string associated with this value
 									 $actValue = $stringObj->content;
-									 $obsArray[$obsNodeID][$predicateShort][] = array("id" => "#string-".$row["objectUUID"], $actType => $actValue);
+									 $obsArray[$obsNodeID][$predicateShort][] = array("id" => "#string-".$row["objectUUID"], $actType => $actValue); //string has uuid to identify it
 								}
 								else{
 									 if($actType == self::dateLiteral){

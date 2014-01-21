@@ -30,7 +30,7 @@ class OCitems_Chronodata {
         $db = $this->startDB();
         
         $sql = 'SELECT *
-                FROM oc_geodata
+                FROM oc_chronology
                 WHERE uuid = "'.$uuid.'"
                 LIMIT 1';
 		

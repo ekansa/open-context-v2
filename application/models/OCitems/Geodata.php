@@ -14,8 +14,8 @@ class OCitems_Geodata {
     public $projectUUID;
     public $path;
 	 public $featureType;
-    public $lat;
-	 public $lon;
+    public $latitude;
+	 public $longitude;
 	 public $geoJSON;
 	 public $geoObj;
     public $updated;
@@ -42,8 +42,8 @@ class OCitems_Geodata {
 				$this->projectUUID = $result[0]["project_id"];
 				$this->path = $result[0]["path"];
 				$this->featureType = $result[0]["ftype"];
-				$this->lat = $result[0]["lat"];
-				$this->lon = $result[0]["lon"];
+				$this->latitude = $result[0]["latitude"];
+				$this->longitude = $result[0]["longitude"];
 				
 				if(strlen($result[0]["geoJSON"])>0){
 					 $geoObj = Zend_Json::decode($result[0]["geoJSON"]);
@@ -70,8 +70,8 @@ class OCitems_Geodata {
 								  "project_id" => $this->projectUUID,
 								  "path" => $this->path,
 								  "ftype" => $this->featureType,
-								  "lat" => $this->lat,
-								  "lon" => $this->lon,
+								  "latitude" => $this->latitude,
+								  "longitude" => $this->longitude,
 								  "geoJSON" => $this->geoJSON
 								  );	
 		  }
