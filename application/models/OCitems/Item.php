@@ -74,6 +74,11 @@ class OCitems_Item {
 	 const Predicate_obsStatus= "oc-gen:obsStatus"; //if the observation is current or deprecated
 	 const Predicate_hasNote = "oc-gen:has-note"; //note about the observation
 	 
+	 const Predicate_dcTermsPublished = "dc-terms:published";
+	 const Predicate_dcTermsCreator = "dc-terms:creator";
+	 const Predicate_dcTermsContributor = "dc-terms:contributor";
+	 const Predicate_dcTermsIsPartOf = "dc-terms:isPartOf";
+	 
 	 const stringLiteral = "xsd:string"; 
 	 const integerLiteral = "xsd:integer"; //numeric
 	 const decimalLiteral = "xsd:decimal"; //numeric
@@ -101,6 +106,41 @@ class OCitems_Item {
         return $output;
     }
     
+	 //convert short to long JSON, adding related data
+	 function shortToLongJSON(){
+		  if(is_array($this->shortJSON)){
+				$JSON_LD = $this->shortJSON;
+				
+		  }
+	 }
+	 
+	 
+	 function recursiveNodeExpand($arrayNode){
+		  $ocGenObj = new OCitems_General;
+		  $OCbaseURI = $ocGenObj->getCanonicalBaseURI();
+		  $uriObj = new infoURI;
+		  $manifestObj = new OCitems_Manifest;
+		  if(is_array($arrayNode)){
+				$newArrayNode = array();
+				foreach($arrayNode as $key => $actVals){
+					 if(!is_array($actVals)){
+						  if($key == "id" || $key == "@id"){
+								if(stristr($actVals, $OCbaseURI)){
+									 //this is an open context base URI
+								}
+						  }
+					 }
+					 else{
+						  $actVals = $this->recursiveNodeExpand($actVals);
+					 }
+				}
+				
+				
+		  }
+		  
+	 }
+	 
+	 
 	 
 	 //generates a new short JSON-LD representation from database queries
 	 function generateShortByUUID($uuid){
@@ -115,6 +155,9 @@ class OCitems_Item {
 				$this->label = $manifestObj->label;
 				$this->itemType = $manifestObj->itemType;
 				$this->uri = $ocGenObj->generateItemURI($this->uuid, $this->itemType);
+				$this->published = $manifestObj->published;
+				$this->projectUUID = $manifestObj->projectUUID;
+				$this->projectURI = $ocGenObj->generateItemURI($this->projectUUID, "project");
 				
 				$JSON_LD = array();
 				$JSON_LD["@context"] = array(
@@ -152,6 +195,9 @@ class OCitems_Item {
 				
 				$JSON_LD = $this->addSpaceOrTimeRefJSON($JSON_LD, true); //location reference
 				$JSON_LD = $this->addSpaceOrTimeRefJSON($JSON_LD, false); //chronology reference
+				
+				$JSON_LD[self::Predicate_dcTermsPublished] = $this->published;
+				$JSON_LD[self::Predicate_dcTermsIsPartOf][] = array("id" => $this->projectURI);
 				
 				$output = $JSON_LD;
 		  }
