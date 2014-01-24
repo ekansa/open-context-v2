@@ -16,7 +16,7 @@ class OCitems_Property {
     public $sourceID;
 	 public $predicateUUID;
 	 public $rank; //rank of the property, useful for ordinal values
-	 public $propValue;
+	 public $label;
 	 public $note;
     public $updated;
 	 
@@ -43,7 +43,7 @@ class OCitems_Property {
 				$this->sourceID = $result[0]["source_id"];
 				$this->predicateUUID = $result[0]["predicateUUID"];
 				$this->rank = $result[0]["rank"];
-				$this->propValue = $result[0]["propValue"];
+				$this->label = $result[0]["label"];
 				$this->note  = $result[0]["note"];
 				$this->updated = $result[0]["updated"];
 		  }
@@ -51,17 +51,17 @@ class OCitems_Property {
     }
     
 	 
-	 function makeHashID($predicateUUID, $propValue){
-		  $propValue= trim($propValue);
-		  return sha1($predicateUUID." ".$propValue);
+	 function makeHashID($predicateUUID, $label){
+		  $label= trim($label);
+		  return sha1($predicateUUID." ".$label);
 	 }
 	 
 	 
-	 function getByPropValue($predicateUUID, $propValue){
+	 function getByPropLabel($predicateUUID, $propLabel){
 		  
 		  $db = $this->startDB();
 		  
-		  $hashID = $this->makeHashID($predicateUUID, $propValue);
+		  $hashID = $this->makeHashID($predicateUUID, $propLabel);
 		  $output = false;
 		  $sql = "SELECT * FROM oc_properties WHERE hashID = '$hashID' LIMIT 1; ";
 		  
@@ -74,7 +74,7 @@ class OCitems_Property {
 				$this->sourceID = $result[0]["source_id"];
 				$this->predicateUUID = $result[0]["predicateUUID"];
 				$this->rank = $result[0]["rank"];
-				$this->propValue = $result[0]["propValue"];
+				$this->label = $result[0]["label"];
 				$this->note  = $result[0]["note"];
 				$this->updated = $result[0]["updated"];
 				//$this->getItemData($uuid);
@@ -97,7 +97,7 @@ class OCitems_Property {
 								  "source_id" => $this->sourceID,
 								  "predicateUUID" => $this->predicateUUID,
 								  "rank" => $this->rank,
-								  "propValue" => $this->propValue,
+								  "label" => $this->label,
 								  "note" => $this->note
 								  );	
 		  }
@@ -112,7 +112,7 @@ class OCitems_Property {
 				$data["uuid"] = $ocGenObj->generateUUID();
 		  }
 		  
-		  $data["hashID"] = $this->makeHashID($data["predicateUUID"], $data["propValue"]);
+		  $data["hashID"] = $this->makeHashID($data["predicateUUID"], $data["label"]);
 	 
 		  foreach($data as $key => $value){
 				if(is_array($value)){
