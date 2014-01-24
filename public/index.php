@@ -53,104 +53,19 @@ $subjectsJSONlongRoute = new Zend_Controller_Router_Route_Regex('subjects/(.*)\.
 // Add it to the router
 $router->addRoute('subjectsJSONlong', $subjectsJSONlongRoute ); // long JSON representation
 
-//A short, more normalized version
+//A short, more normalized version from the cache
 $subjectsJSONterseRoute = new Zend_Controller_Router_Route_Regex('subjects/(.*)\/short.json',
                                                         array('controller' => 'subjects', 'action' => 'json-short'),
                                                         array(1 => 'uuid'), 'subjects/%s/');
 // Add it to the router
 $router->addRoute('subjectsJSONterse', $subjectsJSONterseRoute ); // terse JSON representation
 
-//A short, more normalized version
+//A short, more normalized version, generated from the database
 $subjectsJSONgenTerseRoute = new Zend_Controller_Router_Route_Regex('subjects/(.*)\/gen-short.json',
                                                         array('controller' => 'subjects', 'action' => 'json-gen-short'),
                                                         array(1 => 'uuid'), 'subjects/%s/');
 // Add it to the router
 $router->addRoute('subjectsJSONgenTerse', $subjectsJSONgenTerseRoute ); // terse JSON representation
-
-
-
-
-//A given book, JSON format
-$bookJSONRoute = new Zend_Controller_Router_Route_Regex('books/(.*)\.json',
-                                                        array('controller' => 'books', 'action' => 'bookjson'),
-                                                        array(1 => 'id'), 'books/%s/');
-// Add it to the router
-$router->addRoute('bookJSONRoute', $bookJSONRoute ); // A given book, JSON format
-
-//Summary of all books JSON format
-$allBooksJSONRoute = new Zend_Controller_Router_Route_Regex('books/\.json',
-                                                            array('controller' => 'books', 'action' => 'alljson'));
-// Add it to the router
-$router->addRoute('allBooksJSONRoute', $allBooksJSONRoute ); // //Summary of all books JSON format
-
-//Summary of all books JSON format
-$allBooksJSONRouteB = new Zend_Controller_Router_Route('books.json',
-                                                             array('controller' => 'books', 'action' => 'alljson'));
-// Add it to the router
-$router->addRoute('allBooksJSONRouteB', $allBooksJSONRouteB ); // //Summary of all books JSON format
-
-//Summary of all books JSON format
-$allBooksJSONRouteC = new Zend_Controller_Router_Route('books/.json',
-                                                             array('controller' => 'books', 'action' => 'alljson'));
-// Add it to the router
-$router->addRoute('allBooksJSONRouteC', $allBooksJSONRouteC ); // //Summary of all books JSON format
-
-
-//A given book, and page JSON format
-$bookpageJSONRoute = new Zend_Controller_Router_Route_Regex('books/(.*)/page/(.*)\.json',
-                                                        array('controller' => 'books', 'action' => 'bookpagejson'),
-                                                        array(1 => 'docID', 2 => 'pageID'), 'books/%s/');
-// Add it to the router
-$router->addRoute('bookpageJSONRoute', $bookpageJSONRoute ); // A given book, JSON format
-
-
-
-
-
-$placeJSONroute = new Zend_Controller_Router_Route_Regex('places/(.*)\.json',
-                                                        array('controller' => 'places', 'action' => 'placejson'),
-                                                        array(1 => 'IDgazURI'), 'places/%s/');
-// Add it to the router
-$router->addRoute('placeJSONroute', $placeJSONroute ); // A given book, JSON format 
-
-$placeJSONrouteB = new Zend_Controller_Router_Route_Regex('places/(.*)\/.json',
-                                                        array('controller' => 'places', 'action' => 'placejson'),
-                                                        array(1 => 'IDgazURI'), 'places/%s/');
-// Add it to the router
-$router->addRoute('placeJSONrouteB', $placeJSONrouteB ); // A given book, JSON format 
-
-$placeBookJSONroute = new Zend_Controller_Router_Route_Regex('places/(.*)\/books.json',
-                                                        array('controller' => 'places', 'action' => 'bookjson'),
-                                                        array(1 => 'IDgazURI'), 'places/%s/');
-// Add it to the router
-$router->addRoute('placeBookJSONroute', $placeBookJSONroute ); // A given book, JSON format 
-
-
-
-$tokenIssuesRoute = new Zend_Controller_Router_Route('report/token-issues/:tokenID', array('controller' => 'report', 'action' => 'token-issues'));
-// Add it to the router
-$router->addRoute('tokenIssuesRoute', $tokenIssuesRoute); // Issues on a token, HTML
-
-
-
-$tokenIssuesJSONroute = new Zend_Controller_Router_Route_Regex('report/token-issues/(.*)\.json',
-                                                        array('controller' => 'report', 'action' => 'tokenissuesjson'),
-                                                        array(1 => 'tokenID'), 'places/token-issues/%s/');
-// Add it to the router
-$router->addRoute('tokenIssuesJSONroute', $tokenIssuesJSONroute ); // Issues on a token, JSON format 
-
-
-$placeIssuesRoute = new Zend_Controller_Router_Route('report/place-issues/:uriID', array('controller' => 'report', 'action' => 'place-issues'));
-// Add it to the router
-$router->addRoute('placeIssuesRoute', $placeIssuesRoute ); // Issues on a place, HTML
-
-
-
-$placeIssuesJSONroute = new Zend_Controller_Router_Route_Regex('report/place-issues/(.*)\.json',
-                                                        array('controller' => 'report', 'action' => 'placeissuesjson'),
-                                                        array(1 => 'uriID'), 'places/place-issues/%s/');
-// Add it to the router
-$router->addRoute('placeIssuesJSONroute', $placeIssuesJSONroute ); // Issues on a token, JSON format 
 
 
 
