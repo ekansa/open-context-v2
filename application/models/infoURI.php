@@ -14,9 +14,8 @@ class infoURI {
     public $uri;
 	 
 	 
-	 
 	 function lookupURI($possURI){
-		  
+		  $output = false;
 		  $ocGenObj = new OCitems_General;
 		  $isURI = false;
 		  if(substr($possURI, 0, 7) == "http://" || substr($possURI, 0, 8) == "https://"){
@@ -36,12 +35,37 @@ class infoURI {
 				$OCbaseURI = $ocGenObj->getCanonicalBaseURI();
 				if(strstr($possURI, $OCbaseURI)){
 					 //lookup an Open Context item
+					 $output = $this->lookupOCitem($possURI);
 				}
 				else{
-					 //loojip an outside entiry
+					 //lookup an outside entity
 				}
 		  }
 		  
+		  return $output;
+	 }
+	 
+	 
+	 
+	 function lookupOCitem($uri){
+		  $output = false;
+		  $ocGenObj = new OCitems_General;
+		  $itemType = $ocGenObj->itemTypeFromURI($uri);
+		  $uuid = $ocGenObj->itemUUIDfromURI($uri);
+		  if($itemType == "predicate"){
+				$predicateObj = new OCitems_Predicate;
+				$output = $predicateObj->getByUUID($uuid);
+		  }
+		  elseif($itemType == "property"){
+				$propertyObj = new OCitems_Property;
+				$output = $propertyObj->getByUUID($uuid);
+		  }
+		  else{
+				$manifestObj = new OCitems_Manifest;
+				$output = $manifestObj->getByUUID($uuid);
+		  }
+		  
+		  return $output;
 	 }
 	 
 	 
