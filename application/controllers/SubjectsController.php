@@ -33,6 +33,38 @@ class SubjectsController extends Zend_Controller_Action
 		  
 		  echo $genObj->JSONoutputString($itemObj->shortJSON);
 	 }
+	 
+	 public function jsonLongAction(){
+		  
+		  $requestParams =  $this->_request->getParams();
+		  $this->_helper->viewRenderer->setNoRender();
+		  
+		  Zend_Loader::loadClass('OCitems_Item');
+		  Zend_Loader::loadClass('OCitems_Manifest');
+		  Zend_Loader::loadClass('OCitems_DataCache');
+		  Zend_Loader::loadClass('OCitems_Manifest');
+		  Zend_Loader::loadClass('OCitems_DataCache');
+		  Zend_Loader::loadClass('OCitems_Assertions');
+		  Zend_Loader::loadClass('OCitems_String');
+		  Zend_Loader::loadClass('OCitems_Geodata');
+		  Zend_Loader::loadClass('OCitems_Chronodata');
+		  Zend_Loader::loadClass('OCitems_Predicate');
+		  Zend_Loader::loadClass('OCitems_Property');
+		  Zend_Loader::loadClass('linkAnnotation');
+		  Zend_Loader::loadClass('infoURI');
+		  
+		  if(isset($requestParams["uuid"])){
+				$uuid = $requestParams["uuid"];
+		  }
+		  
+		  $genObj = new OCitems_General;
+		  $itemObj = new OCitems_Item;
+		  $ok = $itemObj->getLongByUUID($uuid);
+		  
+		  header('Content-Type: application/json; charset=utf8');
+		  
+		  echo $genObj->JSONoutputString($itemObj->longJSON);
+	 }
    
 	
 	 public function jsonGenShortAction(){
@@ -47,6 +79,10 @@ class SubjectsController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('OCitems_String');
 		  Zend_Loader::loadClass('OCitems_Geodata');
 		  Zend_Loader::loadClass('OCitems_Chronodata');
+		  Zend_Loader::loadClass('OCitems_Predicate');
+		  Zend_Loader::loadClass('linkAnnotation');
+		  Zend_Loader::loadClass('infoURI');
+		  
 		  
 		  if(isset($requestParams["uuid"])){
 				$uuid = $requestParams["uuid"];

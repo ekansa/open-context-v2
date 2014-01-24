@@ -45,12 +45,24 @@ class OCitems_String {
     }
     
 	 
+	 function updateHashIDs(){
+		  
+		  //a maintenance query to keep hashIDs in synch with the content
+		  $db = $this->startDB();
+		  
+		  $sql = 'UPDATE oc_strings SET hashID = CAST(SHA1(CONCAT(CAST(project_id AS CHAR CHARACTER SET utf8), "_", content)) AS CHAR CHARACTER SET ascii)
+		  WHERE hashID != CAST(SHA1(CONCAT(CAST(project_id AS CHAR CHARACTER SET utf8), "_", content)) AS CHAR CHARACTER SET ascii) ;';
+		  
+		  $db->query($sql);
+	 }
+	 
+	 
+	 
 	 function makeHashID($content, $project_id){
 		  
 		  $content = trim($content);
 		  return sha1($project_id."_".$content);
 	 }
-	 
 	 
 	 
 	 

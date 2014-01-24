@@ -105,39 +105,68 @@ class OCitems_Item {
 		  
         return $output;
     }
+	 
+	 //get data from database
+    function getLongByUUID($uuid){
+        
+        $uuid = $this->security_check($uuid);
+        $output = false; //not found
+        
+		  $manifestObj = new OCitems_Manifest;
+		  $this->manifest = $manifestObj->getByUUID($uuid);
+		  if(is_array($this->manifest)){
+				$dataCacheObj = new OCitems_DataCache;
+				$this->shortJSON = $dataCacheObj->getContentArrayByUUID($uuid);
+				if(is_array($this->shortJSON)){
+					 $manifestObj->addViewCount(); //add to the view count
+					 $this->shortToLongJSON();
+					 $output = true;
+				}
+		  }
+		  
+        return $output;
+    }
+	 
     
 	 //convert short to long JSON, adding related data
 	 function shortToLongJSON(){
+		  $JSON_LD = false;
 		  if(is_array($this->shortJSON)){
-				$JSON_LD = $this->shortJSON;
-				
+				$JSON_LD = $this->recursiveNodeExpand($this->shortJSON);
+				$this->longJSON = $JSON_LD;
 		  }
+		  return $JSON_LD;
 	 }
 	 
 	 
 	 function recursiveNodeExpand($arrayNode){
 		  $ocGenObj = new OCitems_General;
-		  $OCbaseURI = $ocGenObj->getCanonicalBaseURI();
 		  $uriObj = new infoURI;
 		  $manifestObj = new OCitems_Manifest;
 		  if(is_array($arrayNode)){
 				$newArrayNode = array();
 				foreach($arrayNode as $key => $actVals){
 					 if(!is_array($actVals)){
+						  $newArrayNode[$key] = $actVals;
 						  if($key == "id" || $key == "@id"){
-								if(stristr($actVals, $OCbaseURI)){
-									 //this is an open context base URI
+								$deRef = $uriObj->lookupURI($actVals);
+								if(is_array($deRef)){
+									 if(isset($deRef["label"])){
+										  $newArrayNode["label"] = $deRef["label"];
+									 }
 								}
 						  }
 					 }
 					 else{
-						  $actVals = $this->recursiveNodeExpand($actVals);
+						  $newActVals = $this->recursiveNodeExpand($actVals);
+						  $newArrayNode[$key] = $newActVals;
 					 }
 				}
-				
-				
+				unset($arrayNode);
+				$arrayNode = $newArrayNode;
+				unset($newArrayNode);
 		  }
-		  
+		  return $arrayNode;
 	 }
 	 
 	 
@@ -196,6 +225,7 @@ class OCitems_Item {
 				$JSON_LD = $this->addSpaceOrTimeRefJSON($JSON_LD, true); //location reference
 				$JSON_LD = $this->addSpaceOrTimeRefJSON($JSON_LD, false); //chronology reference
 				
+				$JSON_LD = $this->addDCpeopleJSON($JSON_LD); //add creators and contributors
 				$JSON_LD[self::Predicate_dcTermsPublished] = $this->published;
 				$JSON_LD[self::Predicate_dcTermsIsPartOf][] = array("id" => $this->projectURI);
 				
@@ -342,10 +372,16 @@ class OCitems_Item {
 		  if(is_array($this->assertions)){
 				$ocGenObj = new OCitems_General;
 				$stringObj = new OCitems_String;
+				$linkAnnotObj = new linkAnnotation;
 				
 				$vars = array();
 				$links = array();
 				$obsArray = array();
+				$dcRels = array();
+				$dcRels["creators"] = array();
+				$dcRels["contributors"] = array();
+				$dcCreators = array();
+				$dcContributors = array();
 				
 				foreach($this->assertions as $row){
 					 if($row["predicateUUID"] != self::Predicate_contains){
@@ -397,6 +433,12 @@ class OCitems_Item {
 										  $actLinkNumber = count($links) + 1;
 										  $predicateShort = "link-".$actLinkNumber;
 										  $links[$predicateURI] = array("type" => $actType, "abrev" => $predicateShort);
+										  if($linkAnnotObj->DCcreatorCheck($row["predicateUUID"])){
+												$dcRels["creators"][] = $predicateURI;
+										  }
+										  if($linkAnnotObj->DCcontributorCheck($row["predicateUUID"])){
+												$dcRels["contributors"][] = $predicateURI;
+										  }
 									 }
 									 else{
 										  $predicateShort = $links[$predicateURI]["abrev"];
@@ -422,6 +464,12 @@ class OCitems_Item {
 						  }
 						  else{
 								$obsArray[$obsNodeID][$predicateShort][] = array("id" => $objectURI);
+								if(in_array($predicateURI, $dcRels["creators"])){
+									 $dcCreators[] = array("id" => $objectURI);
+								}
+								if(in_array($predicateURI, $dcRels["contributors"])){
+									 $dcContributors[] = array("id" => $objectURI);
+								}
 						  }
 					 }
 				}
@@ -444,11 +492,29 @@ class OCitems_Item {
 						  $JSON_LD[self::Predicate_hasObs][] = $observationData;
 					 }
 				}
+				
+				if(count($dcCreators)>0){
+					 $this->creators = $dcCreators;
+				}
+				if(count($dcContributors)>0){
+					 $this->contributors = $dcContributors;
+				}
+				
 		  }
 		  
 		  return $JSON_LD;
 	 }
 	 
+	 //
+	 function addDCpeopleJSON($JSON_LD){
+		  if(is_array($this->creators)){
+				$JSON_LD[self::Predicate_dcTermsCreator] = $this->creators;
+		  }
+		  if(is_array($this->contributors)){
+				$JSON_LD[self::Predicate_dcTermsContributor] = $this->contributors;
+		  }
+		  return $JSON_LD;
+	 }
 	 
 	 
 	 
