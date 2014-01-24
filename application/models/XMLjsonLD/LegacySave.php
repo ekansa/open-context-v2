@@ -148,6 +148,9 @@ class XMLjsonLD_LegacySave  {
 					 if($type == "subject"){
 						  $this->addSubjectItem($itemUUID);
 					 }
+					 if($type == "media"){
+						  $this->addMediaItem($itemUUID);
+					 }
 					 if($this->doneURIs > $currentDone){
 						  $data = array("done" => 1);
 						  $where = "uuid = '$itemUUID' ";
@@ -420,7 +423,7 @@ class XMLjsonLD_LegacySave  {
 				$doc = $compactObj->makeCompactXML($JSONld);
 				$xmlString = $doc->saveXML();
 				*/
-				$jsonString = json_encode($JSONld,  JSON_PRETTY_PRINT);
+				$jsonString = $ocGenObj->JSONoutputString($JSONld);
 				unset($JSONld);
 				unset($data);
 				$data = array();
@@ -449,14 +452,14 @@ class XMLjsonLD_LegacySave  {
 		  $data["project_id"] = $LinkedDataItem->projectUUID;
 		  $data["source_id"] = self::defaultSourceID;
 		  $data["mediaType"] = $LinkedDataItem->mediaType;
-		  $data["mediaTypeURI"] = $LinkedDataItem->mimeTypeURI;
+		  $data["mimeTypeURI"] = $LinkedDataItem->mimeTypeURI;
 		  $data["thumbMimeURI"] = $LinkedDataItem->thumbMimeURI;
 		  $data["thumbURI"] = $LinkedDataItem->thumbURI;
 		  $data["previewMimeURI"] = $LinkedDataItem->previewMimeURI;
 		  $data["previewURI"] = $LinkedDataItem->previewURI;
 		  $data["fullURI"] = $LinkedDataItem->fullURI;
 		  $data["fileSize"] = $LinkedDataItem->fileSize;
-		  
+		 
 		  $mediaFileObj->createRecord($data);
 	 }
 
@@ -596,16 +599,16 @@ class XMLjsonLD_LegacySave  {
 		  if(isset($actProperty["id"])){
 				$predicateUUID = $this->makeUUIDfromURI($varURI);
 				$propUUID = $actProperty["propUUID"];
-				$propValue = $actProperty["value"];
+				$propLabel = $actProperty["value"];
 				$propertyObj = new OCitems_Property;
-				$existUUID = $propertyObj->getByPropValue($predicateUUID, $propValue);
+				$existUUID = $propertyObj->getByPropLabel($predicateUUID, $propLabel);
 				if(!$existUUID){
 					 
 					 $data = array("uuid" => $propUUID,
 										"project_id" => $projectUUID,
 										"source_id" => self::defaultSourceID,
 										"predicateUUID" => $predicateUUID,
-										"propValue" => $propValue
+										"label" => $propLabel
 										);
 					 
 					 $output = $propertyObj->createRecord($data);

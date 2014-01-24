@@ -13,7 +13,7 @@ class OCitems_MediaFile {
     public $projectUUID;
     public $sourceID;
 	 public $mediaType;
-	 public $mediaTypeURI;
+	 public $mimeTypeURI;
 	 public $thumbMimeURI;
 	 public $thumbURI;
 	 public $previewMimeURI;
@@ -44,7 +44,7 @@ class OCitems_MediaFile {
 				$this->projectUUID = $result[0]["project_id"];
 				$this->sourceID = $result[0]["source_id"];
 				$this->mediaType = $result[0]["mediaType"];
-				$this->mediaTypeURI = $result[0]["mediaTypeURI"];
+				$this->mimeTypeURI = $result[0]["mimeTypeURI"];
 				$this->thumbMimeURI = $result[0]["thumbMimeURI"];
 				$this->thumbURI = $result[0]["thumbURI"];
 				$this->previewMimeURI = $result[0]["previewMimeURI"];
@@ -76,7 +76,7 @@ class OCitems_MediaFile {
 									 "project_id" => $this->projectUUID,
 									 "source_id" => $this->sourceID,
 									 "mediaType" => $this->mediaType,
-									 "mediaTypeURI" => $this->mediaTypeURI,
+									 "mimeTypeURI" => $this->mimeTypeURI,
 									 "thumbMimeURI" => $this->thumbMimeURI,
 									 "thumbURI" => $this->thumbURI,
 									 "previewMimeURI" => $this->previewMimeURI,
@@ -105,6 +105,9 @@ class OCitems_MediaFile {
 				$db->insert("oc_mediafiles", $data);
 				$success = $data["uuid"];
 		  } catch (Exception $e) {
+				
+				echo print_r($e);
+				die;
 				$success = false;
 		  }
 		  return $success;
