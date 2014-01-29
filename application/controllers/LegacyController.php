@@ -239,12 +239,16 @@ class LegacyController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('OCitems_Manifest');
 		  Zend_Loader::loadClass('OCitems_DataCache');
 		  Zend_Loader::loadClass('OCitems_MediaFile');
+		  Zend_Loader::loadClass('OCitems_Document');
 		  
 		  
 		  $legacySaveObj = new XMLjsonLD_LegacySave;
 		  $legacySaveObj->retrieveBaseSubjectURI = "http://opencontext/subjects/";
-		  $legacySaveObj->retrieveBaseMediaURI = "http://opencontext/media/";
-		  $legacySaveObj->toDoList("media");
+		  $legacySaveObj->retrieveBaseMediaURI = "http://opencontext.org/media/";
+		  $legacySaveObj->retrieveBaseDocURI = "http://opencontext.org/documents/";
+
+		  
+		  $legacySaveObj->toDoList("document");
 		  $output = array("done" => $legacySaveObj->doneURIs, "existing" => $legacySaveObj->existingURIs, "errors" => $legacySaveObj->errors);
 		  header('Content-Type: application/json; charset=utf8');
 		  echo json_encode($output,  JSON_PRETTY_PRINT);

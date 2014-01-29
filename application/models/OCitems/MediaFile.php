@@ -46,16 +46,26 @@ class OCitems_MediaFile {
 				$this->mediaType = $result[0]["mediaType"];
 				$this->mimeTypeURI = $result[0]["mimeTypeURI"];
 				$this->thumbMimeURI = $result[0]["thumbMimeURI"];
-				$this->thumbURI = $result[0]["thumbURI"];
+				$this->thumbURI = $this->uriValidate($result[0]["thumbURI"]);
 				$this->previewMimeURI = $result[0]["previewMimeURI"];
-				$this->previewURI = $result[0]["previewURI"];
-				$this->fullURI = $result[0]["fullURI"];
+				$this->previewURI = $this->uriValidate($result[0]["previewURI"]);
+				$this->fullURI = $this->uriValidate($result[0]["fullURI"]);
 				$this->fileSize = $result[0]["fileSize"];
 				$this->HRfileSize = $this->formatBytes($this->fileSize);
 				$this->updated = $result[0]["updated"];
 		  }
         return $output;
     }
+	 
+	 //only allows HTTP uris
+	 function uriValidate($possURI){
+		  if(substr($possURI, 0, 7) == "http://" || substr($possURI, 0, 8) == "https://"){
+				return $possURI;
+		  }
+		  else{
+				return false;
+		  }
+	 }
     
 	 
 	 function makeHashID($content, $project_id){

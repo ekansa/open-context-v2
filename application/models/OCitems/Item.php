@@ -85,6 +85,14 @@ class OCitems_Item {
 	 const booleanLiteral = "xsd:boolean"; //numeric
 	 const dateLiteral = "xsd:date";
 	 
+	 const mediaCatPrefix = "dcat";
+	 const mediaCatBaseURI = "http://www.w3.org/ns/dcat#";
+	 const Predicate_fileSize = "dcat:size";
+	 const Predicate_DCformat = "dc-terms:hasFormat";
+	 const Predicate_hasPrimaryFile = "oc-gen:has-primary-file";
+	 const Predicate_hasPreviewFile = "oc-gen:has-preview-file";
+	 const Predicate_hasThumbFile = "oc-gen:has-thumb-file";
+	 const Predicate_hasContent = "oc-gen:has-content";
 	 
     //get data from database
     function getShortByUUID($uuid){
@@ -224,6 +232,8 @@ class OCitems_Item {
 				
 				$JSON_LD = $this->addSpaceOrTimeRefJSON($JSON_LD, true); //location reference
 				$JSON_LD = $this->addSpaceOrTimeRefJSON($JSON_LD, false); //chronology reference
+				
+				$JSON_LD = $this->addMediaJSON($JSON_LD); //add links to media files, if of media type
 				
 				$JSON_LD = $this->addDCpeopleJSON($JSON_LD); //add creators and contributors
 				$JSON_LD[self::Predicate_dcTermsPublished] = $this->published;
@@ -505,7 +515,42 @@ class OCitems_Item {
 		  return $JSON_LD;
 	 }
 	 
-	 //
+	 
+	 //add media files
+	 function addMediaJSON($JSON_LD){
+		  if($this->itemType == "media"){
+				$mediaFileObj = new OCitems_MediaFile;
+				$media = $mediaFileObj->getByUUID($this->uuid);
+				if(is_array($media)){
+					 $JSON_LD["@context"][self::mediaCatPrefix] = self::mediaCatBaseURI;
+					 if($mediaFileObj->fullURI){
+						  $JSON_LD["@context"]["dcat"] = "http://www.w3.org/ns/dcat#";
+						  
+						  $JSON_LD["oc-gen:has-primary-file"][] = array("id" => $mediaFileObj->fullURI,
+																					 "dc-terms:hasFormat" => $mediaFileObj->mimeTypeURI,
+																					 "dcat:size" => $mediaFileObj->fileSize +0
+																					 );
+					 }
+					 
+					 if($mediaFileObj->previewURI){
+						  $JSON_LD["oc-gen:has-preview-file"][] = array("id" => $mediaFileObj->previewURI,
+																					 "dc-terms:hasFormat" => $mediaFileObj->previewMimeURI
+																					 );
+					 }
+					 
+					 if($mediaFileObj->thumbURI){
+						  $JSON_LD["oc-gen:has-thumb-file"][] = array("id" => $mediaFileObj->thumbURI,
+																					 "dc-terms:hasFormat" =>$mediaFileObj->thumbMimeURI
+																					 );
+					 }
+					 
+				}
+		  }
+		  return $JSON_LD;
+	 }
+	 
+	 
+	 //adds Dublin Core creator / contributor relations
 	 function addDCpeopleJSON($JSON_LD){
 		  if(is_array($this->creators)){
 				$JSON_LD[self::Predicate_dcTermsCreator] = $this->creators;
