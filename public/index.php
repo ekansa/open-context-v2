@@ -70,6 +70,38 @@ $router->addRoute('subjectsJSONgenTerse', $subjectsJSONgenTerseRoute ); // terse
 
 
 
+$mediaViewRoute = new Zend_Controller_Router_Route('media/:uuid', array('controller' => 'media', 'action' => 'view'));
+// Add it to the router
+$router->addRoute('subjectView', $mediaViewRoute); // html representation
+
+//A longer version
+$mediaJSONlongRoute = new Zend_Controller_Router_Route_Regex('media/(.*)\.json',
+                                                        array('controller' => 'media', 'action' => 'json-long'),
+                                                        array(1 => 'uuid'), 'media/%s/');
+// Add it to the router
+$router->addRoute('mediaJSONlong', $mediaJSONlongRoute ); // long JSON representation
+
+//A short, more normalized version from the cache
+$mediaJSONterseRoute = new Zend_Controller_Router_Route_Regex('media/(.*)\/short.json',
+                                                        array('controller' => 'media', 'action' => 'json-short'),
+                                                        array(1 => 'uuid'), 'media/%s/');
+// Add it to the router
+$router->addRoute('mediaJSONterse', $mediaJSONterseRoute ); // terse JSON representation
+
+//A short, more normalized version, generated from the database
+$mediaJSONgenTerseRoute = new Zend_Controller_Router_Route_Regex('media/(.*)\/gen-short.json',
+                                                        array('controller' => 'media', 'action' => 'json-gen-short'),
+                                                        array(1 => 'uuid'), 'media/%s/');
+// Add it to the router
+$router->addRoute('mediaJSONgenTerse', $mediaJSONgenTerseRoute ); // terse JSON representation
+
+
+
+
+
+
+
+
 
 
 

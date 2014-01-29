@@ -2,7 +2,7 @@
 /** Zend_Controller_Action */
 require_once 'Zend/Controller/Action.php';
 
-class SubjectsController extends Zend_Controller_Action
+class MediaController extends Zend_Controller_Action
 {
     
 	 function init(){
@@ -81,6 +81,7 @@ class SubjectsController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('OCitems_Geodata');
 		  Zend_Loader::loadClass('OCitems_Chronodata');
 		  Zend_Loader::loadClass('OCitems_Predicate');
+		  Zend_Loader::loadClass('OCitems_MediaFile');
 		  Zend_Loader::loadClass('linkAnnotation');
 		  Zend_Loader::loadClass('infoURI');
 		  
