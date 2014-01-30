@@ -51,7 +51,8 @@ class MediaController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('OCitems_Predicate');
 		  Zend_Loader::loadClass('OCitems_Property');
 		  Zend_Loader::loadClass('OCitems_MediaFile');
-		  Zend_Loader::loadClass('linkAnnotation');
+		  Zend_Loader::loadClass('OCitems_Identifiers');
+		  Zend_Loader::loadClass('Links_linkAnnotation');
 		  Zend_Loader::loadClass('infoURI');
 		  
 		  if(isset($requestParams["uuid"])){
@@ -82,7 +83,8 @@ class MediaController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('OCitems_Chronodata');
 		  Zend_Loader::loadClass('OCitems_Predicate');
 		  Zend_Loader::loadClass('OCitems_MediaFile');
-		  Zend_Loader::loadClass('linkAnnotation');
+		  Zend_Loader::loadClass('OCitems_Identifiers');
+		  Zend_Loader::loadClass('Links_linkAnnotation');
 		  Zend_Loader::loadClass('infoURI');
 		  
 		  
