@@ -15,6 +15,7 @@ class XMLjsonLD_LegacySave  {
 	 public $retrieveBaseSubjectURI;
 	 public $retrieveBaseMediaURI;
 	 public $retrieveBaseDocURI;
+	 public $retrieveBasePersonURI;
 	 
 	 public $maxLimit = false;
 	 const maxComplete = 200;
@@ -154,6 +155,9 @@ class XMLjsonLD_LegacySave  {
 					 }
 					 if($type == "document"){
 						  $this->addDocItem($itemUUID);
+					 }
+					 if($type == "person"){
+						  $this->addPersonItem($itemUUID);
 					 }
 					 if($this->doneURIs > $currentDone){
 						  $data = array("done" => 1);
@@ -507,6 +511,115 @@ class XMLjsonLD_LegacySave  {
 	 }
 	 
 	 
+	 function addPersonItem($itemUUID){
+		 
+		  $this->changedUUIDs = false;
+		  $doneURIs = $this->doneURIs;
+		  $existingURIs = $this->existingURIs;
+		  $errors = array();
+		  $itemURL = $this->retrieveBasePersonURI.$itemUUID.".xml";
+		  $output = false;
+		  if(!$this->checkItemExits($itemUUID)){
+				$db = $this->startDB();
+				@$xmlString = file_get_contents($itemURL);
+				if($xmlString != false){
+					 
+					 
+					 $xmlString = str_replace('<?xml version="1.0"?>', '<?xml version="1.0" encoding="UTF-8" ?>', $xmlString);
+					 
+					 $xmlString = tidy_repair_string($xmlString,
+										  array( 
+												'doctype' => "omit",
+												'input-xml' => true,
+												'output-xml' => true 
+										  ));
+					 
+					 @$itemXML = simplexml_load_string($xmlString);
+					 /*
+					 if(!$itemXML){
+						  echo "here";
+						  $xmlString = tidy_repair_string($xmlString,
+										  array( 
+												'doctype' => "omit",
+												'input-xml' => true,
+												'output-xml' => true 
+										  ));
+						  
+						  @$itemXML = simplexml_load_string($xmlString);
+						  if(!$itemXML){
+								echo "bad XML ";
+								echo $xmlString ;
+								die;
+						  }
+						  
+					 }
+					 */
+					 
+					 @$itemXML = simplexml_load_string($xmlString);
+					 
+					 if($itemXML != false){
+						  $jsonLDObj = new XMLjsonLD_Item;
+						  $xpathsObj = new XMLjsonLD_XpathBasics;
+						  $jsonLDObj = $xpathsObj->URIconvert($itemURL , $jsonLDObj);
+						  $jsonLDObj->uri = $itemURL;
+						  $jsonLDObj->uri = $jsonLDObj->validateURI($jsonLDObj->uri);
+						  $this->assertionSort = 1;
+						  $this->saveContainmentData($jsonLDObj);
+						  $this->saveObservationData($jsonLDObj);
+						 
+						  if($this->changedUUIDs){
+								//UUIDs changed (removed redundant information), parse XML again with updated UUIDs
+								$this->changedUUIDs = false;
+								unset($jsonLDObj);
+								unset($xpathsObj);
+								$xpathsObj = new XMLjsonLD_XpathBasics;
+								$jsonLDObj = new XMLjsonLD_Item;
+								$jsonLDObj = $xpathsObj->URIconvert($itemURL , $jsonLDObj);
+								$jsonLDObj->uri = $itemURL;
+								$jsonLDObj->uri = $jsonLDObj->validateURI($jsonLDObj->uri);
+								$this->assertionSort = 1;
+								$this->saveContainmentData($jsonLDObj);
+								$this->saveObservationData($jsonLDObj);
+						  }
+						  
+						  if(!$this->changedUUIDs){
+								$this->addManifest($jsonLDObj);
+						  }
+						  else{
+								$errors[] = "$itemURL has inconsistent UUIDs";
+						  }
+						  
+						  unset($jsonLDObj);
+						  unset($xpathsObj);
+						  
+						  $doneURIs++;
+						  $this->doneURIs = $doneURIs;
+						  $output = $itemURL;
+					 }
+					 else{
+						  $errors[] = "$itemURL has bad XML";
+					 }
+				}
+				else{
+					 $errors[] = "$itemURL cannot be found";
+				}
+		  
+				if(!$output){
+					 $this->addToDoList($itemUUID, "person");
+				}
+				
+				$this->noteErrors($errors);
+		  }
+		  else{
+				$existingURIs++;
+				$this->existingURIs = $existingURIs;
+		  }
+		  
+		  
+		  return $output;
+	 }
+	 
+	 
 	 //adds the item to the Manifest list, and saves the cached data
 	 function addManifest($LinkedDataItem){
 		  
@@ -533,7 +646,9 @@ class XMLjsonLD_LegacySave  {
 				if($LinkedDataItem->documentContents){
 					 $this->docFileSave($LinkedDataItem); //save the document contents
 				}
-				
+				if($LinkedDataItem->itemType == "person"){
+					 $this->personFileSave($LinkedDataItem); //save the document contents
+				}
 				$JSONld = $LinkedDataItem->makeJSON_LD();
 				/*
 				$compactObj = new XMLjsonLD_CompactXML;
@@ -592,6 +707,23 @@ class XMLjsonLD_LegacySave  {
 		 
 		  $docObj->createRecord($data);
 	 }
+	 
+	 //media file save
+	 function personFileSave($LinkedDataItem){
+		  $persObj = new OCitems_Person;
+		  
+		  $data = array();
+		  $data["uuid"] = $LinkedDataItem->uuid;
+		  $data["project_id"] = $LinkedDataItem->projectUUID;
+		  $data["source_id"] = self::defaultSourceID;
+		  $data["foafType"] = $LinkedDataItem->foafType;
+		  $data["combined_name"] = $LinkedDataItem->label;
+		  $data["given_name"] = $LinkedDataItem->givenName;
+		  $data["surname"] = $LinkedDataItem->surname;
+		 
+		  $persObj->createRecord($data);
+	 }
+	 
 
 	 //saves observation data
 	 function saveObservationData($LinkedDataItem){

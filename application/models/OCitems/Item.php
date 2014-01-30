@@ -94,6 +94,11 @@ class OCitems_Item {
 	 const Predicate_hasThumbFile = "oc-gen:has-thumb-file";
 	 const Predicate_hasContent = "oc-gen:has-content";
 	 
+	 const foafPrefix = "foaf";
+	 const foafBaseURI = "http://xmlns.com/foaf/spec/";
+	 const Predicate_familyName = "foaf:familyName";
+	 const Predicate_givenName = "foaf:givenName";
+	 
     //get data from database
     function getShortByUUID($uuid){
         
@@ -210,6 +215,8 @@ class OCitems_Item {
 					 "oc-gen" => "http://opencontext.org/vocabularies/oc-general/"
 					 );
 				
+				
+				
 				$JSON_LD["id"] = $this->uri;
 				$JSON_LD["label"] = $this->label;
 				$JSON_LD["uuid"] = $this->uuid;
@@ -235,7 +242,10 @@ class OCitems_Item {
 				
 				$JSON_LD = $this->addMediaJSON($JSON_LD); //add links to media files, if of media type
 				
+				$JSON_LD = $this->addPersonJSON($JSON_LD);
 				$JSON_LD = $this->addDCpeopleJSON($JSON_LD); //add creators and contributors
+				$JSON_LD = $this->addStableIdentifiersJSON($JSON_LD); //add stable identifiers
+				
 				$JSON_LD[self::Predicate_dcTermsPublished] = $this->published;
 				$JSON_LD[self::Predicate_dcTermsIsPartOf][] = array("id" => $this->projectURI);
 				
@@ -382,7 +392,7 @@ class OCitems_Item {
 		  if(is_array($this->assertions)){
 				$ocGenObj = new OCitems_General;
 				$stringObj = new OCitems_String;
-				$linkAnnotObj = new linkAnnotation;
+				$linkAnnotObj = new Links_linkAnnotation;
 				
 				$vars = array();
 				$links = array();
@@ -551,6 +561,25 @@ class OCitems_Item {
 	 
 	 
 	 //adds Dublin Core creator / contributor relations
+	 
+	 //add some details about the person from the database, load in FOAF namespace
+	 function addPersonJSON($JSON_LD){
+		  
+		  if($this->itemType == "person"){
+				$JSON_LD["@context"][self::foafPrefix] = self::foafBaseURI;
+				$persObj = new OCitems_Person;
+				$pres = $persObj->getByUUID($uuid);
+				if(is_array($pres)){
+					 $JSON_LD["rdfs:type"][] = array("id" => $persObj->foafType);
+					 $JSON_LD[self::Predicate_familyName] = $persObj->surname;
+					 $JSON_LD[self::Predicate_givenName] = $persObj->givenName;
+				}
+		  }  
+		  return $JSON_LD;
+	 }
+	 
+	 
+	 
 	 function addDCpeopleJSON($JSON_LD){
 		  if(is_array($this->creators)){
 				$JSON_LD[self::Predicate_dcTermsCreator] = $this->creators;
@@ -561,6 +590,19 @@ class OCitems_Item {
 		  return $JSON_LD;
 	 }
 	 
+	 //add stable itentifiers 
+	 function addStableIdentifiersJSON($JSON_LD){
+		  $idObj = new OCitems_Identifiers;
+		  $ids = $idObj->getStableLinksByUUID($this->uuid);
+		  if(is_array($ids)){
+				foreach($ids as $predicateKey => $objectIDs){
+					 foreach( $objectIDs as $objItemArray){
+						  $JSON_LD[$predicateKey][] = $objItemArray;
+					 }
+				}
+		  }
+		  return $JSON_LD;
+	 }
 	 
 	 
     function security_check($input){

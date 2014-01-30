@@ -4,7 +4,7 @@
 /*this class stores information annotating Open Context data items with
  *entities from outside vocabularies
 */
-class linkAnnotation {
+class Links_linkAnnotation {
     
 	 public $db;
 	 

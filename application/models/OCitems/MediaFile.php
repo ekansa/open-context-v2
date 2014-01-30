@@ -50,7 +50,7 @@ class OCitems_MediaFile {
 				$this->previewMimeURI = $result[0]["previewMimeURI"];
 				$this->previewURI = $this->uriValidate($result[0]["previewURI"]);
 				$this->fullURI = $this->uriValidate($result[0]["fullURI"]);
-				$this->fileSize = $result[0]["fileSize"];
+				$this->fileSize = $result[0]["filesize"];
 				$this->HRfileSize = $this->formatBytes($this->fileSize);
 				$this->updated = $result[0]["updated"];
 		  }
@@ -92,7 +92,7 @@ class OCitems_MediaFile {
 									 "previewMimeURI" => $this->previewMimeURI,
 									 "previewURI" => $this->previewURI,
 									 "fullURI" => $this->fullURI,
-									 "fileSize" => $this->fileSize,
+									 "filesize" => $this->fileSize,
 									 "updated" => $this->updated
 								  );	
 		  }
@@ -105,9 +105,9 @@ class OCitems_MediaFile {
 				}
 		  }
 	 
-		  if(!isset($data["fileSize"])){
-				$data["fileSize"] = $this->remote_filesize($data["fullURI"]);
-				$this->fileSize = $data["fileSize"];
+		  if(!isset($data["filesize"])){
+				$data["filesize"] = $this->remote_filesize($data["fullURI"]);
+				$this->fileSize = $data["filesize"];
 		  }
 	 
 	 

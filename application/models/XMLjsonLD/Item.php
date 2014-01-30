@@ -43,6 +43,7 @@ class XMLjsonLD_Item  {
 	 //person specific
 	 public $surname; //person's last name
 	 public $givenName; //persons first name
+	 public $foafType = "foaf:Person"; 
 
 	 public $contexts; //context array (for subjects)
 	 public $children; //children array (for subjects)
@@ -287,6 +288,13 @@ class XMLjsonLD_Item  {
 		  
 		  if($this->documentContents){
 				$JSON_LD["oc-gen:has-content"] = $this->documentContents;
+		  }
+		  
+		  if($this->itemType == "person"){
+				$JSON_LD["@context"]["foaf"] = "http://xmlns.com/foaf/spec/";
+				$JSON_LD["rdfs:type"][] = array("id" => $this->foafType);
+				$JSON_LD["foaf:familyName"] = $this->surname;
+				$JSON_LD["foaf:givenName"] = $this->givenName;
 		  }
 		 
 		  

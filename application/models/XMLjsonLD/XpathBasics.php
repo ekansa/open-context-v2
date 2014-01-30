@@ -333,6 +333,28 @@ class XMLjsonLD_XpathBasics  {
 			  $LinkedDataItem->projectURI = self::projectBaseURI.$projUUID;
 			  $this->projectUUID =  $projUUID;
 		  }
+		  
+		  
+		  if($itemXML->xpath("//oc:metadata/oc:links")){
+				
+				$idObj = new OCitems_Identifiers;
+				foreach ($itemXML->xpath("//oc:metadata/oc:links/oc:link") as $stableURI) {
+					 $stableURI = (string)$stableURI;
+					 $stabEx = explode("/", $stableURI);
+					 $stableID = $stabEx[count($stabEx)-1];
+					 
+					 $data = array("uuid" => $LinkedDataItem->uuid,
+										"project_id" => $LinkedDataItem->projectUUID,
+										"itemType" => "person",
+										"stableID" => $stableID,
+										"stableType" => "orcid"
+										);
+					 
+					 $idObj->createRecord($data);
+				}//end loop for item labels
+		  }
+		  
+		  
 	
 		return 	$LinkedDataItem;
 	 }//end function
