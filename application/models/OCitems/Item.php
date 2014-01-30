@@ -241,8 +241,8 @@ class OCitems_Item {
 				$JSON_LD = $this->addSpaceOrTimeRefJSON($JSON_LD, false); //chronology reference
 				
 				$JSON_LD = $this->addMediaJSON($JSON_LD); //add links to media files, if of media type
-				
-				$JSON_LD = $this->addPersonJSON($JSON_LD);
+				$JSON_LD = $this->addDocumentJSON($JSON_LD); //add the document content
+				$JSON_LD = $this->addPersonJSON($JSON_LD); //adds person specific information
 				$JSON_LD = $this->addDCpeopleJSON($JSON_LD); //add creators and contributors
 				$JSON_LD = $this->addStableIdentifiersJSON($JSON_LD); //add stable identifiers
 				
@@ -562,13 +562,30 @@ class OCitems_Item {
 	 
 	 //adds Dublin Core creator / contributor relations
 	 
+	 
+	 //add document content
+	 function addDocumentJSON($JSON_LD){
+		  
+		  if($this->itemType == "document"){
+				$JSON_LD["@context"][self::foafPrefix] = self::foafBaseURI;
+				$docObj = new OCitems_Document;
+				$res = $docObj->getByUUID($this->uuid);
+				if(is_array($res)){
+					 $JSON_LD[self::Predicate_hasContent] = $docObj->content;
+				}
+		  }  
+		  return $JSON_LD;
+	 }
+	 
+	 
+	 
 	 //add some details about the person from the database, load in FOAF namespace
 	 function addPersonJSON($JSON_LD){
 		  
 		  if($this->itemType == "person"){
 				$JSON_LD["@context"][self::foafPrefix] = self::foafBaseURI;
 				$persObj = new OCitems_Person;
-				$pres = $persObj->getByUUID($uuid);
+				$pres = $persObj->getByUUID($this->uuid);
 				if(is_array($pres)){
 					 $JSON_LD["rdfs:type"][] = array("id" => $persObj->foafType);
 					 $JSON_LD[self::Predicate_familyName] = $persObj->surname;

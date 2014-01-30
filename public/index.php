@@ -72,7 +72,7 @@ $router->addRoute('subjectsJSONgenTerse', $subjectsJSONgenTerseRoute ); // terse
 
 $mediaViewRoute = new Zend_Controller_Router_Route('media/:uuid', array('controller' => 'media', 'action' => 'view'));
 // Add it to the router
-$router->addRoute('subjectView', $mediaViewRoute); // html representation
+$router->addRoute('mediaView', $mediaViewRoute); // html representation
 
 //A longer version
 $mediaJSONlongRoute = new Zend_Controller_Router_Route_Regex('media/(.*)\.json',
@@ -99,6 +99,59 @@ $router->addRoute('mediaJSONgenTerse', $mediaJSONgenTerseRoute ); // terse JSON 
 
 
 
+$documentsViewRoute = new Zend_Controller_Router_Route('documents/:uuid', array('controller' => 'documents', 'action' => 'view'));
+// Add it to the router
+$router->addRoute('documentsView', $documentsViewRoute); // html representation
+
+//A longer version
+$documentsJSONlongRoute = new Zend_Controller_Router_Route_Regex('documents/(.*)\.json',
+                                                        array('controller' => 'documents', 'action' => 'json-long'),
+                                                        array(1 => 'uuid'), 'documents/%s/');
+// Add it to the router
+$router->addRoute('documentsJSONlong', $documentsJSONlongRoute ); // long JSON representation
+
+//A short, more normalized version from the cache
+$documentsJSONterseRoute = new Zend_Controller_Router_Route_Regex('documents/(.*)\/short.json',
+                                                        array('controller' => 'documents', 'action' => 'json-short'),
+                                                        array(1 => 'uuid'), 'documents/%s/');
+// Add it to the router
+$router->addRoute('documentsJSONterse', $documentsJSONterseRoute ); // terse JSON representation
+
+//A short, more normalized version, generated from the database
+$documentsJSONgenTerseRoute = new Zend_Controller_Router_Route_Regex('documents/(.*)\/gen-short.json',
+                                                        array('controller' => 'documents', 'action' => 'json-gen-short'),
+                                                        array(1 => 'uuid'), 'documents/%s/');
+// Add it to the router
+$router->addRoute('documentsJSONgenTerse', $documentsJSONgenTerseRoute ); // terse JSON representation
+
+
+
+
+
+$personsViewRoute = new Zend_Controller_Router_Route('persons/:uuid', array('controller' => 'persons', 'action' => 'view'));
+// Add it to the router
+$router->addRoute('personsView', $personsViewRoute); // html representation
+
+//A longer version
+$personsJSONlongRoute = new Zend_Controller_Router_Route_Regex('persons/(.*)\.json',
+                                                        array('controller' => 'persons', 'action' => 'json-long'),
+                                                        array(1 => 'uuid'), 'persons/%s/');
+// Add it to the router
+$router->addRoute('personsJSONlong', $personsJSONlongRoute ); // long JSON representation
+
+//A short, more normalized version from the cache
+$personsJSONterseRoute = new Zend_Controller_Router_Route_Regex('persons/(.*)\/short.json',
+                                                        array('controller' => 'persons', 'action' => 'json-short'),
+                                                        array(1 => 'uuid'), 'persons/%s/');
+// Add it to the router
+$router->addRoute('personsJSONterse', $personsJSONterseRoute ); // terse JSON representation
+
+//A short, more normalized version, generated from the database
+$personsJSONgenTerseRoute = new Zend_Controller_Router_Route_Regex('persons/(.*)\/gen-short.json',
+                                                        array('controller' => 'persons', 'action' => 'json-gen-short'),
+                                                        array(1 => 'uuid'), 'persons/%s/');
+// Add it to the router
+$router->addRoute('personsJSONgenTerse', $personsJSONgenTerseRoute ); // terse JSON representation
 
 
 
