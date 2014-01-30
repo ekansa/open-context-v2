@@ -16,6 +16,7 @@ class XMLjsonLD_LegacySave  {
 	 public $retrieveBaseMediaURI;
 	 public $retrieveBaseDocURI;
 	 public $retrieveBasePersonURI;
+	 public $retrieveBaseProjectURI;
 	 
 	 public $maxLimit = false;
 	 const maxComplete = 200;
@@ -158,6 +159,9 @@ class XMLjsonLD_LegacySave  {
 					 }
 					 if($type == "person"){
 						  $this->addPersonItem($itemUUID);
+					 }
+					 if($type == "project"){
+						  $this->addProjectItem($itemUUID);
 					 }
 					 if($this->doneURIs > $currentDone){
 						  $data = array("done" => 1);
@@ -618,6 +622,119 @@ class XMLjsonLD_LegacySave  {
 		  
 		  return $output;
 	 }
+	 
+	 
+	 function addProjectItem($itemUUID){
+		 
+		  $this->changedUUIDs = false;
+		  $doneURIs = $this->doneURIs;
+		  $existingURIs = $this->existingURIs;
+		  $errors = array();
+		  $itemURL = $this->retrieveBaseProjectURI.$itemUUID.".xml";
+		  $output = false;
+		  if(!$this->checkItemExits($itemUUID)){
+				$db = $this->startDB();
+				@$xmlString = file_get_contents($itemURL);
+				if($xmlString != false){
+					 
+					 
+					 $xmlString = str_replace('<?xml version="1.0"?>', '<?xml version="1.0" encoding="UTF-8" ?>', $xmlString);
+					 /*
+					 $xmlString = tidy_repair_string($xmlString,
+										  array( 
+												'doctype' => "omit",
+												'input-xml' => true,
+												'output-xml' => true 
+										  ));
+					 
+					 @$itemXML = simplexml_load_string($xmlString);
+					 /*
+					 if(!$itemXML){
+						  echo "here";
+						  $xmlString = tidy_repair_string($xmlString,
+										  array( 
+												'doctype' => "omit",
+												'input-xml' => true,
+												'output-xml' => true 
+										  ));
+						  
+						  @$itemXML = simplexml_load_string($xmlString);
+						  if(!$itemXML){
+								echo "bad XML ";
+								echo $xmlString ;
+								die;
+						  }
+						  
+					 }
+					 */
+					 
+					 @$itemXML = simplexml_load_string($xmlString);
+					 
+					 if($itemXML != false){
+						  $jsonLDObj = new XMLjsonLD_Item;
+						  $xpathsObj = new XMLjsonLD_XpathBasics;
+						  $jsonLDObj = $xpathsObj->URIconvert($itemURL , $jsonLDObj);
+						  $jsonLDObj->uri = $itemURL;
+						  $jsonLDObj->uri = $jsonLDObj->validateURI($jsonLDObj->uri);
+						  $this->assertionSort = 1;
+						  $this->saveContainmentData($jsonLDObj);
+						  $this->saveObservationData($jsonLDObj);
+						 
+						  if($this->changedUUIDs){
+								//UUIDs changed (removed redundant information), parse XML again with updated UUIDs
+								$this->changedUUIDs = false;
+								unset($jsonLDObj);
+								unset($xpathsObj);
+								$xpathsObj = new XMLjsonLD_XpathBasics;
+								$jsonLDObj = new XMLjsonLD_Item;
+								$jsonLDObj = $xpathsObj->URIconvert($itemURL , $jsonLDObj);
+								$jsonLDObj->uri = $itemURL;
+								$jsonLDObj->uri = $jsonLDObj->validateURI($jsonLDObj->uri);
+								$this->assertionSort = 1;
+								$this->saveContainmentData($jsonLDObj);
+								$this->saveObservationData($jsonLDObj);
+						  }
+						  
+						  /*
+						  if(!$this->changedUUIDs){
+								$this->addManifest($jsonLDObj);
+						  }
+						  else{
+								$errors[] = "$itemURL has inconsistent UUIDs";
+						  }
+						  
+						  unset($jsonLDObj);
+						  unset($xpathsObj);
+						  
+						  $doneURIs++;
+						  $this->doneURIs = $doneURIs;
+						  $output = $itemURL;
+						  
+						  */
+					 }
+					 else{
+						  $errors[] = "$itemURL has bad XML";
+					 }
+				}
+				else{
+					 $errors[] = "$itemURL cannot be found";
+				}
+		  
+				if(!$output){
+					 $this->addToDoList($itemUUID, "project");
+				}
+				
+				$this->noteErrors($errors);
+		  }
+		  else{
+				$existingURIs++;
+				$this->existingURIs = $existingURIs;
+		  }
+		  
+		  
+		  return $output;
+	 }
+	 
 	 
 	 
 	 //adds the item to the Manifest list, and saves the cached data

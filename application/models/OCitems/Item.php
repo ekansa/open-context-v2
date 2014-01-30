@@ -95,7 +95,7 @@ class OCitems_Item {
 	 const Predicate_hasContent = "oc-gen:has-content";
 	 
 	 const foafPrefix = "foaf";
-	 const foafBaseURI = "http://xmlns.com/foaf/spec/";
+	 const foafBaseURI = "http://xmlns.com/foaf/0.1/";
 	 const Predicate_familyName = "foaf:familyName";
 	 const Predicate_givenName = "foaf:givenName";
 	 

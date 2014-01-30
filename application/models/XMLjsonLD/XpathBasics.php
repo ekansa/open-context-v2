@@ -281,6 +281,44 @@ class XMLjsonLD_XpathBasics  {
 			  $LinkedDataItem->longitude =$geoArray[1];  //lat, lon
 		  }
 	
+		  if($itemXML->xpath("//oc:metadata/dc:identifier/@type")){
+				
+				$idObj = new OCitems_Identifiers;
+				$stableType = false;
+				foreach ($itemXML->xpath("//oc:metadata/dc:identifier/@type") as $stableType) {
+					 $stableType = (string)$stableType;
+					 
+					 foreach ($itemXML->xpath("//oc:metadata/dc:identifier[@type = '$stableType']") as $stableID) {
+						  $stableID = (string)$stableID;
+						  $data = array("uuid" => $LinkedDataItem->uuid,
+											 "project_id" => $LinkedDataItem->projectUUID,
+											 "itemType" => "project",
+											 "stableID" => $stableID,
+											 "stableType" => $stableType
+											 );
+						  
+						  $idObj->createRecord($data);
+					 }//end loop for item labels
+				}
+		  }
+	
+		  $DCobj = new Links_tempDC;
+		  foreach ($itemXML->xpath("//oc:metadata/dc:subject") as $subject) {
+				$stableType = (string)$subject;
+				$subject = strtolower($subject);
+				
+				$data = array("term" => $subject, "type" => false, "uri" => false);
+				$DCobj->createRecord($data);
+		  }
+		  foreach ($itemXML->xpath("//oc:metadata/dc:coverage") as $subject) {
+				$stableType = (string)$subject;
+				$subject = strtolower($subject);
+				
+				$data = array("term" => $subject, "type" => false, "uri" => false);
+				$DCobj->createRecord($data);
+		  }
+	
+	
 		  return 	$LinkedDataItem;
 	}//end function
 
