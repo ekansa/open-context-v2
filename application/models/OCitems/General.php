@@ -35,7 +35,7 @@ class OCitems_General {
 																	 "xsd:string" => "variable"
 																	 );
 	 
-	 
+	 public $errors;
 	 
 	 //convert an array into a well-formatted JSON string
 	 function JSONoutputString($array){
@@ -132,6 +132,71 @@ class OCitems_General {
 	 }
 	 
 	 
+	 function validateInput($inputArray, $expectedSchema){
+		  $validArray = array();
+		  $typeURImappings = $this->typeURImappings;
+		  $problemEncountered = false;
+		  foreach($expectedSchema as $key => $valExpect){
+				
+				$keyOK = true;
+				$actInputValue = $this->checkExistsNonBlank($key, $inputArray);
+				if($valExpect["type"] == "OCitemType"){
+					 if(!in_array($actInputValue, $typeURImappings)){
+						  $this->noteError("Key: '$key' has value: '$actInputValue', not a valid OC item type.");
+						  $keyOK = false;
+					 }
+				}
+				if(!$valExpect["blankOK"]){
+					 if(!$actInputValue){
+						  $this->noteError("Key: '$key' required.");
+						  $keyOK = false;
+					 }
+				}
+				
+				if($keyOK){
+					 $validArray[$key] = $actInputValue;
+				}
+				else{
+					 $problemEncountered = true;
+				}
+		  }
+		  
+		  if($problemEncountered){
+				$validArray = false;
+		  }
+		  
+		  return $validArray;
+	 }
+	 
+	 
+	 
+	 //used for validating data
+	 function checkExistsNonBlank($key, $requestParams){
+		  $value = false;
+		  if(isset($requestParams[$key])){
+				$value = trim($requestParams[$key]);
+				if(strlen($value)<1){
+					 $value = false;
+				}
+		  }
+		  return $value;
+	 }
+	 
+	 //stores an error
+	 function noteError($errorMessage){
+		  if(!is_array($this->errors)){
+				$errors = array();
+		  }
+		  else{
+				$errors = $this->errors;
+		  }
+		  $errors[] = $errorMessage;
+		  $this->errors = $errors;
+	 }
+	 
+	 
+	 
+	 //make a UUID
     function generateUUID()    {
         $rawid = strtoupper(md5(uniqid(rand(), true)));
 		  $workid = $rawid;

@@ -37,8 +37,19 @@ class EditController extends Zend_Controller_Action
 	 
 	 
 	 private function error405($expectedMethod){
-		  header("HTTP/1.0 405 Method Not Allowed");
+		  header('HTTP/1.0 405 Method Not Allowed');
+		  header('Content-Type: application/json; charset=utf8');
 		  $output = array("error" => "Need to use the HTTP $expectedMethod method.",
+								"requestParams" => $this->_request->getParams()
+								);
+		  $genObj = new OCitems_General;
+		  echo $genObj->JSONoutputString($output);
+	 }
+	 
+	 private function error400($errors){
+		  header('HTTP/1.0 400 Bad Request');
+		  header('Content-Type: application/json; charset=utf8');
+		  $output = array("errors" => $errors,
 								"requestParams" => $this->_request->getParams()
 								);
 		  $genObj = new OCitems_General;
@@ -51,12 +62,17 @@ class EditController extends Zend_Controller_Action
 		  $this->_helper->viewRenderer->setNoRender();
 		  
 		  if(!$this->getRequest()->isPost()){
-				//not a post
-				$this->error405("POST");
+				$this->error405("POST"); //not a post, throw an error
 				exit;
 		  }
 		  else{
-				
+				$genObj = new OCitems_General;
+				$linkAnnotObj = new Links_linkAnnotation;
+				$data = $genObj->validateInput($requestParams, $linkAnnotObj->expectedSchema);
+				if(!$data){
+					 $this->error400($genObj->errors); //throw an error explaining what was expected
+					 exit;
+				}
 		  }
 	 }
 }

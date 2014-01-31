@@ -26,6 +26,14 @@ class Links_linkAnnotation {
 	 const DCtermsCreator = "http://purl.org/dc/terms/creator";
 	 const DCtermsContributor = "http://purl.org/dc/terms/contributor";
 	 
+	 public $expectedSchema = array("uuid" => array("type" => "xsd:string", "blankOK" => false),
+											  "subjectType" => array("type" => "OCitemType", "blankOK" => false),
+											  "project_id" => array("type" => "xsd:string", "blankOK" => false),
+											  "source_id" => array("type" => "xsd:string", "blankOK" => true),
+											  "predicteURI" => array("type" => "xsd:string", "blankOK" => false),
+											  "objectURI" => array("type" => "xsd:string", "blankOK" => false),
+											  "creatorUUID" => array("type" => "xsd:string", "blankOK" => true)
+											  );
 	 
 	 
 	  //get data from database
