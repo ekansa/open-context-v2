@@ -32,7 +32,9 @@ class EditorialController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('OCitems_Person');
 		  
 		  Zend_Loader::loadClass('Links_linkAnnotation');
+		  Zend_Loader::loadClass('Links_linkEntity');
 		  Zend_Loader::loadClass('Links_tempDC');
+		  Zend_Loader::loadClass('infoURI');
     }
 	 
 	 public function projectAction(){

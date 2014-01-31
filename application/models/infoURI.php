@@ -39,6 +39,8 @@ class infoURI {
 				}
 				else{
 					 //lookup an outside entity
+					 $linkEntityObj = new Links_linkEntity;
+					 $output = $linkEntityObj->getByURI($possURI);
 				}
 		  }
 		  

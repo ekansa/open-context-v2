@@ -32,14 +32,16 @@ class EditController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('OCitems_Person');
 		  
 		  Zend_Loader::loadClass('Links_linkAnnotation');
+		  Zend_Loader::loadClass('Links_linkEntity');
 		  Zend_Loader::loadClass('Links_tempDC');
+		  Zend_Loader::loadClass('infoURI');
     }
 	 
 	 
 	 private function error405($expectedMethod){
 		  header('HTTP/1.0 405 Method Not Allowed');
 		  header('Content-Type: application/json; charset=utf8');
-		  $output = array("error" => "Need to use the HTTP $expectedMethod method.",
+		  $output = array("errors" => array("Need to use the HTTP $expectedMethod method."),
 								"requestParams" => $this->_request->getParams()
 								);
 		  $genObj = new OCitems_General;
@@ -54,6 +56,27 @@ class EditController extends Zend_Controller_Action
 								);
 		  $genObj = new OCitems_General;
 		  echo $genObj->JSONoutputString($output);
+	 }
+	 
+	 
+	 public function getAnnotationsAction(){
+		  $requestParams =  $this->_request->getParams();
+		  $this->_helper->viewRenderer->setNoRender();
+		  
+		  $genObj = new OCitems_General;
+		  $linkAnnotObj = new Links_linkAnnotation;
+		  if(!isset($requestParams["uuid"])){
+				$errors = array("Need 'uuid' parameter");
+				$this->error400($errors);
+		  }
+		  else{
+				$result = $linkAnnotObj->getAnnotationsByUUID($requestParams["uuid"]);
+				$output = array("response" => $result,
+										  "errors" => false,
+										  "requestParams" => $requestParams);
+				header('Content-Type: application/json; charset=utf8');
+				echo $genObj->JSONoutputString($output);
+		  }
 	 }
 	 
 	 
@@ -72,6 +95,14 @@ class EditController extends Zend_Controller_Action
 				if(!$data){
 					 $this->error400($genObj->errors); //throw an error explaining what was expected
 					 exit;
+				}
+				else{
+					 $ok = $linkAnnotObj->createRecord($data);
+					 $output = array("response" => $ok,
+										  "errors" => false,
+										  "data" => $data);
+					 header('Content-Type: application/json; charset=utf8');
+					 echo $genObj->JSONoutputString($output);
 				}
 		  }
 	 }

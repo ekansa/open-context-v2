@@ -174,9 +174,15 @@ class OCitems_General {
 	 function checkExistsNonBlank($key, $requestParams){
 		  $value = false;
 		  if(isset($requestParams[$key])){
-				$value = trim($requestParams[$key]);
-				if(strlen($value)<1){
+				if(is_array($requestParams[$key])){
+					 $this->noteError("Key: '$key' should not be an array.");
 					 $value = false;
+				}
+				else{
+					 $value = trim($requestParams[$key]);
+					 if(strlen($value)<1){
+						  $value = false;
+					 }	 
 				}
 		  }
 		  return $value;

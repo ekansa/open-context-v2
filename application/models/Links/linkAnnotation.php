@@ -78,6 +78,56 @@ class Links_linkAnnotation {
     }
 	 
 	 
+	 //get all annotations data from database
+    function getAnnotationsByUUID($uuid, $predicateURI = false, $objectURI = false){
+        
+        $uuid = $this->security_check($uuid);
+        $output = false; //not found
+        
+        $db = $this->startDB();
+        
+		  $predicateTerm = "";
+		  $objectTerm = "";
+		  if($predicateURI != false){
+				$predicateTerm = " AND predicateURI = '$predicateURI ' ";
+		  }
+		  if($objectURI != false){
+				$objectTerm = " AND objectURI = '$objectURI ' ";
+		  }
+		  
+        $sql = 'SELECT *
+                FROM link_annotations
+                WHERE uuid = "'.$uuid.'"
+					 '.$predicateTerm.' 
+					 '.$objectTerm.'
+                ';
+		
+        $result = $db->fetchAll($sql, 2);
+        if($result){
+				$output = array();
+				$uriObj = new infoURI;
+            foreach($result as $row){
+					 $pRes = $uriObj->lookupURI($row["predicateURI"]);
+					 $row["predicateLabel"] = false;
+					 $row["objectLabel"] = false;
+					 if(is_array($pRes)){
+						  $row["predicateLabel"] = $pRes["label"];
+					 }
+					 $pRes = $uriObj->lookupURI($row["objectURI"]);
+					 if(is_array($pRes)){
+						  $row["objectLabel"] = $pRes["label"];
+					 }
+					 $output[] = $row; 
+				}
+		  }
+        return $output;
+    }
+	 
+	 
+	 
+	 
+	 
+	 
 	 //checks to see if the uuid is a DC creator
 	 function DCcreatorCheck($uuid){
 		  return $this->getByUUID($uuid, self::SKOScloseMatch, self::DCtermsCreator);
@@ -183,7 +233,6 @@ class Links_linkAnnotation {
 		  $db = $this->startDB();
 		  $success = false;
 		  if(!is_array($data)){
-				
 				$data = array("uuid" => $this->uuid,
 								  "subjectType" => $this->subjectType,
 								  "project_id" => $this->projectUUID,
@@ -193,25 +242,12 @@ class Links_linkAnnotation {
 								  "creatorUUID" => false
 								  );	
 		  }
-		  else{
-				if(!isset($data["uuid"])){
-					 $data["uuid"] = false;
-				}
-		  }
 		  
 		  $data["hashID"] = $this->makeHashID($data["uuid"], $data["predicateURI"], $data["objectURI"]);
 	 
-		  foreach($data as $key => $value){
-				if(is_array($value)){
-					 echo print_r($data);
-					 die;
-				}
-		  }
-	 
-	 
 		  try{
 				$db->insert("link_annotations", $data);
-				$success = $data["uuid"];
+				$success = $data["hashID"];
 		  } catch (Exception $e) {
 				$success = false;
 		  }

@@ -54,6 +54,7 @@ class PersonsController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('OCitems_MediaFile');
 		  Zend_Loader::loadClass('OCitems_Identifiers');
 		  Zend_Loader::loadClass('Links_linkAnnotation');
+		  Zend_Loader::loadClass('Links_linkEntity');
 		  Zend_Loader::loadClass('infoURI');
 		  
 		  if(isset($requestParams["uuid"])){
@@ -86,6 +87,7 @@ class PersonsController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('OCitems_MediaFile');
 		  Zend_Loader::loadClass('OCitems_Identifiers');
 		  Zend_Loader::loadClass('Links_linkAnnotation');
+		  Zend_Loader::loadClass('Links_linkEntity');
 		  Zend_Loader::loadClass('infoURI');
 		  
 		  
