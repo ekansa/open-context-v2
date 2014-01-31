@@ -639,7 +639,7 @@ class XMLjsonLD_LegacySave  {
 					 
 					 
 					 $xmlString = str_replace('<?xml version="1.0"?>', '<?xml version="1.0" encoding="UTF-8" ?>', $xmlString);
-					 /*
+					 
 					 $xmlString = tidy_repair_string($xmlString,
 										  array( 
 												'doctype' => "omit",
@@ -679,6 +679,7 @@ class XMLjsonLD_LegacySave  {
 						  $this->assertionSort = 1;
 						  $this->saveContainmentData($jsonLDObj);
 						  $this->saveObservationData($jsonLDObj);
+						  $this->saveProjectDC($jsonLDObj);
 						 
 						  if($this->changedUUIDs){
 								//UUIDs changed (removed redundant information), parse XML again with updated UUIDs
@@ -693,6 +694,7 @@ class XMLjsonLD_LegacySave  {
 								$this->assertionSort = 1;
 								$this->saveContainmentData($jsonLDObj);
 								$this->saveObservationData($jsonLDObj);
+								$this->saveProjectDC($jsonLDObj);
 						  }
 						  
 						  /*
@@ -1161,6 +1163,36 @@ class XMLjsonLD_LegacySave  {
 	 
 	 
 	 //register change in UUIDs
+	 
+	 function saveProjectDC($LinkedDataItem){
+		  if($LinkedDataItem->itemType == "project"){
+				$linkAnnotObj = new Links_linkAnnotation;
+				if(is_array($LinkedDataItem->creators)){
+					 foreach($LinkedDataItem->creators as $pURI){
+						  $data = array("uuid" => $LinkedDataItem->uuid,
+											 "subjectType" => $LinkedDataItem->itemType,
+											 "project_id" => $LinkedDataItem->projectUUID,
+											 "source_id" => self::defaultSourceID,
+											 "objectURI" => $pURI,
+											 "creatorUUID" => false);
+						  $linkAnnotObj->createDCcreatorRecord($data);
+					 }
+				}
+				if(is_array($LinkedDataItem->contributors)){
+					 foreach($LinkedDataItem->contributors as $pURI){
+						  $data = array("uuid" => $LinkedDataItem->uuid,
+											 "subjectType" => $LinkedDataItem->itemType,
+											 "project_id" => $LinkedDataItem->projectUUID,
+											 "source_id" => self::defaultSourceID,
+											 "objectURI" => $pURI,
+											 "creatorUUID" => false);
+						  $linkAnnotObj->createDCcontributorRecord($data);
+					 }
+				}
+		  }
+	 }
+	 
+	 
 	 function registerUUIDchange($oldUUID, $newUUID, $type){
 		  if($newUUID != false && $newUUID != $oldUUID){
 				$data = array("oldUUID" => $oldUUID, "newUUID" => $newUUID, "type" => $type);

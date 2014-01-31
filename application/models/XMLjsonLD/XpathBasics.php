@@ -304,18 +304,38 @@ class XMLjsonLD_XpathBasics  {
 	
 		  $DCobj = new Links_tempDC;
 		  foreach ($itemXML->xpath("//oc:metadata/dc:subject") as $subject) {
-				$stableType = (string)$subject;
+				$subject = (string)$subject;
 				$subject = strtolower($subject);
-				
-				$data = array("term" => $subject, "type" => false, "uri" => false);
-				$DCobj->createRecord($data);
+				if(strstr($subject, ",")){
+					 $subjects = explode(",", $subject);
+				}
+				else{
+					 $subjects = array($subject);
+				}
+				foreach($subjects as $actSubject){
+					 $actSubject = trim($subject);
+					 if(strlen( $actSubject)>1){
+						  $data = array("term" =>  $actSubject, "type" => false, "uri" => false);
+						  $DCobj->createRecord($data);
+					 }
+				}
 		  }
 		  foreach ($itemXML->xpath("//oc:metadata/dc:coverage") as $subject) {
-				$stableType = (string)$subject;
+				$subject = (string)$subject;
 				$subject = strtolower($subject);
-				
-				$data = array("term" => $subject, "type" => false, "uri" => false);
-				$DCobj->createRecord($data);
+				if(strstr($subject, ",")){
+					 $subjects = explode(",", $subject);
+				}
+				else{
+					 $subjects = array($subject);
+				}
+				foreach($subjects as $actSubject){
+					 $actSubject = trim($subject);
+					 if(strlen( $actSubject)>1){
+						  $data = array("term" =>  $actSubject, "type" => false, "uri" => false);
+						  $DCobj->createRecord($data);
+					 }
+				}
 		  }
 	
 	

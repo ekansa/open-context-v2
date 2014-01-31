@@ -155,6 +155,20 @@ class Links_linkAnnotation {
 		  return sha1($uuid."_".$predicateURI."_".$objectURI);
 	 }
 	 
+	 
+	 //create a dublin core contributor record
+	 function createDCcontributorRecord($data){
+		  $data["predicateURI"] = self::DCtermsContributor;
+		  return $this->createRecord($data);
+	 }
+	 
+	 //create a dublin core contributor record
+	 function createDCcreatorRecord($data){
+		  $data["predicateURI"] = self::DCtermsCreator;
+		  return $this->createRecord($data);
+	 }
+	 
+	 
 	 //adds an item to the database, returns its uuid if successful
 	 function createRecord($data = false){
 		 

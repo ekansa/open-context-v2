@@ -242,6 +242,8 @@ class LegacyController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('OCitems_Identifiers');
 		  Zend_Loader::loadClass('OCitems_Document');
 		  Zend_Loader::loadClass('OCitems_Person');
+		  
+		  Zend_Loader::loadClass('Links_linkAnnotation');
 		  Zend_Loader::loadClass('Links_tempDC');
 		  
 		  $legacySaveObj = new XMLjsonLD_LegacySave;
