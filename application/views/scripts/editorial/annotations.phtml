@@ -1,5 +1,19 @@
 <?php
 
+$genObj = new OCitems_General;
+$result = $this->result;
+if(is_array($result)){
+	 $subjectLabel = $result[0]["subjectLabel"];
+	 $subjectType = $result[0]["subjectType"];
+	 $subjectURI = $genObj->generateItemURI($this->uuid, $subjectType);
+	 $subjectLocalLink = $genObj->generateItemURI($this->uuid, $subjectType, false);
+}
+else{
+	 $subjectLabel = false;
+	 $subjectType = false;
+	 $subjectURI = false;
+	 $subjectLocalLink = false;
+}
 
 
 ?>
@@ -10,16 +24,69 @@
         <title>Editorial Functions for Item Annotation</title>
         <link href="../bootstrap/css/bootstrap.css"  rel="stylesheet" type="text/css" />
         <link href="../bootstrap/css/bootstrap-theme.css"  rel="stylesheet" type="text/css" />
-       
+		  
+		  <!-- general javascript -->
+		  <script src="../js/general/jquery.js" type="text/javascript" ></script>
+		  <script type="text/javascript" src="../js/general/json2.js"></script>
+        <script type="text/javascript" src="../js/general/utils.js"></script>
+        <script type="text/javascript" src="../js/general/prototype.js"></script>
+		  <!-- end of general javascript -->
+		 
+		  <script type="text/javascript" src="../js/editorial/annotations.js"></script>
+		  
     </head>
     <body id="docBody">
 		  <div class="container-fluid" style="padding: 0 15px;">
 				<div class="row">
-					 <div class="col-md-6">
+					 <div class="col-md-4">
 						  <h1>Item Annotation</h1>
+					 </div>
+					 <div class="col-md-4">
+					 
+					 </div>
+					 <div class="col-md-4">
+						  <form action="../editorial/annotations" method="get">
+								<h5>Lookup UUID</h5>
+								<input name="uuid" type="text" id="in-item-uuid" value="<?php echo $this->uuid; ?>" />
+								<button type="submit">Get Annotations</button>
+						  </form>
+					 </div>
+				</div>
+				<div class="row">
+					 <div class="col-md-3">
+						  <h4>Subject Entity Label</h4>
+						  <h5><?php echo $subjectLabel; ?></h5>
+					 </div>
+					 <div class="col-md-3">
+						  <h4>Subject Entity UUID</h4>
+						  <h5><?php echo $this->uuid; ?></h5>
+					 </div>
+					 <div class="col-md-3">
+						  <h4>Subject Entity Type</h4>
+						  <h5><?php echo $subjectType; ?></h5>
+					 </div>
+					 <div class="col-md-3">
+						  <h4>Subject Entity URI</h4>
+						  <h5><a href="<?php echo $subjectLocalLink; ?>" target="_blank"><?php echo $subjectURI; ?></a></h5>
+					 </div>
+				</div>
+				<div class="row">
+					 <div class="col-md-6">
+						  
 					 </div>
 					 <div class="col-md-6">
 						  
+					 </div>
+				</div>
+				<div class="row">
+					 <div class="col-md-12">
+						  <div id="annotations">
+								<table>
+									 <thead>
+										  <th></th>
+									 </thead>
+								</table>
+						  </div>
 					 </div>
 				</div>
 		  </div>

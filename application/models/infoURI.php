@@ -35,7 +35,7 @@ class infoURI {
 				$OCbaseURI = $ocGenObj->getCanonicalBaseURI();
 				if(strstr($possURI, $OCbaseURI)){
 					 //lookup an Open Context item
-					 $output = $this->lookupOCitem($possURI);
+					 $output = $this->lookupOCitemByURI($possURI);
 				}
 				else{
 					 //lookup an outside entity
@@ -49,11 +49,20 @@ class infoURI {
 	 
 	 
 	 
-	 function lookupOCitem($uri){
+	 function lookupOCitemByURI($uri){
 		  $output = false;
 		  $ocGenObj = new OCitems_General;
 		  $itemType = $ocGenObj->itemTypeFromURI($uri);
 		  $uuid = $ocGenObj->itemUUIDfromURI($uri);
+		  $output = $this->lookupOCitem($uuid, $itemType);
+		  
+		  return $output;
+	 }
+	 
+	 
+	 function lookupOCitem($uuid, $itemType){
+		  $output = false;
+		  
 		  if($itemType == "predicate"){
 				$predicateObj = new OCitems_Predicate;
 				$output = $predicateObj->getByUUID($uuid);
@@ -69,7 +78,6 @@ class infoURI {
 		  
 		  return $output;
 	 }
-	 
 	 
 	 
 	 

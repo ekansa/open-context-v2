@@ -43,8 +43,20 @@ class EditorialController extends Zend_Controller_Action
 	 }
 	 
 	 public function annotationsAction(){
+		  $requestParams =  $this->_request->getParams();
+		  $genObj = new OCitems_General;
+		  $linkAnnotObj = new Links_linkAnnotation;
+		  if(!isset($requestParams["uuid"])){
+				$uuid = false;
+				$result = false;
+		  }
+		  else{
+				$uuid = $requestParams["uuid"];
+				$result = $linkAnnotObj->getAnnotationsByUUID($requestParams["uuid"]);
+		  }
 		  
-		  
+		  $this->view->uuid = $uuid;
+		  $this->view->result = $result;
 	 }
 }
 

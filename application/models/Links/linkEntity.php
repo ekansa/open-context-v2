@@ -53,7 +53,7 @@ class Links_linkEntity {
 	 
 	 
     function security_check($input){
-        $badArray = array("DROP", "SELECT", "#", "--", "DELETE", "INSERT", "UPDATE", "ALTER", "=");
+        $badArray = array("DROP", "SELECT", " ", "--", "DELETE", "INSERT", "UPDATE", "ALTER", "=");
         foreach($badArray as $bad_word){
             if(stristr($input, $bad_word) != false){
                 $input = str_ireplace($bad_word, "XXXXXX", $input);

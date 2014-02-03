@@ -102,22 +102,29 @@ class Links_linkAnnotation {
 					 '.$objectTerm.'
                 ';
 		
+		
         $result = $db->fetchAll($sql, 2);
         if($result){
 				$output = array();
 				$uriObj = new infoURI;
             foreach($result as $row){
+					 $actRecord = $row;
+					 $actRecord["subjectLabel"] = false;
+					 $actRecord["predicateLabel"] = false;
+					 $actRecord["objectLabel"] = false;
+					 $sRes = $uriObj->lookupOCitem($uuid, $row["subjectType"]);
+					 if(is_array($sRes)){
+						  $actRecord["subjectLabel"] = $sRes["label"];
+					 }
 					 $pRes = $uriObj->lookupURI($row["predicateURI"]);
-					 $row["predicateLabel"] = false;
-					 $row["objectLabel"] = false;
 					 if(is_array($pRes)){
-						  $row["predicateLabel"] = $pRes["label"];
+						  $actRecord["predicateLabel"] = $pRes["label"];
 					 }
 					 $pRes = $uriObj->lookupURI($row["objectURI"]);
 					 if(is_array($pRes)){
-						  $row["objectLabel"] = $pRes["label"];
+						  $actRecord["objectLabel"] = $pRes["label"];
 					 }
-					 $output[] = $row; 
+					 $output[] = $actRecord; 
 				}
 		  }
         return $output;
@@ -257,7 +264,7 @@ class Links_linkAnnotation {
 	 
 	 
     function security_check($input){
-        $badArray = array("DROP", "SELECT", "#", "--", "DELETE", "INSERT", "UPDATE", "ALTER", "=");
+        $badArray = array("DROP", "SELECT", " ", "--", "DELETE", "INSERT", "UPDATE", "ALTER", "=");
         foreach($badArray as $bad_word){
             if(stristr($input, $bad_word) != false){
                 $input = str_ireplace($bad_word, "XXXXXX", $input);

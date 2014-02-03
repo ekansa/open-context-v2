@@ -62,7 +62,7 @@ class OCitems_General {
 	 }
 	 
 	 //makes an item's URI based on it's type
-	 function generateItemURI($uuid, $type, $cannonical = true){
+	 function generateItemURI($uuid, $itemType, $cannonical = true){
 		  $output = false;
 		  if($cannonical){
 				$baseURI = $this->getCanonicalBaseURI();
@@ -71,8 +71,8 @@ class OCitems_General {
 				$baseURI = $this->getLocalBaseURI();
 		  }
 		  
-		  foreach($this->typeURImappings as $uriTypeKey => $typeValue){
-				if($typeValue == $type){
+		  foreach($this->typeURImappings as $uriTypeKey => $itemTypeValue){
+				if($itemTypeValue == $itemType){
 					 $output = $baseURI.$uriTypeKey."/".$uuid;
 					 break;
 				}
