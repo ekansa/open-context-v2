@@ -44,8 +44,8 @@ class OCitems_Manifest {
         if($result){
             $output = $result[0];
 				$this->uuid = $uuid;
-				$this->projectUUID = $result[0]["project_id"];
-				$this->sourceID = $result[0]["source_id"];
+				$this->projectUUID = $result[0]["projectUUID"];
+				$this->sourceID = $result[0]["sourceID"];
 				$this->itemType = $result[0]["itemType"];
 				$this->repo = $result[0]["repo"];
 				$this->classURI = $result[0]["classURI"];

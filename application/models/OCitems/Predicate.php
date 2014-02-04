@@ -50,8 +50,8 @@ class OCitems_Predicate {
         if($result){
             $output = $result[0];
 				$this->uuid = $uuid;
-				$this->projectUUID = $result[0]["project_id"];
-				$this->sourceID = $result[0]["source_id"];
+				$this->projectUUID = $result[0]["projectUUID"];
+				$this->sourceID = $result[0]["sourceID"];
 				$this->archaeoMLtype = $result[0]["archaeoMLtype"];
 				$this->dataType = $result[0]["dataType"];
 				$this->label = $result[0]["label"];
@@ -63,13 +63,13 @@ class OCitems_Predicate {
     }
     
 	 
-	 function getByLabel($label, $project_ids = false, $archaeoMLtypes = false, $dataTypes = false){
+	 function getByLabel($label, $projectUUIDs = false, $archaeoMLtypes = false, $dataTypes = false){
 		  
 		  $db = $this->startDB();
 		  $ocGenObj = new OCitems_General;
 		  
 		  $conditions = " label = '$label' ";
-		  $projConds = $ocGenObj->makeORcondition($project_ids, "project_id");
+		  $projConds = $ocGenObj->makeORcondition($projectUUIDs, "projectUUID");
 		  if($projConds != false){
 				$conditions .= " AND ($projConds) ";
 		  }
@@ -89,8 +89,8 @@ class OCitems_Predicate {
         if($result){
             $output = $result[0];
 				$this->uuid = $result[0]["uuid"];
-				$this->projectUUID = $result[0]["project_id"];
-				$this->sourceID = $result[0]["source_id"];
+				$this->projectUUID = $result[0]["projectUUID"];
+				$this->sourceID = $result[0]["sourceID"];
 				$this->archaeoMLtype = $result[0]["archaeoMLtype"];
 				$this->dataType = $result[0]["dataType"];
 				$this->label = $result[0]["label"];
@@ -110,8 +110,8 @@ class OCitems_Predicate {
 		  $success = false;
 		  if(!is_array($data)){
 				$data = array("uuid" => $this->uuid,
-								  "project_id" => $this->projectUUID,
-								  "source_id" => $this->sourceID,
+								  "projectUUID" => $this->projectUUID,
+								  "sourceID" => $this->sourceID,
 								  "archaeoMLtype" => $this->archaeoMLtype,
 								  "dataType" => $this->dataType,
 								  "label" => $this->label,

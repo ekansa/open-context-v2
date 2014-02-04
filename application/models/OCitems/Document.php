@@ -33,8 +33,8 @@ class OCitems_Document {
         if($result){
             $output = $result[0];
 				$this->uuid = $uuid;
-				$this->projectUUID = $result[0]["project_id"];
-				$this->sourceID = $result[0]["source_id"];
+				$this->projectUUID = $result[0]["projectUUID"];
+				$this->sourceID = $result[0]["sourceID"];
 				$this->content = $result[0]["content"];
 				$this->updated = $result[0]["updated"];
 		  }
@@ -50,8 +50,8 @@ class OCitems_Document {
 		  if(!is_array($data)){
 				
 				$data = array(	"uuid" => $this->uuid,
-									 "project_id" => $this->projectUUID,
-									 "source_id" => $this->sourceID,
+									 "projectUUID" => $this->projectUUID,
+									 "sourceID" => $this->sourceID,
 									 "content" => $this->content
 								  );	
 		  }

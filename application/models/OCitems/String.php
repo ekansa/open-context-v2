@@ -36,8 +36,8 @@ class OCitems_String {
             $output = $result[0];
 				$this->uuid = $uuid;
 				$this->hashID = $result[0]["hashID"];
-				$this->projectUUID = $result[0]["project_id"];
-				$this->sourceID = $result[0]["source_id"];
+				$this->projectUUID = $result[0]["projectUUID"];
+				$this->sourceID = $result[0]["sourceID"];
 				$this->content = $result[0]["content"];
 				$this->updated = $result[0]["updated"];
 		  }
@@ -50,43 +50,43 @@ class OCitems_String {
 		  //a maintenance query to keep hashIDs in synch with the content
 		  $db = $this->startDB();
 		  
-		  $sql = 'UPDATE oc_strings SET hashID = CAST(SHA1(CONCAT(CAST(project_id AS CHAR CHARACTER SET utf8), "_", content)) AS CHAR CHARACTER SET ascii)
-		  WHERE hashID != CAST(SHA1(CONCAT(CAST(project_id AS CHAR CHARACTER SET utf8), "_", content)) AS CHAR CHARACTER SET ascii) ;';
+		  $sql = 'UPDATE oc_strings SET hashID = CAST(SHA1(CONCAT(CAST(projectUUID AS CHAR CHARACTER SET utf8), "_", content)) AS CHAR CHARACTER SET ascii)
+		  WHERE hashID != CAST(SHA1(CONCAT(CAST(projectUUID AS CHAR CHARACTER SET utf8), "_", content)) AS CHAR CHARACTER SET ascii) ;';
 		  
 		  $db->query($sql);
 	 }
 	 
 	 
 	 
-	 function makeHashID($content, $project_id){
+	 function makeHashID($content, $projectUUID){
 		  
 		  $content = trim($content);
-		  return sha1($project_id."_".$content);
+		  return sha1($projectUUID."_".$content);
 	 }
 	 
 	 
 	 
-	 function getByContent($content, $project_ids){
+	 function getByContent($content, $projectUUIDs){
 		  
 		  $db = $this->startDB();
 		  $ocGenObj = new OCitems_General;
 		  
-		  if(is_array($project_ids)){
+		  if(is_array($projectUUIDs)){
 				$hashArray = array();
-				foreach($project_ids as $projectID){
+				foreach($projectUUIDs as $projectID){
 					 $hashArray[] = $this->makeHashID($content, $projectID);
 				}
 		  }
 		  else{
 				$hashArray = array();
-				$hashArray[] = $this->makeHashID($content, $project_ids);
+				$hashArray[] = $this->makeHashID($content, $projectUUIDs);
 		  }
 		  
 		  $hashConds = $ocGenObj->makeORcondition($hashArray, "hashID");
 		  if($hashConds != false){
 				$conditions = "($hashConds) ";
 		  }
-		  $projConds = $ocGenObj->makeORcondition($project_ids, "project_id");
+		  $projConds = $ocGenObj->makeORcondition($projectUUIDs, "projectUUID");
 		  if($projConds != false){
 				$conditions .= " AND ($projConds) ";
 		  }
@@ -99,10 +99,10 @@ class OCitems_String {
             $output = $result[0];
 				$this->uuid = $result[0]["uuid"];
 				$this->hashID = $result[0]["hashID"];
-				$this->projectUUID = $result[0]["project_id"];
-				$this->sourceID = $result[0]["source_id"];
-				$this->projectUUID = $result[0]["project_id"];
-				$this->sourceID = $result[0]["source_id"];
+				$this->projectUUID = $result[0]["projectUUID"];
+				$this->sourceID = $result[0]["sourceID"];
+				$this->projectUUID = $result[0]["projectUUID"];
+				$this->sourceID = $result[0]["sourceID"];
 				$this->content = $result[0]["content"];
 				$this->updated = $result[0]["updated"];
 				//$this->getItemData($uuid);
@@ -121,8 +121,8 @@ class OCitems_String {
 		  if(!is_array($data)){
 				
 				$data = array("uuid" => $this->uuid,
-								  "project_id" => $this->projectUUID,
-								  "source_id" => $this->sourceID,
+								  "projectUUID" => $this->projectUUID,
+								  "sourceID" => $this->sourceID,
 								  "content" => $this->content
 								  );	
 		  }
@@ -137,7 +137,7 @@ class OCitems_String {
 				$data["uuid"] = $ocGenObj->generateUUID();
 		  }
 		  
-		  $data["hashID"] = $this->makeHashID($data["content"], $data["project_id"]);
+		  $data["hashID"] = $this->makeHashID($data["content"], $data["projectUUID"]);
 	 
 		  foreach($data as $key => $value){
 				if(is_array($value)){

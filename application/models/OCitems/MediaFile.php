@@ -41,8 +41,8 @@ class OCitems_MediaFile {
         if($result){
             $output = $result[0];
 				$this->uuid = $uuid;
-				$this->projectUUID = $result[0]["project_id"];
-				$this->sourceID = $result[0]["source_id"];
+				$this->projectUUID = $result[0]["projectUUID"];
+				$this->sourceID = $result[0]["sourceID"];
 				$this->mediaType = $result[0]["mediaType"];
 				$this->mimeTypeURI = $result[0]["mimeTypeURI"];
 				$this->thumbMimeURI = $result[0]["thumbMimeURI"];
@@ -68,10 +68,10 @@ class OCitems_MediaFile {
 	 }
     
 	 
-	 function makeHashID($content, $project_id){
+	 function makeHashID($content, $projectUUID){
 		  
 		  $content = trim($content);
-		  return sha1($project_id."_".$content);
+		  return sha1($projectUUID."_".$content);
 	 }
 	 
 	 
@@ -83,8 +83,8 @@ class OCitems_MediaFile {
 		  if(!is_array($data)){
 				
 				$data = array(	"uuid" => $this->uuid,
-									 "project_id" => $this->projectUUID,
-									 "source_id" => $this->sourceID,
+									 "projectUUID" => $this->projectUUID,
+									 "sourceID" => $this->sourceID,
 									 "mediaType" => $this->mediaType,
 									 "mimeTypeURI" => $this->mimeTypeURI,
 									 "thumbMimeURI" => $this->thumbMimeURI,

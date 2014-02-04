@@ -39,8 +39,8 @@ class OCitems_Person {
         if($result){
             $output = $result[0];
 				$this->uuid = $uuid;
-				$this->projectUUID = $result[0]["project_id"];
-				$this->sourceID = $result[0]["source_id"];
+				$this->projectUUID = $result[0]["projectUUID"];
+				$this->sourceID = $result[0]["sourceID"];
 				$this->foafType = $result[0]["foafType"];
 				$this->combinedName = $result[0]["combined_name"];
 				$this->givenName = $result[0]["given_name"];
@@ -62,8 +62,8 @@ class OCitems_Person {
 		  if(!is_array($data)){
 				
 				$data = array(	"uuid" => $this->uuid,
-									 "project_id" => $this->projectUUID,
-									 "source_id" => $this->sourceID,
+									 "projectUUID" => $this->projectUUID,
+									 "sourceID" => $this->sourceID,
 									 "foafType" => $this->foafType,
 									 "combined_name" => $this->combinedName,
 									 "given_name" => $this->givenName,

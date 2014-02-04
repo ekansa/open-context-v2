@@ -15,8 +15,8 @@ class Links_linkAnnotation {
 	 public $uuid;
     public $subjectURI;
 	 public $subjectType;
-	 public $project_id;
-	 public $source_id;
+	 public $projectUUID;
+	 public $sourceID;
 	 public $predicateURI;
 	 public $objectURI;
 	 public $creatorUUID; // itentifier of a person responsible for making the annotation
@@ -28,8 +28,8 @@ class Links_linkAnnotation {
 	 
 	 public $expectedSchema = array("uuid" => array("type" => "xsd:string", "blankOK" => false),
 											  "subjectType" => array("type" => "OCitemType", "blankOK" => false),
-											  "project_id" => array("type" => "xsd:string", "blankOK" => false),
-											  "source_id" => array("type" => "xsd:string", "blankOK" => true),
+											  "projectUUID" => array("type" => "xsd:string", "blankOK" => false),
+											  "sourceID" => array("type" => "xsd:string", "blankOK" => true),
 											  "predicateURI" => array("type" => "xsd:string", "blankOK" => false),
 											  "objectURI" => array("type" => "xsd:string", "blankOK" => false),
 											  "creatorUUID" => array("type" => "xsd:string", "blankOK" => true)
@@ -67,8 +67,8 @@ class Links_linkAnnotation {
             $output = $result[0];
 				$this->hashID = $result[0]["hashID"];
 				$this->uuid = $uuid;
-				$this->projectUUID = $result[0]["project_id"];
-				$this->sourceID = $result[0]["source_id"];
+				$this->projectUUID = $result[0]["projectUUID"];
+				$this->sourceID = $result[0]["sourceID"];
 				$this->subjectType = $result[0]["subjectType"];
 				$this->predicateURI = $result[0]["predicateURI"];
 				$this->objectURI = $result[0]["objectURI"];
@@ -154,7 +154,7 @@ class Links_linkAnnotation {
 	 //saves linking relations that we've assigned to standard Dublin core creator / contributor roles
 	 function annotateStandardDClinks(){
 		  
-		  $project_ids = array("0");
+		  $projectUUIDs = array("0");
 		  $predicateObj = new OCitems_Predicate;
 		  
 		  $relToCreator = array("Principle Investigator",
@@ -165,12 +165,12 @@ class Links_linkAnnotation {
 		  
 		  
 		  foreach($relToCreator  as $relationLabel){
-				$predData = $predicateObj->getByLabel($relationLabel, $project_ids, "link");
+				$predData = $predicateObj->getByLabel($relationLabel, $projectUUIDs, "link");
 				if(is_array($predData)){
 					 $data = array("uuid" => $predicateObj->uuid,
 										"subjectType" => "predicate",
-										"project_id" => $predicateObj->projectUUID,
-										"source_id" => $predicateObj->sourceID,
+										"projectUUID" => $predicateObj->projectUUID,
+										"sourceID" => $predicateObj->sourceID,
 										"predicateURI" => self::SKOScloseMatch,
 										"objectURI" => self::DCtermsCreator,
 										"creatorUUID" => false,
@@ -196,12 +196,12 @@ class Links_linkAnnotation {
 					 );
 		  
 		  foreach($relToContributor as $relationLabel){
-				$predData = $predicateObj->getByLabel($relationLabel, $project_ids, "link");
+				$predData = $predicateObj->getByLabel($relationLabel, $projectUUIDs, "link");
 				if(is_array($predData)){
 					 $data = array("uuid" => $predicateObj->uuid,
 										"subjectType" => "predicate",
-										"project_id" => $predicateObj->projectUUID,
-										"source_id" => $predicateObj->sourceID,
+										"projectUUID" => $predicateObj->projectUUID,
+										"sourceID" => $predicateObj->sourceID,
 										"predicateURI" => self::SKOScloseMatch,
 										"objectURI" => self::DCtermsContributor,
 										"creatorUUID" => false,
@@ -244,8 +244,8 @@ class Links_linkAnnotation {
 		  if(!is_array($data)){
 				$data = array("uuid" => $this->uuid,
 								  "subjectType" => $this->subjectType,
-								  "project_id" => $this->projectUUID,
-								  "source_id" => $this->sourceID,
+								  "projectUUID" => $this->projectUUID,
+								  "sourceID" => $this->sourceID,
 								  "predicateURI" => $this->predicateURI,
 								  "objectURI" => $this->objectURI,
 								  "creatorUUID" => false

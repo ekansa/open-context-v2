@@ -5,8 +5,8 @@ $result = $this->result;
 if(is_array($result)){
 	 $subjectLabel = $result[0]["subjectLabel"];
 	 $subjectType = $result[0]["subjectType"];
-	 $projectUUID = $result[0]["project_id"];
-	 $sourceID = $result[0]["source_id"];
+	 $projectUUID = $result[0]["projectUUID"];
+	 $sourceID = $result[0]["sourceID"];
 	 $subjectURI = $genObj->generateItemURI($this->uuid, $subjectType);
 	 $subjectLocalLink = $genObj->generateItemURI($this->uuid, $subjectType, false);
 }
@@ -119,8 +119,8 @@ else{
 									 <form action="../edit/add-annotation" method="post" >
 										  <input type="hidden" name="uuid" value="<?php echo $this->uuid; ?>" />
 										  <input type="hidden" name="subjectType" value="<?php echo $subjectType; ?>" />
-										  <input type="hidden" name="project_id" value="<?php echo (string)$projectUUID; ?>" />
-										  <input type="hidden" name="source_id" value="<?php echo $sourceID; ?>" />
+										  <input type="hidden" name="projectUUID" value="<?php echo (string)$projectUUID; ?>" />
+										  <input type="hidden" name="sourceID" value="<?php echo $sourceID; ?>" />
 										  <tr>
 												<td><button class="btn" type="submit">+</button></td>
 												<td id="add-pred-label"></td>

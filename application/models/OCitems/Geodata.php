@@ -39,7 +39,7 @@ class OCitems_Geodata {
         if($result){
             $output = $result[0];
 				$this->uuid = $uuid;
-				$this->projectUUID = $result[0]["project_id"];
+				$this->projectUUID = $result[0]["projectUUID"];
 				$this->path = $result[0]["path"];
 				$this->featureType = $result[0]["ftype"];
 				$this->latitude = $result[0]["latitude"];
@@ -67,7 +67,7 @@ class OCitems_Geodata {
 		  $success = false;
 		  if(!is_array($data)){
 				$data = array("uuid" => $this->uuid,
-								  "project_id" => $this->projectUUID,
+								  "projectUUID" => $this->projectUUID,
 								  "path" => $this->path,
 								  "ftype" => $this->featureType,
 								  "latitude" => $this->latitude,

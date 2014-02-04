@@ -38,7 +38,7 @@ class OCitems_Chronodata {
         if($result){
             $output = $result[0];
 				$this->uuid = $uuid;
-				$this->projectUUID = $result[0]["project_id"];
+				$this->projectUUID = $result[0]["projectUUID"];
 				$this->startLC = $result[0]["startLC"];
 				$this->startC = $result[0]["startC"];
 				$this->endC = $result[0]["endC"];
@@ -58,7 +58,7 @@ class OCitems_Chronodata {
 		  $success = false;
 		  if(!is_array($data)){
 				$data = array("uuid" => $this->uuid,
-								  "project_id" => $this->projectUUID,
+								  "projectUUID" => $this->projectUUID,
 								  "startLC" => $this->startLC,
 								  "startC" => $this->startC,
 								  "endC" => $this->endC,

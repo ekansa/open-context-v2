@@ -291,7 +291,7 @@ class XMLjsonLD_XpathBasics  {
 					 foreach ($itemXML->xpath("//oc:metadata/dc:identifier[@type = '$stableType']") as $stableID) {
 						  $stableID = (string)$stableID;
 						  $data = array("uuid" => $LinkedDataItem->uuid,
-											 "project_id" => $LinkedDataItem->projectUUID,
+											 "projectUUID" => $LinkedDataItem->projectUUID,
 											 "itemType" => "project",
 											 "stableID" => $stableID,
 											 "stableType" => $stableType
@@ -402,7 +402,7 @@ class XMLjsonLD_XpathBasics  {
 					 $stableID = $stabEx[count($stabEx)-1];
 					 
 					 $data = array("uuid" => $LinkedDataItem->uuid,
-										"project_id" => $LinkedDataItem->projectUUID,
+										"projectUUID" => $LinkedDataItem->projectUUID,
 										"itemType" => "person",
 										"stableID" => $stableID,
 										"stableType" => "orcid"
@@ -583,10 +583,10 @@ class XMLjsonLD_XpathBasics  {
 					 $lon = (string)$geoNode;
 					 $lon = $lat + 0;
 				}
-				foreach ($itemXML->xpath("//oc:geo_reference/oc:metasource/oc:source_id") as $geoNode) {
+				foreach ($itemXML->xpath("//oc:geo_reference/oc:metasource/oc:sourceID") as $geoNode) {
 					 $refUUID = (string)$geoNode;
 					 $data = array("uuid" => $refUUID,
-							 "project_id" => $this->projectUUID,
+							 "projectUUID" => $this->projectUUID,
 							 "ftype" => "point",
 							 "lat" => $lat,
 							 "lon" => $lon
@@ -626,10 +626,10 @@ class XMLjsonLD_XpathBasics  {
 					 $tEnd  = (string)$tNode;
 					 $tEnd  = $tEnd  + 0;
 				}
-				foreach ($itemXML->xpath("//oc:chrono/oc:metasource/oc:source_id") as $tNode) {
+				foreach ($itemXML->xpath("//oc:chrono/oc:metasource/oc:sourceID") as $tNode) {
 					 $refUUID = (string)$tNode;
 					 $data = array("uuid" => $refUUID,
-							 "project_id" => $this->projectUUID,
+							 "projectUUID" => $this->projectUUID,
 							 "startLC" => $tStart,
 							 "startC" => $tStart,
 							 "endC" => $tEnd,
@@ -890,10 +890,10 @@ class XMLjsonLD_XpathBasics  {
 	 //get a URI equivalent for the current relationship
 	 function makeGetLinkPredicateURI($relationLabel){
 		  $uri = false;
-		  $project_ids = array("0", $this->projectUUID);
+		  $projectUUIDs = array("0", $this->projectUUID);
 		  
 		  $predicateObj = new OCitems_Predicate;
-		  $predData = $predicateObj->getByLabel($relationLabel, $project_ids, "link");
+		  $predData = $predicateObj->getByLabel($relationLabel, $projectUUIDs, "link");
 		  if(is_array($predData)){
 				$uri = self::predicateBaseURI.$predicateObj->uuid;
 		  }
@@ -907,8 +907,8 @@ class XMLjsonLD_XpathBasics  {
 				}
 				
 				$data = array("uuid" => $newUUID,
-								  "project_id" => $this->projectUUID,
-								  "source_id" => $sourceID,
+								  "projectUUID" => $this->projectUUID,
+								  "sourceID" => $sourceID,
 								  "archaeoMLtype" => "link",
 								  "dataType" => "uri",
 								  "label" => $relationLabel,

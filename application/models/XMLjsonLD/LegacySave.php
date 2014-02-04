@@ -746,8 +746,8 @@ class XMLjsonLD_LegacySave  {
 		  
 		  $data = array();
 		  $data["uuid"] = $LinkedDataItem->uuid;
-		  $data["project_id"] = $LinkedDataItem->projectUUID;
-		  $data["source_id"] = self::defaultSourceID;
+		  $data["projectUUID"] = $LinkedDataItem->projectUUID;
+		  $data["sourceID"] = self::defaultSourceID;
 		  $data["itemType"] = $LinkedDataItem->itemType;
 		  $data["repo"] = false;
 		  $data["classURI"] = $ocGenObj->abbreviateURI($LinkedDataItem->itemClassURI);
@@ -800,8 +800,8 @@ class XMLjsonLD_LegacySave  {
 		  
 		  $data = array();
 		  $data["uuid"] = $LinkedDataItem->uuid;
-		  $data["project_id"] = $LinkedDataItem->projectUUID;
-		  $data["source_id"] = self::defaultSourceID;
+		  $data["projectUUID"] = $LinkedDataItem->projectUUID;
+		  $data["sourceID"] = self::defaultSourceID;
 		  $data["mediaType"] = $LinkedDataItem->mediaType;
 		  $data["mimeTypeURI"] = $LinkedDataItem->mimeTypeURI;
 		  $data["thumbMimeURI"] = $LinkedDataItem->thumbMimeURI;
@@ -820,8 +820,8 @@ class XMLjsonLD_LegacySave  {
 		  
 		  $data = array();
 		  $data["uuid"] = $LinkedDataItem->uuid;
-		  $data["project_id"] = $LinkedDataItem->projectUUID;
-		  $data["source_id"] = self::defaultSourceID;
+		  $data["projectUUID"] = $LinkedDataItem->projectUUID;
+		  $data["sourceID"] = self::defaultSourceID;
 		  $data["content"] = $LinkedDataItem->documentContents;
 		 
 		  $docObj->createRecord($data);
@@ -833,8 +833,8 @@ class XMLjsonLD_LegacySave  {
 		  
 		  $data = array();
 		  $data["uuid"] = $LinkedDataItem->uuid;
-		  $data["project_id"] = $LinkedDataItem->projectUUID;
-		  $data["source_id"] = self::defaultSourceID;
+		  $data["projectUUID"] = $LinkedDataItem->projectUUID;
+		  $data["sourceID"] = self::defaultSourceID;
 		  $data["foafType"] = $LinkedDataItem->foafType;
 		  $data["combined_name"] = $LinkedDataItem->label;
 		  $data["given_name"] = $LinkedDataItem->givenName;
@@ -960,8 +960,8 @@ class XMLjsonLD_LegacySave  {
 				}
 				
 				$data = array("uuid" => $predicateUUID,
-								  "project_id" => $projectUUID,
-								  "source_id" => self::defaultSourceID,
+								  "projectUUID" => $projectUUID,
+								  "sourceID" => self::defaultSourceID,
 								  "archaeoMLtype" => "variable",
 								  "dataType" => $dataType,
 								  "label" => $varLabel,
@@ -986,8 +986,8 @@ class XMLjsonLD_LegacySave  {
 				if(!$existUUID){
 					 
 					 $data = array("uuid" => $propUUID,
-										"project_id" => $projectUUID,
-										"source_id" => self::defaultSourceID,
+										"projectUUID" => $projectUUID,
+										"sourceID" => self::defaultSourceID,
 										"predicateUUID" => $predicateUUID,
 										"label" => $propLabel
 										);
@@ -1025,8 +1025,8 @@ class XMLjsonLD_LegacySave  {
 		  if(!$this->changedUUIDs){
 				$data = array();
 				$data["uuid"] = $LinkedDataItem->uuid;
-				$data["project_id"]= $LinkedDataItem->projectUUID;
-				$data["source_id"]= $sourceID;
+				$data["projectUUID"]= $LinkedDataItem->projectUUID;
+				$data["sourceID"]= $sourceID;
 				$data["subjectType"]= $LinkedDataItem->itemType;
 				$data["obsNode"]= $obsNode;
 				$data["obsNum"]= $obsNumKey;
@@ -1079,8 +1079,8 @@ class XMLjsonLD_LegacySave  {
 		  if(!$this->changedUUIDs){
 				$data = array();
 				$data["uuid"] = $LinkedDataItem->uuid;
-				$data["project_id"]= $LinkedDataItem->projectUUID;
-				$data["source_id"]= $sourceID;
+				$data["projectUUID"]= $LinkedDataItem->projectUUID;
+				$data["sourceID"]= $sourceID;
 				$data["subjectType"]= $LinkedDataItem->itemType;
 				$data["obsNode"]= $obsNode;
 				$data["obsNum"]= $obsNumKey;
@@ -1110,8 +1110,8 @@ class XMLjsonLD_LegacySave  {
 					 $data["uuid"] = $this->makeUUIDfromURI($subjectURI);
 					 $data["subjectType"]= $this->makeTypeFromURI($subjectURI);
 				}
-				$data["project_id"]= $LinkedDataItem->projectUUID;
-				$data["source_id"]= $sourceID;
+				$data["projectUUID"]= $LinkedDataItem->projectUUID;
+				$data["sourceID"]= $sourceID;
 				$data["obsNode"]= $obsNode;
 				$data["obsNum"]= $obsNumKey;
 				$data["sort"]= $this->assertionSort;
@@ -1143,8 +1143,8 @@ class XMLjsonLD_LegacySave  {
 				}
 				
 				$data = array("uuid" => $textUUID,
-								  "project_id" => $projectUUID,
-								  "source_id" => self::defaultSourceID,
+								  "projectUUID" => $projectUUID,
+								  "sourceID" => self::defaultSourceID,
 								  "content" => $textContent
 								  );
 				
@@ -1171,8 +1171,8 @@ class XMLjsonLD_LegacySave  {
 					 foreach($LinkedDataItem->creators as $pURI){
 						  $data = array("uuid" => $LinkedDataItem->uuid,
 											 "subjectType" => $LinkedDataItem->itemType,
-											 "project_id" => $LinkedDataItem->projectUUID,
-											 "source_id" => self::defaultSourceID,
+											 "projectUUID" => $LinkedDataItem->projectUUID,
+											 "sourceID" => self::defaultSourceID,
 											 "objectURI" => $pURI,
 											 "creatorUUID" => false);
 						  $linkAnnotObj->createDCcreatorRecord($data);
@@ -1182,8 +1182,8 @@ class XMLjsonLD_LegacySave  {
 					 foreach($LinkedDataItem->contributors as $pURI){
 						  $data = array("uuid" => $LinkedDataItem->uuid,
 											 "subjectType" => $LinkedDataItem->itemType,
-											 "project_id" => $LinkedDataItem->projectUUID,
-											 "source_id" => self::defaultSourceID,
+											 "projectUUID" => $LinkedDataItem->projectUUID,
+											 "sourceID" => self::defaultSourceID,
 											 "objectURI" => $pURI,
 											 "creatorUUID" => false);
 						  $linkAnnotObj->createDCcontributorRecord($data);

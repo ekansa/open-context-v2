@@ -416,7 +416,7 @@ class OCitems_Item {
 								}
 								
 								$obsArray[$obsNodeID] = array("id" => $obsNodeID,
-																		self::Predicate_sourceID => $row["source_id"],
+																		self::Predicate_sourceID => $row["sourceID"],
 																		self::Predicate_obsStatus => $obsStatus);
 						  }
 						  

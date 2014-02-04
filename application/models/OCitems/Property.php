@@ -39,8 +39,8 @@ class OCitems_Property {
             $output = $result[0];
 				$this->uuid = $uuid;
 				$this->hashID = $result[0]["hashID"];
-				$this->projectUUID = $result[0]["project_id"];
-				$this->sourceID = $result[0]["source_id"];
+				$this->projectUUID = $result[0]["projectUUID"];
+				$this->sourceID = $result[0]["sourceID"];
 				$this->predicateUUID = $result[0]["predicateUUID"];
 				$this->rank = $result[0]["rank"];
 				$this->label = $result[0]["label"];
@@ -70,8 +70,8 @@ class OCitems_Property {
             $output = $result[0];
 				$this->uuid = $result[0]["uuid"];
 				$this->hashID = $result[0]["hashID"];
-				$this->projectUUID = $result[0]["project_id"];
-				$this->sourceID = $result[0]["source_id"];
+				$this->projectUUID = $result[0]["projectUUID"];
+				$this->sourceID = $result[0]["sourceID"];
 				$this->predicateUUID = $result[0]["predicateUUID"];
 				$this->rank = $result[0]["rank"];
 				$this->label = $result[0]["label"];
@@ -93,8 +93,8 @@ class OCitems_Property {
 		  if(!is_array($data)){
 				
 				$data = array("uuid" => $this->uuid,
-								  "project_id" => $this->projectUUID,
-								  "source_id" => $this->sourceID,
+								  "projectUUID" => $this->projectUUID,
+								  "sourceID" => $this->sourceID,
 								  "predicateUUID" => $this->predicateUUID,
 								  "rank" => $this->rank,
 								  "label" => $this->label,
