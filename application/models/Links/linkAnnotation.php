@@ -30,11 +30,13 @@ class Links_linkAnnotation {
 											  "subjectType" => array("type" => "OCitemType", "blankOK" => false),
 											  "project_id" => array("type" => "xsd:string", "blankOK" => false),
 											  "source_id" => array("type" => "xsd:string", "blankOK" => true),
-											  "predicteURI" => array("type" => "xsd:string", "blankOK" => false),
+											  "predicateURI" => array("type" => "xsd:string", "blankOK" => false),
 											  "objectURI" => array("type" => "xsd:string", "blankOK" => false),
 											  "creatorUUID" => array("type" => "xsd:string", "blankOK" => true)
 											  );
 	 
+	 public $expectedDeleteSchema = array("uuid" => array("type" => "xsd:string", "blankOK" => false),
+													  "hashID" => array("type" => "xsd:string", "blankOK" => false));
 	 
 	  //get data from database
     function getByUUID($uuid, $predicateURI = false, $objectURI = false){
@@ -255,6 +257,33 @@ class Links_linkAnnotation {
 		  try{
 				$db->insert("link_annotations", $data);
 				$success = $data["hashID"];
+		  } catch (Exception $e) {
+				$success = false;
+		  }
+		  return $success;
+	 }
+	 
+	 
+	 //adds an item to the database, returns its uuid if successful
+	 function deleteRecord($whereData = false){
+		 
+		  $db = $this->startDB();
+		  $success = false;
+		  if(!is_array($whereData)){
+				$where = array();
+				$where[] = "uuid = '".$this->uuid."' ";
+				$where[] = "hashID = '".($this->makeHashID($this->uuid, $this->predicateURI, $this->objectURI))."' ";
+		  }
+		  else{
+				$where = array();
+				foreach($whereData as $fieldKey => $value){
+					 $where[] = $fieldKey." = '$value' ";
+				}
+		  }
+		  
+		  try{
+				$db->delete("link_annotations", $where);
+				$success = true;
 		  } catch (Exception $e) {
 				$success = false;
 		  }

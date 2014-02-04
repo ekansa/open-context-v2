@@ -98,13 +98,54 @@ class EditController extends Zend_Controller_Action
 				}
 				else{
 					 $ok = $linkAnnotObj->createRecord($data);
-					 $output = array("response" => $ok,
-										  "errors" => false,
-										  "data" => $data);
-					 header('Content-Type: application/json; charset=utf8');
-					 echo $genObj->JSONoutputString($output);
+					 if(isset($requestParams["json"])){
+						  $output = array("response" => $ok,
+												"errors" => false,
+												"data" => $data);
+						  header('Content-Type: application/json; charset=utf8');
+						  echo $genObj->JSONoutputString($output);
+					 }
+					 else{
+						  header("Location: ../editorial/annotations?uuid=".$data["uuid"]);
+						  echo "POSTed data";
+					 }
 				}
 		  }
 	 }
+	 
+	 public function deleteAnnotationAction(){
+		  $requestParams =  $this->_request->getParams();
+		  $this->_helper->viewRenderer->setNoRender();
+		  
+		  if(!$this->getRequest()->isPost()){
+				$this->error405("POST"); //not a post, throw an error
+				exit;
+		  }
+		  else{
+				$genObj = new OCitems_General;
+				$linkAnnotObj = new Links_linkAnnotation;
+				$data = $genObj->validateInput($requestParams, $linkAnnotObj->expectedDeleteSchema);
+				if(!$data){
+					 $this->error400($genObj->errors); //throw an error explaining what was expected
+					 exit;
+				}
+				else{
+					 $ok = $linkAnnotObj->deleteRecord($data);
+					 if(isset($requestParams["json"])){
+						  $output = array("response" => $ok,
+												"errors" => false,
+												"data" => $data);
+						  header('Content-Type: application/json; charset=utf8');
+						  echo $genObj->JSONoutputString($output);
+					 }
+					 else{
+						  header("Location: ../editorial/annotations?uuid=".$data["uuid"]);
+						  echo "POSTed data";
+					 }
+				}
+		  }
+	 }
+	 
+	 
 }
 

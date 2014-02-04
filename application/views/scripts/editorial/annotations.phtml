@@ -5,12 +5,16 @@ $result = $this->result;
 if(is_array($result)){
 	 $subjectLabel = $result[0]["subjectLabel"];
 	 $subjectType = $result[0]["subjectType"];
+	 $projectUUID = $result[0]["project_id"];
+	 $sourceID = $result[0]["source_id"];
 	 $subjectURI = $genObj->generateItemURI($this->uuid, $subjectType);
 	 $subjectLocalLink = $genObj->generateItemURI($this->uuid, $subjectType, false);
 }
 else{
 	 $subjectLabel = false;
 	 $subjectType = false;
+	 $projectUUID = false;
+	 $sourceID = false;
 	 $subjectURI = false;
 	 $subjectLocalLink = false;
 }
@@ -31,7 +35,10 @@ else{
         <script type="text/javascript" src="../js/general/utils.js"></script>
         <script type="text/javascript" src="../js/general/prototype.js"></script>
 		  <!-- end of general javascript -->
-		 
+		  <!--
+		 http://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js
+		 -->
+		  <script type="text/javascript" src="http://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js"></script>
 		  <script type="text/javascript" src="../js/editorial/annotations.js"></script>
 		  
     </head>
@@ -81,10 +88,48 @@ else{
 				<div class="row">
 					 <div class="col-md-12">
 						  <div id="annotations">
-								<table>
+								<table class="table table-condensed table-striped table-hover">
 									 <thead>
-										  <th></th>
+										  <th style="width:8%;">Delete</th>
+										  <th style="width:16%;">Predicate Label</th>
+										  <th style="width:30%;">Predicate URI</th>
+										  <th style="width:16%;">Object Label</th>
+										  <th style="width:30%;">Object URI</th>
 									 </thead>
+									 <tbody>
+									 <?php
+									 if(is_array($result)){
+										  foreach($result as $row){
+												echo "<form action=\"../edit/delete-annotation\" method=\"post\" >";
+												echo "<input type=\"hidden\" name=\"uuid\" value=\"".$this->uuid."\" />";
+												echo "<input type=\"hidden\" name=\"hashID\" value=\"".$row["hashID"]."\" />";
+												echo "<tr id=\"".$row["hashID"]."\">".chr(13);
+												echo "<td>";
+												echo "<button title=\"Delete this annotation\" type=\"submit\" class=\"btn btn-warning\">X</button>";
+												echo "</td>".chr(13);
+												echo "<td>".$row["predicateLabel"]."</td>".chr(13);
+												echo "<td>".$row["predicateURI"]."</td>".chr(13);
+												echo "<td>".$row["objectLabel"]."</td>".chr(13);
+												echo "<td>".$row["objectURI"]."</td>".chr(13);
+												echo "</tr>".chr(13);
+												echo "</form>".chr(13);
+										  }
+									 }
+									 ?>
+									 <form action="../edit/add-annotation" method="post" >
+										  <input type="hidden" name="uuid" value="<?php echo $this->uuid; ?>" />
+										  <input type="hidden" name="subjectType" value="<?php echo $subjectType; ?>" />
+										  <input type="hidden" name="project_id" value="<?php echo (string)$projectUUID; ?>" />
+										  <input type="hidden" name="source_id" value="<?php echo $sourceID; ?>" />
+										  <tr>
+												<td><button class="btn" type="submit">+</button></td>
+												<td id="add-pred-label"></td>
+												<td><input class="form-control" type="text" name="predicateURI" id="add-pred-uri"/></td>
+												<td id="add-obj-label"></td>
+												<td><input class="form-control" type="text" name="objectURI" id="add-obj-uri"/></td>
+										  </tr>
+									  </form>
+									 </tbody>
 								</table>
 						  </div>
 					 </div>
