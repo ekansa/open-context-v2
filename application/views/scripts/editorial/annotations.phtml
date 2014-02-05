@@ -1,8 +1,29 @@
 <?php
 
 $genObj = new OCitems_General;
+$uriObj = new infoURI;
+
+$subjectLabel = false;
+$subjectType = false;
+$projectUUID = false;
+$sourceID = false;
+$subjectURI = false;
+$subjectLocalLink = false;
+
+$requestParams = $this->requestParams;
+if(isset($requestParams["itemType"]) && $this->uuid){
+	 $sRes = $uriObj->lookupOCitem($this->uuid, $requestParams["itemType"]);
+	 if(is_array($sRes)){
+		  $subjectLabel = $sRes["label"];
+		  $subjectType = $sRes["itemType"];
+		  $projectUUID = $sRes["projectUUID"];
+		  $subjectURI = $genObj->generateItemURI($this->uuid, $subjectType);
+		  $subjectLocalLink = $genObj->generateItemURI($this->uuid, $subjectType, false);
+	 }
+}
+
 $result = $this->result;
-if(is_array($result)){
+if(is_array($result) && !$subjectLabel){
 	 $subjectLabel = $result[0]["subjectLabel"];
 	 $subjectType = $result[0]["subjectType"];
 	 $projectUUID = $result[0]["projectUUID"];
@@ -10,15 +31,6 @@ if(is_array($result)){
 	 $subjectURI = $genObj->generateItemURI($this->uuid, $subjectType);
 	 $subjectLocalLink = $genObj->generateItemURI($this->uuid, $subjectType, false);
 }
-else{
-	 $subjectLabel = false;
-	 $subjectType = false;
-	 $projectUUID = false;
-	 $sourceID = false;
-	 $subjectURI = false;
-	 $subjectLocalLink = false;
-}
-
 
 ?>
 <!DOCTYPE html>
@@ -26,20 +38,20 @@ else{
     <head>
         <meta charset="UTF-8" />
         <title>Editorial Functions for Item Annotation</title>
-        <link href="../bootstrap/css/bootstrap.css"  rel="stylesheet" type="text/css" />
-        <link href="../bootstrap/css/bootstrap-theme.css"  rel="stylesheet" type="text/css" />
+        <link href="../../bootstrap/css/bootstrap.css"  rel="stylesheet" type="text/css" />
+        <link href="../../bootstrap/css/bootstrap-theme.css"  rel="stylesheet" type="text/css" />
 		  
 		  <!-- general javascript -->
-		  <script src="../js/general/jquery.js" type="text/javascript" ></script>
-		  <script type="text/javascript" src="../js/general/json2.js"></script>
-        <script type="text/javascript" src="../js/general/utils.js"></script>
-        <script type="text/javascript" src="../js/general/prototype.js"></script>
+		  <script src="../../js/general/jquery.js" type="text/javascript" ></script>
+		  <script src="../../js/general/json2.js" type="text/javascript" ></script>
+        <script src="../../js/general/utils.js" type="text/javascript" ></script>
+        <script src="../../js/general/prototype.js" type="text/javascript" ></script>
 		  <!-- end of general javascript -->
 		  <!--
 		 http://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js
 		 -->
-		  <script type="text/javascript" src="http://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js"></script>
-		  <script type="text/javascript" src="../js/editorial/annotations.js"></script>
+		  <script src="http://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js" type="text/javascript" ></script>
+		  <script src="../../js/editorial/annotations.js" type="text/javascript" ></script>
 		  
     </head>
     <body id="docBody">
@@ -129,12 +141,19 @@ else{
 												<td><input onchange="javascript:getEntityByType('object');" class="form-control" type="text" name="objectURI" id="add-obj-uri"/></td>
 										  </tr>
 									  </form>
-									 <tr>
+										  <tr>
 												<td></td>
 												<td><h4>New Predicate Entity</h4></td>
 												<td><div id="add-pred-entity"></div></td>
 												<td><h4>New Object Entity</h4></td>
 												<td><div id="add-obj-entity"></div></td>
+										  </tr>
+										  <tr>
+												<td></td>
+												<td></td>
+												<td><div id="pred-newEntityForm"></div></td>
+												<td></td>
+												<td><div id="obj-newEntityForm"></div></td>
 										  </tr>
 									 </tbody>
 								</table>

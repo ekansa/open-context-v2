@@ -54,7 +54,7 @@ class EditorialController extends Zend_Controller_Action
 				$uuid = $requestParams["uuid"];
 				$result = $linkAnnotObj->getAnnotationsByUUID($requestParams["uuid"]);
 		  }
-		  
+		  $this->view->requestParams = $requestParams;
 		  $this->view->uuid = $uuid;
 		  $this->view->result = $result;
 	 }
