@@ -126,7 +126,38 @@ function vocabEntity(vocabResult){
 
 
 
+function searchEntities(){
+    
+    var searchLabelDom = document.getElementById("entity-lookup-label");
+    var searchLabel = searchLabelDom.value;
+    var vocab = getCheckedRadio("vocabularies");
+    
+    var rURI = "../../edit/search-entities";
+    var myAjax = new Ajax.Request(rURI,
+        {   method: 'get',
+            parameters:
+                {q: searchLabel,
+                vocabularies: vocab
+                },
+        onComplete: searchEntitiesDone }
+    );    
+}
 
+function searchEntitiesDone(response){
+    var actDom = document.getElementById("lookup-entities");
+    actDom.innerHTML = "";
+    var respData = JSON.parse(response.responseText);
+    if(respData.result != false){
+        var outMessage = "<ul>";
+        for(var i = 0; i < respData.result.length; i++){
+            var actLabel = respData.result[i].label;
+            var actURI = respData.result[i].uri;
+            outMessage += "<li>" + actURI + " <em>" + actLabel + "</em></li>";
+        }
+        outMessage += "</ul>";
+        actDom.innerHTML = outMessage;
+    }
+}
 
 function getCheckedRadio(radioName) {
     var radios = document.getElementsByName(radioName);

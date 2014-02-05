@@ -85,7 +85,7 @@ class Links_linkEntity {
 	 
 	 
 	 //search for entity by label or alt label, limited to vocabularies
-	 function getVocabularie(){
+	 function getVocabularies(){
 		  
 		  $db = $this->startDB();
         

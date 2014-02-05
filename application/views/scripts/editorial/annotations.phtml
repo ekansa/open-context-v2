@@ -98,7 +98,7 @@ if(is_array($result) && !$subjectLabel){
 					 </div>
 				</div>
 				<div class="row">
-					 <div class="col-md-9">
+					 <div class="col-md-8">
 						  <div id="annotations">
 								<table class="table table-condensed table-striped table-hover">
 									 <thead>
@@ -159,8 +159,28 @@ if(is_array($result) && !$subjectLabel){
 								</table>
 						  </div>
 					 </div>
-					 <div class="col-md-3">
-					 
+					 <div class="col-md-2">
+						  <h4>Entity Lookup (Type Label)</h4>
+						  <input onchange="javascript:searchEntities();" class="form-control" type="text" id="entity-lookup-label" />
+						  <ol>
+								<li><input value="" type="radio" name="vocabularies" checked />All (Don't filter)</li>
+								<?php
+								$linkEntityObj = new Links_linkEntity;
+								$vocabs = $linkEntityObj->getVocabularies();
+								if(is_array($vocabs)){
+									 foreach($vocabs as $vocab){
+										  echo "<li>";
+										  echo "<input value=\"".$vocab["vocabURI"]."\" name=\"vocabularies\" type=\"radio\" />".$vocab["vocabLabel"];
+										  echo "</li>".chr(13);
+									 }
+								}
+								
+								?>
+						  </ol>
+					 </div>
+					 <div class="col-md-2">
+						  <h4>Entities</h4>
+						  <div id="lookup-entities"></div>
 					 </div>
 				</div>
 				<div class="row">
