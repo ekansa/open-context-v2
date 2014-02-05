@@ -11,6 +11,7 @@ class OCitems_Manifest {
      General data
     */
     public $uuid;
+	 public $uri;
     public $projectUUID;
     public $sourceID;
 	 public $itemType;
@@ -30,6 +31,7 @@ class OCitems_Manifest {
     //get data from database
     function getByUUID($uuid){
         
+		  $ocGenObj = new OCitems_General;
         $uuid = $this->security_check($uuid);
         $output = false; //not found
         
@@ -42,7 +44,7 @@ class OCitems_Manifest {
 		
         $result = $db->fetchAll($sql, 2);
         if($result){
-            $output = $result[0];
+            
 				$this->uuid = $uuid;
 				$this->projectUUID = $result[0]["projectUUID"];
 				$this->sourceID = $result[0]["sourceID"];
@@ -58,6 +60,9 @@ class OCitems_Manifest {
 				$this->published = $result[0]["published"];
 				$this->revised = $result[0]["revised"];
 				$this->recordUpdated = $result[0]["recordUpdated"];
+				$this->uri = $ocGenObj->generateItemURI($this->uuid, $this->itemType);
+				$result[0]["uri"] = $this->uri;
+				$output = $result[0];
 		  }
 		  return $output;
     }

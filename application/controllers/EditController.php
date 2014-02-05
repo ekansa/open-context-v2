@@ -41,7 +41,8 @@ class EditController extends Zend_Controller_Action
 	 private function error405($expectedMethod){
 		  header('HTTP/1.0 405 Method Not Allowed');
 		  header('Content-Type: application/json; charset=utf8');
-		  $output = array("errors" => array("Need to use the HTTP $expectedMethod method."),
+		  $output = array("result" => false,
+								"errors" => array("Need to use the HTTP $expectedMethod method."),
 								"requestParams" => $this->_request->getParams()
 								);
 		  $genObj = new OCitems_General;
@@ -51,7 +52,8 @@ class EditController extends Zend_Controller_Action
 	 private function error400($errors){
 		  header('HTTP/1.0 400 Bad Request');
 		  header('Content-Type: application/json; charset=utf8');
-		  $output = array("errors" => $errors,
+		  $output = array("result" => false,
+								"errors" => $errors,
 								"requestParams" => $this->_request->getParams()
 								);
 		  $genObj = new OCitems_General;
@@ -71,7 +73,7 @@ class EditController extends Zend_Controller_Action
 		  }
 		  else{
 				$result = $linkAnnotObj->getAnnotationsByUUID($requestParams["uuid"]);
-				$output = array("response" => $result,
+				$output = array("result" => $result,
 										  "errors" => false,
 										  "requestParams" => $requestParams);
 				header('Content-Type: application/json; charset=utf8');
@@ -99,7 +101,7 @@ class EditController extends Zend_Controller_Action
 				else{
 					 $ok = $linkAnnotObj->createRecord($data);
 					 if(isset($requestParams["json"])){
-						  $output = array("response" => $ok,
+						  $output = array("result" => $ok,
 												"errors" => false,
 												"data" => $data);
 						  header('Content-Type: application/json; charset=utf8');
@@ -133,7 +135,7 @@ class EditController extends Zend_Controller_Action
 				else{
 					 $ok = $linkAnnotObj->deleteRecord($data);
 					 if(isset($requestParams["json"])){
-						  $output = array("response" => $ok,
+						  $output = array("result" => $ok,
 												"errors" => false,
 												"data" => $data);
 						  header('Content-Type: application/json; charset=utf8');
@@ -161,7 +163,7 @@ class EditController extends Zend_Controller_Action
 		  }
 		  else{
 				$result = $pRes = $uriObj->lookupURI($requestParams["uri"]);
-				$output = array("response" => $result,
+				$output = array("result" => $result,
 										  "errors" => false,
 										  "requestParams" => $requestParams);
 				header('Content-Type: application/json; charset=utf8');
