@@ -36,8 +36,41 @@ function getAnnotationsDone(response){
 }    
 
 
+var entityType;
+function getEntityByType(type){
+    entityType = type;
+    var uri = document.getElementById('add-obj-uri');
+    getEntity(uri);
+}
 
+//gets entities on a URI
+function getEntity(uri){
+    var rURI = "../edit/get-entity";
+    var myAjax = new Ajax.Request(rURI,
+        {   method: 'get',
+            parameters:
+                {uri: uri
+                },
+        onComplete: getEntityDone }
+    );    
+}
 
+//displays results on checking on new media
+function getEntityDone(response){
+    var respData = JSON.parse(response.responseText);
+    var i = 0;
+    for (i=0; i< respData.length; i++){
+        var fileType = respData[i].filetype;
+        var actDomID = fileType + "-newStatus";
+        var actDom = document.getElementById(actDomID);
+        var bytes = respData[i].bytes;
+        var outputMessage = "<button class=\"btn btn-danger btn-mini\">Not Found!</button>";
+        if(bytes > 0){
+            var outputMessage = "<button class=\"btn btn-success btn-mini\">" + respData[i].human + "</button>";
+        }
+        actDom.innerHTML = outputMessage;
+    }
+}
 
 
 

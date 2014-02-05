@@ -124,14 +124,24 @@ else{
 										  <tr>
 												<td><button class="btn" type="submit">+</button></td>
 												<td id="add-pred-label"></td>
-												<td><input class="form-control" type="text" name="predicateURI" id="add-pred-uri"/></td>
+												<td><input onchange="javascript:getEntityByType('predicate');" class="form-control" type="text" name="predicateURI" id="add-pred-uri"/></td>
 												<td id="add-obj-label"></td>
-												<td><input class="form-control" type="text" name="objectURI" id="add-obj-uri"/></td>
+												<td><input onchange="javascript:getEntityByType('object');" class="form-control" type="text" name="objectURI" id="add-obj-uri"/></td>
 										  </tr>
 									  </form>
 									 </tbody>
 								</table>
 						  </div>
+					 </div>
+				</div>
+				<div class="row">
+					 <div class="col-md-6">
+						  <h4>New Predicate Entity</h4>
+						  <div id="add-pred-entity"></div>
+					 </div>
+					 <div class="col-md-6">
+						  <h4>New Object Entity</h4>
+						  <div id="add-obj-entity"></div>
 					 </div>
 				</div>
 		  </div>

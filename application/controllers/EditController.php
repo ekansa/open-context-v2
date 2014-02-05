@@ -113,6 +113,7 @@ class EditController extends Zend_Controller_Action
 		  }
 	 }
 	 
+	 //deletes an annotation applied to an opencontext entity
 	 public function deleteAnnotationAction(){
 		  $requestParams =  $this->_request->getParams();
 		  $this->_helper->viewRenderer->setNoRender();
@@ -146,6 +147,28 @@ class EditController extends Zend_Controller_Action
 		  }
 	 }
 	 
+	 
+	 //gets some information about a URI identified entity
+	 public function getEntityAction(){
+		  $requestParams =  $this->_request->getParams();
+		  $this->_helper->viewRenderer->setNoRender();
+		  
+		  $genObj = new OCitems_General;
+		  $uriObj = new infoURI;
+		  if(!isset($requestParams["uri"])){
+				$errors = array("Need 'uri' parameter");
+				$this->error400($errors);
+		  }
+		  else{
+				$result = $pRes = $uriObj->lookupURI($requestParams["uri"]);
+				$output = array("response" => $result,
+										  "errors" => false,
+										  "requestParams" => $requestParams);
+				header('Content-Type: application/json; charset=utf8');
+				echo $genObj->JSONoutputString($output);
+		  }
+		  
+	 }
 	 
 }
 
