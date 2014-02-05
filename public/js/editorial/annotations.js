@@ -1,51 +1,21 @@
 
 
-
-
-//gets annotations on a URI
-function getAnnotations(){
-    
-    var uuid = document.getElementById('in-item-uuid');
-    var rURI = "../edit/get-annotations";
-    
-    var myAjax = new Ajax.Request(rURI,
-        {   method: 'get',
-            parameters:
-                {uuid: uuid
-                },
-        onComplete: getAnnotationsDone }
-    );
-    
-}
-
-//displays results on checking on new media
-function getAnnotationsDone(response){
-    var respData = JSON.parse(response.responseText);
-    var i = 0;
-    for (i=0; i< respData.length; i++){
-        var fileType = respData[i].filetype;
-        var actDomID = fileType + "-newStatus";
-        var actDom = document.getElementById(actDomID);
-        var bytes = respData[i].bytes;
-        var outputMessage = "<button class=\"btn btn-danger btn-mini\">Not Found!</button>";
-        if(bytes > 0){
-            var outputMessage = "<button class=\"btn btn-success btn-mini\">" + respData[i].human + "</button>";
-        }
-        actDom.innerHTML = outputMessage;
-    }
-}    
-
-
 var entityType;
 function getEntityByType(type){
     entityType = type;
-    clearNewEntityForm("pred-newEntityForm");
-    clearNewEntityForm("obj-newEntityForm");
+    
     if(entityType == "object"){
+        clearNewEntityForm("pred-newEntityForm");
+        clearNewEntityForm("obj-newEntityForm");
         var uriDom = document.getElementById('add-obj-uri');
     }
-    else{
+    else if(entityType == "predicate"){
+        clearNewEntityForm("pred-newEntityForm");
+        clearNewEntityForm("obj-newEntityForm");
         var uriDom = document.getElementById('add-pred-uri');
+    }
+    else{
+        var uriDom = document.getElementById('new-entity-vocab-uri');
     }
     var uri = uriDom.value;
     getEntity(uri);
@@ -75,10 +45,13 @@ function getEntityDone(response){
             var actSmallLabelDom = "add-obj-label";
             var formRootDomID = "obj-newEntityForm";
         }
-        else{
+        else if(entityType == "predicate"){
             var actDomID = "add-pred-entity";
             var actSmallLabelDom = "add-pred-label";
             var formRootDomID = "pred-newEntityForm";
+        }
+        else{
+            vocabEntity(result); //deal with the vocabulary entity
         }
         var actDom = document.getElementById(actDomID);
         var smallLabelDom = document.getElementById(actSmallLabelDom);
@@ -95,7 +68,7 @@ function getEntityDone(response){
             }
         }
         else{
-           
+            smallLabelDom.innerHTML = "";
             var outputMessage = "<h5>Entity new to Open Context</h5>";
             newEntityForm(formRootDomID, activeEntityURI);
         }
@@ -125,13 +98,31 @@ function newEntityForm(formRootDomID, uri){
     formHTML += "<input type=\"text\" id=\"new-entity-alt-label\" value=\"\" class=\"form-control\" />";
     
     formHTML += "<br/>";
-    formHTML += "Entity Alt-Label:<br/>";
-    formHTML += "<input type=\"text\" id=\"new-entity-alt-label\" value=\"\" class=\"form-control\" />";
+    formHTML += "Entity Vocabulary URI:<br/>";
+    formHTML += "<input onchange=\"javascript:getEntityByType('vocabulary');\" type=\"text\" id=\"new-entity-vocab-uri\" value=\"\" class=\"form-control\" />";
     
+    formHTML += "<br/>";
+    formHTML += "Entity Vocabulary Label <span id=\"vocab-new-note\"></span>:<br/>";
+    formHTML += "<input type=\"text\" id=\"new-entity-vocab-label\" value=\"\" class=\"form-control\" />";
+    
+    actDom.innerHTML = formHTML;
 }
 
 
-
+function vocabEntity(vocabResult){
+    var newNoteDom = document.getElementById("vocab-new-note");
+    var vocabLabelDom = document.getElementById("new-entity-vocab-label");
+    if(vocabResult != false){
+        newNoteDom.innerHTML = "[Used]";
+        var vocabLabelDom = document.getElementById("new-entity-vocab-label");
+        vocabLabelDom.value = vocabResult.label;
+    }
+    else{
+        newNoteDom.innerHTML = "<strong>[NEW]<strong>";
+        vocabLabelDom.value = "";
+        vocabLabelDom.placeholder = "Add vocabulary label";
+    }
+}
 
 
 
