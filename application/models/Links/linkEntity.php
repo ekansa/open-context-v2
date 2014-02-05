@@ -51,6 +51,60 @@ class Links_linkEntity {
 	 }
 	 
 	 
+	 //search for entity by label or alt label, limited to vocabularies
+	 function getByLabel($label, $requestParams){
+		  $output = false;
+		  $qlabel = addslashes($label);
+		  
+		  $vocabTerm = "";
+		  $ocGenObj = new OCitems_General;
+		  $vocabularies = $ocGenObj->checkExistsNonBlank("vocabularies", $requestParams, true);
+		  if($vocabularies != false){
+				$vocabTerm = $ocGenObj->makeORcondition($vocabularies, "vocabURI", "le");
+				$vocabTerm = " AND (".$vocabTerm.")";
+		  }
+		  
+		  $db = $this->startDB();
+        
+        $sql = 'SELECT le.uri, le.label, le.altLabel, le.vocabURI, ve.label AS vocabLabel, ve.altLabel as vocabAltLabel
+                FROM link_entities AS le
+					 LEFT JOIN link_entities AS ve ON le.vocabURI = ve.uri
+                WHERE (le.label LIKE "%'.$qlabel.'%"
+					 OR le.altLabel LIKE "%'.$qlabel.'%")
+					 '.$vocabTerm.'
+                LIMIT 20;';
+		
+		  
+		  
+        $result = $db->fetchAll($sql, 2);
+        if($result){
+            $output = $result;
+		  }
+        return $output;
+	 }
+	 
+	 
+	 //search for entity by label or alt label, limited to vocabularies
+	 function getVocabularie(){
+		  
+		  $db = $this->startDB();
+        
+        $sql = 'SELECT DISTINCT le.vocabURI, ve.label AS vocabLabel, ve.altLabel as vocabAltLabel
+                FROM link_entities AS le
+					 LEFT JOIN link_entities AS ve ON le.vocabURI = ve.uri
+                WHERE 1
+					 ORDER BY ve.label
+					 ';
+		
+        $result = $db->fetchAll($sql, 2);
+        if($result){
+            $output = $result;
+		  }
+        return $output;
+	 }
+	 
+	 
+	 
 	 
     function security_check($input){
         $badArray = array("DROP", "SELECT", " ", "--", "DELETE", "INSERT", "UPDATE", "ALTER", "=");

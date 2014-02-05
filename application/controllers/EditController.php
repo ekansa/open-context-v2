@@ -156,6 +156,7 @@ class EditController extends Zend_Controller_Action
 		  $this->_helper->viewRenderer->setNoRender();
 		  
 		  $genObj = new OCitems_General;
+		  $genObj->startClock();
 		  $uriObj = new infoURI;
 		  if(!isset($requestParams["uri"])){
 				$errors = array("Need 'uri' parameter");
@@ -167,6 +168,33 @@ class EditController extends Zend_Controller_Action
 										  "errors" => false,
 										  "requestParams" => $requestParams);
 				header('Content-Type: application/json; charset=utf8');
+				$output = $genObj->documentElapsedTime($output);
+				echo $genObj->JSONoutputString($output);
+		  }
+		  
+	 }
+	 
+	 //gets some information about a URI identified entity
+	 public function searchEntitiesAction(){
+		  $requestParams =  $this->_request->getParams();
+		  $this->_helper->viewRenderer->setNoRender();
+		  
+		  $genObj = new OCitems_General;
+		  $genObj->startClock();
+		  $linkEntityObj = new Links_linkEntity;
+		  
+		  if(!isset($requestParams["q"])){
+				$errors = array("Need 'q' parameter");
+				$this->error400($errors);
+		  }
+		  else{
+				$label = $requestParams["q"];
+				$result = $linkEntityObj->getByLabel($label, $requestParams);
+				$output = array("result" => $result,
+										  "errors" => false,
+										  "requestParams" => $requestParams);
+				header('Content-Type: application/json; charset=utf8');
+				$output = $genObj->documentElapsedTime($output);
 				echo $genObj->JSONoutputString($output);
 		  }
 		  

@@ -6,6 +6,9 @@
 class OCitems_General {
     
 	 public $db;
+	 public $startTime;
+	 public $endTime;
+	 
 	 public $localBaseURI; //the base uri for this local instance used for development and testing 
 	 public $canonicalBaseURI; //the cannonical URI for the live deployment
 	 
@@ -171,18 +174,37 @@ class OCitems_General {
 	 
 	 
 	 //used for validating data
-	 function checkExistsNonBlank($key, $requestParams){
+	 function checkExistsNonBlank($key, $requestParams, $allowArrayValues = false){
 		  $value = false;
 		  if(isset($requestParams[$key])){
-				if(is_array($requestParams[$key])){
-					 $this->noteError("Key: '$key' should not be an array.");
-					 $value = false;
+				if(!$allowArrayValues){
+					 if(is_array($requestParams[$key])){
+						  $this->noteError("Key: '$key' should not be an array.");
+						  $value = false;
+					 }
+					 else{
+						  $value = trim($requestParams[$key]);
+						  if(strlen($value)<1){
+								$value = false;
+						  }	 
+					 }
 				}
 				else{
-					 $value = trim($requestParams[$key]);
-					 if(strlen($value)<1){
-						  $value = false;
-					 }	 
+					 if(is_array($requestParams[$key])){
+						  $value = array();
+						  foreach($requestParams[$key] as $actVal){
+								$actVal = trim($actVal);
+								if(strlen($actVal)>1){
+									 $value[] = $actVal;
+								}
+						  }
+					 }
+					 else{
+						  $value = trim($requestParams[$key]);
+						  if(strlen($value)<1){
+								$value = false;
+						  }
+					 }
 				}
 		  }
 		  return $value;
@@ -259,6 +281,19 @@ class OCitems_General {
 		  return $allCond ;
 	 }
 	 
+	 //start the clock going to see the time
+	 function startClock(){
+		  $this->startTime = microtime(true);
+	 }
+	 
+	 //stop the clock, record the difference
+	 function documentElapsedTime($outputArray = false){
+		  $this->endTime = microtime(true);
+		  if(is_array($outputArray)){
+				$outputArray["elapsedTime"] = $this->endTime - $this->startTime;
+		  }
+		  return $outputArray;
+	 }
 	 
     
     function security_check($input){
