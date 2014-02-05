@@ -11,6 +11,7 @@ class OCitems_Predicate {
      General item metadata
     */
     public $uuid;
+	 public $uri;
     public $projectUUID;
     public $sourceID;
     public $label;
@@ -35,7 +36,8 @@ class OCitems_Predicate {
    
     //get data from database
     function getByUUID($uuid){
-        
+		  
+        $ocGenObj = new OCitems_General;
         $uuid = $this->security_check($uuid);
         $output = false; //not found
         
@@ -48,7 +50,7 @@ class OCitems_Predicate {
 		
         $result = $db->fetchAll($sql, 2);
         if($result){
-            $output = $result[0];
+           
 				$this->uuid = $uuid;
 				$this->projectUUID = $result[0]["projectUUID"];
 				$this->sourceID = $result[0]["sourceID"];
@@ -57,7 +59,9 @@ class OCitems_Predicate {
 				$this->label = $result[0]["label"];
 				$this->created = $result[0]["created"];
 				$this->updated = $result[0]["updated"];
-				//$this->getItemData($uuid);
+				$this->uri = $ocGenObj->generateItemURI($this->uuid, "predicate");
+				$result[0]["uri"] = $this->uri;
+				$output = $result[0];
 		  }
         return $output;
     }

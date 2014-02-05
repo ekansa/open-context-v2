@@ -11,6 +11,7 @@ class OCitems_Property {
      General data
     */
     public $uuid;
+	 public $uri;
 	 public $hashID;
     public $projectUUID;
     public $sourceID;
@@ -24,6 +25,7 @@ class OCitems_Property {
     //get data from database
     function getByUUID($uuid){
         
+		  $ocGenObj = new OCitems_General;
         $uuid = $this->security_check($uuid);
         $output = false; //not found
         
@@ -36,7 +38,7 @@ class OCitems_Property {
 		
         $result = $db->fetchAll($sql, 2);
         if($result){
-            $output = $result[0];
+            
 				$this->uuid = $uuid;
 				$this->hashID = $result[0]["hashID"];
 				$this->projectUUID = $result[0]["projectUUID"];
@@ -46,6 +48,9 @@ class OCitems_Property {
 				$this->label = $result[0]["label"];
 				$this->note  = $result[0]["note"];
 				$this->updated = $result[0]["updated"];
+				$this->uri = $ocGenObj->generateItemURI($this->uuid, "property");
+				$result[0]["uri"] = $this->uri;
+				$output = $result[0];
 		  }
         return $output;
     }
