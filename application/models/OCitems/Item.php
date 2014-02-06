@@ -94,8 +94,6 @@ class OCitems_Item {
 	 const Predicate_hasThumbFile = "oc-gen:has-thumb-file";
 	 const Predicate_hasContent = "oc-gen:has-content";
 	 
-	 const foafPrefix = "foaf";
-	 const foafBaseURI = "http://xmlns.com/foaf/0.1/";
 	 const Predicate_familyName = "foaf:familyName";
 	 const Predicate_givenName = "foaf:givenName";
 	 
@@ -206,12 +204,16 @@ class OCitems_Item {
 					 "type" => "@type",
 					 "id" => "@id",
 					 "rdfs" => "http://www.w3.org/2000/01/rdf-schema#",
+					 "label" => "rdfs:label",
+					 "xsd" => "http://www.w3.org/2001/XMLSchema#",
+					 "skos" => "http://www.w3.org/2004/02/skos/core#",
+					 "owl" => "http://www.w3.org/2002/07/owl#",
 					 "dc-elems" => "http://purl.org/dc/elements/1.1/",
 					 "dc-terms" => "http://purl.org/dc/terms/",
 					 "uuid" => "dc-terms:identifier",
 					 "bibo" => "http://purl.org/ontology/bibo/",
-					 "label" => "http://www.w3.org/2000/01/rdf-schema#label",
-					 "xsd" => "http://www.w3.org/2001/XMLSchema#",
+					 "foaf" => "http://xmlns.com/foaf/0.1/",
+					 "cidoc-crm" => "http://www.cidoc-crm.org/cidoc-crm/",
 					 "oc-gen" => "http://opencontext.org/vocabularies/oc-general/"
 					 );
 				
@@ -583,7 +585,6 @@ class OCitems_Item {
 	 function addPersonJSON($JSON_LD){
 		  
 		  if($this->itemType == "person"){
-				$JSON_LD["@context"][self::foafPrefix] = self::foafBaseURI;
 				$persObj = new OCitems_Person;
 				$pres = $persObj->getByUUID($this->uuid);
 				if(is_array($pres)){

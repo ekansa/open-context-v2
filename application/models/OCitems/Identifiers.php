@@ -10,12 +10,17 @@ class OCitems_Identifiers {
 											  "ark" => "http://n2t.net/ark:/",
 											  "orcid" => "http://orcid.org/"
 											  );
-   
+   /*
 	 public $IDtypePredicates = array("doi" => "http://www.w3.org/2002/07/owl#sameAs",
 											  "ark" => "http://www.w3.org/2002/07/owl#sameAs",
 											  "orcid" => "http://xmlns.com/foaf/0.1/isPrimaryTopicOf"
 											  );
-	
+	*/
+	 
+	 public $IDtypePredicates = array("doi" => "owl:sameAs",
+											  "ark" => "owl:sameAs",
+											  "orcid" => "foaf:isPrimaryTopicOf"
+											  );
 	
    //get data from database
     function getByUUID($uuid){
