@@ -50,7 +50,7 @@ if(is_array($result) && !$subjectLabel){
 		  <!--
 		 http://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js
 		 -->
-		  <script src="http://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js" type="text/javascript" ></script>
+		  <script src="../../bootstrap/js/bootstrap.min.js" type="text/javascript" ></script>
 		  <script src="../../js/editorial/annotations.js" type="text/javascript" ></script>
 		  
     </head>
@@ -159,28 +159,48 @@ if(is_array($result) && !$subjectLabel){
 								</table>
 						  </div>
 					 </div>
-					 <div class="col-md-2">
+					 <div class="col-md-4">
 						  <h4>Entity Lookup (Type Label)</h4>
-						  <input onchange="javascript:searchEntities();" class="form-control" type="text" id="entity-lookup-label" />
-						  <ol>
-								<li><input value="" type="radio" name="vocabularies" checked />All (Don't filter)</li>
-								<?php
-								$linkEntityObj = new Links_linkEntity;
-								$vocabs = $linkEntityObj->getVocabularies();
-								if(is_array($vocabs)){
-									 foreach($vocabs as $vocab){
-										  echo "<li>";
-										  echo "<input value=\"".$vocab["vocabURI"]."\" name=\"vocabularies\" type=\"radio\" />".$vocab["vocabLabel"];
-										  echo "</li>".chr(13);
-									 }
-								}
-								
-								?>
-						  </ol>
-					 </div>
-					 <div class="col-md-2">
-						  <h4>Entities</h4>
-						  <div id="lookup-entities"></div>
+						  <input onkeyup="javascript:searchEntities();" class="form-control" type="text" id="entity-lookup-label" />
+						  <div class="panel-group" id="vocab-accordion">
+								<div class="panel panel-default">
+									 <div class="panel-heading">
+										<h4 class="panel-title">
+										  <a data-toggle="collapse" data-parent="#vocab-accordion" href="#vocab-list">Vocabulary List</a>
+										</h4>
+									 </div>
+									 <div id="vocab-list" class="panel-collapse collapse">
+										  <ol>
+												<!--
+												<li role="presentation">
+													 <a role="menuitem" tabindex="-1" href="javascript:setSearchEntityVocab('');">All (Do not limit)</a>
+												</li>
+												-->
+												<li>
+													 <input value="" name="vocabularies" type="radio" checked />All (Do not limit)
+												</li>
+												<?php
+												$linkEntityObj = new Links_linkEntity;
+												$vocabs = $linkEntityObj->getVocabularies();
+												if(is_array($vocabs)){
+													 foreach($vocabs as $vocab){
+														  echo "<li>";
+														  echo "<input value=\"".$vocab["vocabURI"]."\" name=\"vocabularies\" type=\"radio\" />".$vocab["vocabLabel"];
+														  //echo "<a role=\"menuitem\" tabindex=\"-1\" href=\"javascript:setSearchEntityVocab('".$vocab["vocabURI"]."');\">".$vocab["vocabLabel"]."</a>";
+														  echo "</li>".chr(13);
+													 }
+												}
+												
+												?>
+										  </ol>
+									 </div>
+								</div>
+						  </div>
+					 
+						  <div style="padding-top:20px;">
+								<h4>Entities</h4>
+								<div id="lookup-entities" style="margin-right:10px; padding-right:10px;"></div>
+						  </div>
 					 </div>
 				</div>
 				<div class="row">

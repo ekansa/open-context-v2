@@ -125,13 +125,11 @@ function vocabEntity(vocabResult){
 }
 
 
-
 function searchEntities(){
     
     var searchLabelDom = document.getElementById("entity-lookup-label");
     var searchLabel = searchLabelDom.value;
     var vocab = getCheckedRadio("vocabularies");
-    
     var rURI = "../../edit/search-entities";
     var myAjax = new Ajax.Request(rURI,
         {   method: 'get',
@@ -148,16 +146,55 @@ function searchEntitiesDone(response){
     actDom.innerHTML = "";
     var respData = JSON.parse(response.responseText);
     if(respData.result != false){
-        var outMessage = "<ul>";
+        var outMessage = "<table class=\"table table-condensed table-striped table-hover\" style=\"width:95%; font-size:75%;\">";
+        outMessage += "<thead><th>Pred.</th><th>Obj.</th><th>URI</th><th>Label</th></thead>";
+        outMessage += "<tbody>";
         for(var i = 0; i < respData.result.length; i++){
             var actLabel = respData.result[i].label;
             var actURI = respData.result[i].uri;
-            outMessage += "<li>" + actURI + " <em>" + actLabel + "</em></li>";
+            outMessage += "<tr>";
+            outMessage += "<td><button onclick=\"javascript:selectEntity('" + actURI + "', 'predicate');\" title=\"Use as new predicate URI\" type=\"button\" class=\"btn btn-default btn-xs\">+</button></td>";
+            outMessage += "<td><button onclick=\"javascript:selectEntity('" + actURI + "', 'object');\" title=\"Use as new object URI\" type=\"button\" class=\"btn btn-primary btn-xs\">+</button></td>";
+            outMessage += "<td><a target=\"_bank\" href=\"" + actURI + "\">" + actURI + "</a></td><td>" + actLabel + "</td>";
+            outMessage += "</tr>";
         }
-        outMessage += "</ul>";
+        outMessage += "</tbody>";
+        outMessage += "</table>";
         actDom.innerHTML = outMessage;
     }
 }
+
+
+
+function selectEntity(actURI, type){
+    entityType = type;
+    if(entityType == "object"){
+        clearNewEntityForm("pred-newEntityForm");
+        clearNewEntityForm("obj-newEntityForm");
+        var uriDom = document.getElementById('add-obj-uri');
+    }
+    else if(entityType == "predicate"){
+        clearNewEntityForm("pred-newEntityForm");
+        clearNewEntityForm("obj-newEntityForm");
+        var uriDom = document.getElementById('add-pred-uri');
+    }
+    else{
+        var uriDom = document.getElementById('new-entity-vocab-uri');
+    }
+    uriDom.value = actURI;
+    getEntity(actURI);
+}
+
+
+
+
+
+
+
+
+
+
+
 
 function getCheckedRadio(radioName) {
     var radios = document.getElementsByName(radioName);
