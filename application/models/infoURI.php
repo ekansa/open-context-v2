@@ -33,7 +33,7 @@ class infoURI {
 		  
 		  if($isURI){
 				$OCbaseURI = $ocGenObj->getCanonicalBaseURI();
-				if(strstr($possURI, $OCbaseURI)){
+				if(strstr($possURI, $OCbaseURI) && !strstr($possURI, $OCbaseURI."vocabularies") ){
 					 //lookup an Open Context item
 					 $output = $this->lookupOCitemByURI($possURI);
 				}
