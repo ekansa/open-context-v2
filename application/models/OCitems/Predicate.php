@@ -31,7 +31,7 @@ class OCitems_Predicate {
 	 public $repo; //repository, used for keeping data in Github 
     public $viewCount;
    
-    
+    const itemType = "predicate"; //Open Context itemtype
    
    
     //get data from database
@@ -59,7 +59,8 @@ class OCitems_Predicate {
 				$this->label = $result[0]["label"];
 				$this->created = $result[0]["created"];
 				$this->updated = $result[0]["updated"];
-				$this->uri = $ocGenObj->generateItemURI($this->uuid, "predicate");
+				$this->uri = $ocGenObj->generateItemURI($this->uuid, self::itemType);
+				$result[0]["itemType"] = self::itemType;
 				$result[0]["uri"] = $this->uri;
 				$output = $result[0];
 		  }

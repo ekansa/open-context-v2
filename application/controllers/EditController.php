@@ -200,5 +200,32 @@ class EditController extends Zend_Controller_Action
 		  
 	 }
 	 
+	 //gets some information about a URI identified entity
+	 public function predicatePropertiesAction(){
+		  $requestParams =  $this->_request->getParams();
+		  $this->_helper->viewRenderer->setNoRender();
+		  
+		  $genObj = new OCitems_General;
+		  $genObj->startClock();
+		  $propertyObj = new OCitems_Property;
+		  
+		  if(!isset($requestParams["predicateUUID"])){
+				$errors = array("Need 'predicateUUID' parameter");
+				$this->error400($errors);
+		  }
+		  else{
+				$predicateUUID = $requestParams["predicateUUID"];
+				$result = $propertyObj->getByPredicateUUID($predicateUUID, $requestParams);
+				$output = array("result" => $result,
+										  "errors" => false,
+										  "requestParams" => $requestParams);
+				header('Content-Type: application/json; charset=utf8');
+				$output = $genObj->documentElapsedTime($output);
+				echo $genObj->JSONoutputString($output);
+		  }
+		  
+	 }
+	 
+	 
 }
 

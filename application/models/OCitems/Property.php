@@ -21,6 +21,7 @@ class OCitems_Property {
 	 public $note;
     public $updated;
 	 
+	 const itemType = "property"; //open context itemtype
    
     //get data from database
     function getByUUID($uuid){
@@ -48,13 +49,62 @@ class OCitems_Property {
 				$this->label = $result[0]["label"];
 				$this->note  = $result[0]["note"];
 				$this->updated = $result[0]["updated"];
-				$this->uri = $ocGenObj->generateItemURI($this->uuid, "property");
+				$this->uri = $ocGenObj->generateItemURI($this->uuid, self::itemType);
+				$result[0]["itemType"] = self::itemType;
 				$result[0]["uri"] = $this->uri;
 				$output = $result[0];
 		  }
         return $output;
     }
     
+	 //get the properties for an item
+	 function getByPredicateUUID($predicateUUID, $requestParams = false){
+		  
+		  $ocGenObj = new OCitems_General;
+        $predicateUUID = $this->security_check($predicateUUID);
+        $output = false; //not found
+        
+        $db = $this->startDB();
+		  
+		  $getAnnotations = false;
+		  $labelTerm = "";
+        if(is_array($requestParams)){
+				$label = $ocGenObj->checkExistsNonBlank("q", $requestParams);
+				if($label != false){
+					 $labelTerm = " AND (label LIKE '%".addslashes($label)."%') ";
+				}
+				$gAnnot = $ocGenObj->checkExistsNonBlank("getAnnotations", $requestParams);
+				if($gAnnot != false){
+					 $getAnnotations = true; 
+				}
+		  }
+		  
+		  
+        $sql = 'SELECT *
+                FROM oc_properties
+                WHERE predicateUUID = "'.$predicateUUID.'"
+					 '.$labelTerm.'
+					 ORDER BY rank, label
+					 ';
+		
+        $result = $db->fetchAll($sql, 2);
+        if($result){
+            $output = array();
+				
+				foreach($result as $row){
+					 $row["uri"] = $ocGenObj->generateItemURI($row["uuid"], "property");
+					 if($getAnnotations){
+						  $linkAnnotObj = new Links_linkAnnotation;
+						  $row["annotations"] = $linkAnnotObj->getByUUID($row["uuid"]);
+						  unset($linkAnnotObj);
+					 }
+					 $output[] = $row;
+				}
+		  }
+        return $output;
+	 }
+	 
+	 
 	 
 	 function makeHashID($predicateUUID, $label){
 		  $label= trim($label);

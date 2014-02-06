@@ -105,7 +105,6 @@ class Links_linkEntity {
 	 
 	 
 	 
-	 
     function security_check($input){
         $badArray = array("DROP", "SELECT", " ", "--", "DELETE", "INSERT", "UPDATE", "ALTER", "=");
         foreach($badArray as $bad_word){

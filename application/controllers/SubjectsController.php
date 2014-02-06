@@ -26,12 +26,14 @@ class SubjectsController extends Zend_Controller_Action
 		  }
 		  
 		  $genObj = new OCitems_General;
+		  $genObj->startClock();
 		  $itemObj = new OCitems_Item;
 		  $ok = $itemObj->getShortByUUID($uuid);
 		  
 		  header('Content-Type: application/json; charset=utf8');
-		  
-		  echo $genObj->JSONoutputString($itemObj->shortJSON);
+		  $output = $itemObj->shortJSON;
+		  $output = $genObj->documentElapsedTime($output);
+		  echo $genObj->JSONoutputString($output);
 	 }
 	 
 	 public function jsonLongAction(){
@@ -61,12 +63,14 @@ class SubjectsController extends Zend_Controller_Action
 		  }
 		  
 		  $genObj = new OCitems_General;
+		  $genObj->startClock();
 		  $itemObj = new OCitems_Item;
 		  $ok = $itemObj->getLongByUUID($uuid);
 		  
 		  header('Content-Type: application/json; charset=utf8');
-		  
-		  echo $genObj->JSONoutputString($itemObj->longJSON);
+		  $output = $itemObj->longJSON;
+		  $output = $genObj->documentElapsedTime($output);
+		  echo $genObj->JSONoutputString($output);
 	 }
    
 	
@@ -94,12 +98,13 @@ class SubjectsController extends Zend_Controller_Action
 		  }
 		  
 		  $genObj = new OCitems_General;
+		  $genObj->startClock();
 		  $itemObj = new OCitems_Item;
-		  $generatedShortJSON = $itemObj->generateShortByUUID($uuid);
+		  $output = $itemObj->generateShortByUUID($uuid);
 		  
 		  header('Content-Type: application/json; charset=utf8');
-		  
-		  echo $genObj->JSONoutputString($generatedShortJSON);
+		  $output = $genObj->documentElapsedTime($output);
+		  echo $genObj->JSONoutputString($output);
 	 }
 	 
 }

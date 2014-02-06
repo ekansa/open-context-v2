@@ -146,7 +146,8 @@ function searchEntitiesDone(response){
     actDom.innerHTML = "";
     var respData = JSON.parse(response.responseText);
     if(respData.result != false){
-        var outMessage = "<table class=\"table table-condensed table-striped table-hover\" style=\"width:95%; font-size:75%;\">";
+        var outMessage = "<h4>Entities</h4>";
+        outMessage += "<table class=\"table table-condensed table-striped table-hover\" style=\"width:95%; font-size:75%;\">";
         outMessage += "<thead><th>Pred.</th><th>Obj.</th><th>URI</th><th>Label</th></thead>";
         outMessage += "<tbody>";
         for(var i = 0; i < respData.result.length; i++){
@@ -188,7 +189,52 @@ function selectEntity(actURI, type){
 
 
 
+function predicateProperties(){
+    
+    var searchTermDom = document.getElementById("search-prop-term");
+    var searchTerm = searchTermDom.value;
+    var predicateUUIDdom = document.getElementById("search-prop-predicateUUID");
+    var predicateUUID = predicateUUIDdom.value
+    var rURI = "../../edit/predicate-properties";
+    var myAjax = new Ajax.Request(rURI,
+        {   method: 'get',
+            parameters:
+                {predicateUUID: predicateUUID,
+                q: searchTerm
+                },
+        onComplete: predicatePropertiesDone }
+    );    
+}
 
+function predicatePropertiesDone(response){
+    var actDom = document.getElementById("properties");
+    actDom.innerHTML = "";
+    var respData = JSON.parse(response.responseText);
+    if(respData.result != false){
+        var result = respData.result;
+        var outMessage = "<h4>Properties used with this Predicate</h4>";
+        outMessage += "<table class=\"table table-condensed table-striped table-hover\" style=\"width:95%; font-size:75%;\">";
+        outMessage += "<thead><th>UUID</th><th>Label</th><th>Annotations</th></thead>";
+        outMessage += "<tbody>";
+        for(var i = 0; i < result.length; i++){
+            var actLabel = result[i].label;
+            var actURI = result[i].uri;
+            outMessage += "<tr>";
+            outMessage += "<td><a target=\"_bank\" href=\"" + actURI + "\">" + result[i].uuid + "</a></td>";
+            outMessage += "<td>" + actLabel + "</td>";
+            var annotations = result[i].annotations;
+            var outAnnotations = "";
+            if(annotations != false){
+                
+            }
+            outMessage += "<td>" + outAnnotations + "</td>"; //predicate labels
+            outMessage += "</tr>";
+        }
+        outMessage += "</tbody>";
+        outMessage += "</table>";
+        actDom.innerHTML = outMessage;
+    }
+}
 
 
 

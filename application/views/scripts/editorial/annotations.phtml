@@ -80,24 +80,16 @@ if(is_array($result) && !$subjectLabel){
 						  <h4>Subject Entity UUID</h4>
 						  <h5><?php echo $this->uuid; ?></h5>
 					 </div>
-					 <div class="col-md-3">
+					 <div class="col-md-2">
 						  <h4>Subject Entity Type</h4>
 						  <h5><?php echo $subjectType; ?></h5>
 					 </div>
-					 <div class="col-md-3">
+					 <div class="col-md-4">
 						  <h4>Subject Entity URI</h4>
 						  <h5><a href="<?php echo $subjectLocalLink; ?>" target="_blank"><?php echo $subjectURI; ?></a></h5>
 					 </div>
 				</div>
-				<div class="row">
-					 <div class="col-md-6">
-						  
-					 </div>
-					 <div class="col-md-6">
-						  
-					 </div>
-				</div>
-				<div class="row">
+				<div class="row" style="padding-top:20px;">
 					 <div class="col-md-8">
 						  <div id="annotations">
 								<table class="table table-condensed table-striped table-hover">
@@ -157,9 +149,19 @@ if(is_array($result) && !$subjectLabel){
 										  </tr>
 									 </tbody>
 								</table>
+								
+								<?php
+								if($subjectType == "predicate"){
+								?>
+								<div id="properties" style="padding:2%; background-color:#EEF3E2;">
+						  
+								</div>
+								<?php
+								}//end case with properties
+								?>
 						  </div>
 					 </div>
-					 <div class="col-md-4">
+					 <div class="col-md-4" style="background-color:#F5F5F5; padding-bottom:10px;">
 						  <h4>Entity Lookup (Type Label)</h4>
 						  <input onkeyup="javascript:searchEntities();" class="form-control" type="text" id="entity-lookup-label" />
 						  <div class="panel-group" id="vocab-accordion">
@@ -198,17 +200,34 @@ if(is_array($result) && !$subjectLabel){
 						  </div>
 					 
 						  <div style="padding-top:20px;">
-								<h4>Entities</h4>
-								<div id="lookup-entities" style="margin-right:10px; padding-right:10px;"></div>
+								<div id="lookup-entities"></div>
 						  </div>
+						  
+					 <?php
+					 if($subjectType == "predicate"){
+					 ?>
+						  <div style="padding-top:20px;">
+								<h4>Get Related Properties</h4>
+								<form class="form-inline" role="form">
+									 
+										  <input type="hidden" id="search-prop-predicateUUID" value="<?php echo $this->uuid; ?>">
+										  <input onkeyup="javascript:predicateProperties();" class="form-control" type="text" id="search-prop-term" value="" placeholder="Type to filter list" />
+										  <button class="btn btn-default" onclick="javascript:predicateProperties();" type="button" >Get Properties</button>
+									 
+								</form>
+						  </div>
+					 <?php
+					 } //end case of predicate item
+					 ?>
+						  
 					 </div>
 				</div>
 				<div class="row">
-					 <div class="col-md-6">
+					 <div class="col-md-8">
 						  
 					 </div>
-					 <div class="col-md-6">
-						  
+					 <div class="col-md-4">
+					 
 					 </div>
 				</div>
 		  </div>
