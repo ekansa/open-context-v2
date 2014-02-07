@@ -1,8 +1,6 @@
 
+var multUUIDtoDoList = []; //doto list for checking on entities
 var annotationItems = []; //array of objects with item readiness to annotate
-var activeUUID; //active item uuid (used when checking entity URIs)
-var activeSubjectType; // active item subject type
-var entityType; //type of URI being checked ('predicate' or 'object')
 
 var prefixDomID_button = "act-bt-"; //prefix for buttons to submit a new annotation
 var prefixDomID_predURI = "pred-uri-"; //prefix for dom elements with predicate uris
@@ -16,8 +14,20 @@ var selectedVocabs = false; //limits search for entities by a vocabulary
 var propertiesFound = false;
 var propertyUUIDs; //array of property uuids that are current
 
-var activeEntityURI; //last entity that was checked
-var entityStatuses = []; //URI in the good entity list
+
+//to do object for checking on entities
+function uuidToDo(uuid, subjectType, uri, uriEntityType, doneResult, entityChecked){
+    var uuids = [];
+    uuids.push(uuid);
+    this.uuids = uuids;
+    this.subjectType = subjectType;
+    this.uri = uri;
+    this.uriEntityType = uriEntityType;
+    this.doneResult = doneResult;
+    this.entityChecked = entityChecked;
+}
+
+
 
 //documents annotation status for items
 function addUpdateItemStatus(uuid, subjectType, annoURI, annoType){
@@ -54,43 +64,7 @@ function itemAnnotationStatus(uuid, subjectType, predicateURI, objectURI){
 }
 
 
-//object for noting the status of an item
-function entityStatus(uri, status, label){
-    this.uri = uri; //true false
-    this.status = status; //true false
-    this.label = label;
-}
 
-//update the array of entity URI statuses
-function addUpdateEntityStatus(uri, status, label){
-    var uriFound = false;
-    
-    for(var i = 0; i < entityStatuses.length; i++){
-        if(entityStatuses[i].uri == uri){
-            entityStatuses[i].status = status;
-            entityStatuses[i].label = label;
-            uriFound = true;
-        }
-    }
-    if(!uriFound){
-        var newEntity = new entityStatus(uri, status, label);
-        entityStatuses.push(newEntity);
-    }
-}
-
-//get the label for an entity, if it has a good status
-function getEntityLabel(uri){
-    var label = false;
-    for(var i = 0; i < entityStatuses.length; i++){
-        if(entityStatuses[i].uri == uri){
-            if(entityStatuses[i].status != false){
-                label = entityStatuses[i].label;     
-            }
-        }
-    }
-    
-    return label;
-}
 
 
 
@@ -113,28 +87,110 @@ function checkReadySubmissions(){
     }    
 }
 
+
+
+
 //checks an entity URI if it is recognized by open context
-function getEntityByType(type, uuid, subjectType){
-    entityType = type;
-    activeUUID = uuid;
-    activeSubjectType = subjectType;
-    if(entityType == "object"){
+function getEntityByType(uriEntityType, uuid, subjectType){
+    
+    if(uriEntityType == "object"){
         var domID = prefixDomID_objURI + uuid;
     }
-    else if(entityType == "predicate"){
+    else if(uriEntityType == "predicate"){
         var domID = prefixDomID_predURI + uuid;
     }
     else{
-       
+       exit();
     }
     var uriDom = document.getElementById(domID);
     var uri = uriDom.value;
-    getEntity(uri);
+    
+    multUUIDtoDoList = [];
+    var toDoItem = new uuidToDo(uuid, subjectType, uri, uriEntityType, false, false);
+    multUUIDtoDoList.push(toDoItem);
+    processEntityToDoList();
 }
+
+
+
+function processEntityToDoList(){
+    if(multUUIDtoDoList.length > 0){
+        for(var i = 0; i < multUUIDtoDoList.length; i++){
+            var toDoItem = multUUIDtoDoList[i];
+            if(!toDoItem.entityChecked){
+                //alert("not checked");
+                getEntity(toDoItem.uri);
+            }
+            else{
+                for(var j = 0; j < toDoItem.uuids.length; j++){
+                    var uuid = toDoItem.uuids[j];
+                    var result = toDoItem.doneResult;
+                    if(toDoItem.uriEntityType == "object"){
+                        var actDomID = prefixDomID_objEntity + uuid;
+                        var actSmallLabelDom = prefixDomID_objLabel + uuid;
+                        var URIdomID = prefixDomID_objURI + uuid;
+                    }
+                    else{ //predicate
+                        var actDomID = prefixDomID_predEntity + uuid;
+                        var actSmallLabelDom = prefixDomID_predLabel + uuid;
+                        var URIdomID = prefixDomID_predURI + uuid;
+                    }
+                    
+                    var uriDom = document.getElementById(URIdomID);
+                    uriDom.value = toDoItem.uri;
+                    
+                    var smallLabelDom = document.getElementById(actSmallLabelDom);
+                    
+                    if(result != false){
+                        //the entity is known to open context
+                        smallLabelDom.innerHTML = result.label;
+                        var outputMessage = "<h5>" + result.label + "</h5>";
+                        if("vocabURI" in result){
+                            outputMessage += "<p>Vocabulary: <br/>" + result.vocabURI +" (" + result.vocabLabel + ")</p>";
+                        }
+                        else{
+                            outputMessage += "<p>Open Context Item: <br/>" + result.itemType;
+                            outputMessage += "<a href=\""+ toDoItem.uri + "\">[Link]</a></p>";
+                        }
+                        
+                        
+                        addUpdateItemStatus(uuid, toDoItem.subjectType, toDoItem.uri, toDoItem.uriEntityType); //note the status update
+                    }
+                    else{ //the entity was not recognized by open context
+                        
+                        addUpdateItemStatus(uuid, toDoItem.subjectType, false, toDoItem.uriEntityType); //note the status update
+                        smallLabelDom.innerHTML = "";
+                        var outputMessage = "<h5>Add new entity (form on right)</h5>";
+                        newEntityForm(toDoItem.uri);
+                    }
+                    
+                    if(toDoItem.subjectType != "property"){
+                        var actDom = document.getElementById(actDomID);
+                        actDom.innerHTML = outputMessage;
+                    }
+                }
+            }
+        }
+        
+        var allDone = true;
+        for(var i = 0; i < multUUIDtoDoList.length; i++){
+            var toDoItem = multUUIDtoDoList[i];
+            if(!toDoItem.entityChecked){
+                allDone = false;
+            }
+        }
+        
+        if(allDone){
+            multUUIDtoDoList = []; //reset the todo list when all done
+        }
+    }
+}
+
+
+
 
 //gets entities on a URI
 function getEntity(uri){
-    activeEntityURI = uri;
     var rURI = "../../edit/get-entity";
     var myAjax = new Ajax.Request(rURI,
         {   method: 'get',
@@ -145,8 +201,30 @@ function getEntity(uri){
     );    
 }
 
-//displays results on checking on a linked entity
+
 function getEntityDone(response){
+    
+    var respData = JSON.parse(response.responseText);
+    if(!respData.errors){
+        var uri = respData.requestParams.uri;
+        if(multUUIDtoDoList.length >0){
+            for(var i = 0; i < multUUIDtoDoList.length; i++){
+                if(multUUIDtoDoList[i].uri == uri){
+                    multUUIDtoDoList[i].entityChecked = true;
+                    multUUIDtoDoList[i].doneResult = respData.result;
+                }
+            }
+        }
+    }
+    
+    processEntityToDoList();
+}
+
+
+
+
+//displays results on checking on a linked entity
+function OLDgetEntityDone(response){
     var output = false;
     var respData = JSON.parse(response.responseText);
     if(!respData.errors){
@@ -255,10 +333,10 @@ function searchEntitiesDone(response){
 
 
 
-function selectEntity(actURI, type){
-    entityType = type;
-    var uuids = []; //array of uuids to check
+function selectEntity(uri, uriEntityType){
+    
     var doMainSubjectUUID = true;
+    multUUIDtoDoList = [];
     
     if(propertiesFound){
         var applyEntities = getCheckedRadio("applyEntities");
@@ -267,35 +345,17 @@ function selectEntity(actURI, type){
         }
     }
     
+   
+    
     if(doMainSubjectUUID){
         var subjectUUIDdom = document.getElementById('subjectUUID');
-        var subjectUUID = subjectUUIDdom.innerHTML;
-        uuids.push(subjectUUID);
+        var uuid = subjectUUIDdom.innerHTML;
+        var subjectType = "subject";
+        var toDoItem = new uuidToDo(uuid, subjectType, uri, uriEntityType, false, false);
+        multUUIDtoDoList.push(toDoItem);
     }
     
-    for(var i = 0; i < uuids.length; i++){
-        var uuid = uuids[i];
-        activeUUID = uuid;
-        if(entityType == "predicate"){
-            var domID = prefixDomID_predURI + uuid;
-            var domLabelID = prefixDomID_predLabel + uuid;
-        }
-        else{
-            var domID = prefixDomID_objURI + uuid;
-            var domLabelID = prefixDomID_objLabel + uuid;
-        }
-        var uriDom = document.getElementById(domID);
-        var labelDom = document.getElementById(domLabelID);
-        uriDom.value = actURI;
-        if(i < 1){
-            var outcome = getEntity(actURI);
-            alert("done uris " + entityStatuses.length);
-            var label = getEntityLabel(actURI);
-        }
-        if(label != false){
-            labelDom.innerHTML = label;
-        }
-    }
+    processEntityToDoList();
 }
 
 //posts label and vocabulary information on a new entity
