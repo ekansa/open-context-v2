@@ -15,6 +15,14 @@ class Links_linkEntity {
 	 public $vocabLabel;
 	 public $vocabAltLabel;
 	 
+	 public $expectedSchema = array("uri" => array("type" => "xsd:string", "blankOK" => false),
+											  "label" => array("type" => "xsd:string", "blankOK" => false),
+											  "altLabel" => array("type" => "xsd:string", "blankOK" => true),
+											  "vocabURI" => array("type" => "xsd:string", "blankOK" => false),
+											  "type" => array("type" => "xsd:string", "blankOK" => true)
+											  );
+	 
+	 
 	 function getByURI($uri){
 		  $output = false;
 		  $uri = $this->security_check($uri);
@@ -65,16 +73,25 @@ class Links_linkEntity {
 		  }
 		  
 		  $db = $this->startDB();
-        
-        $sql = 'SELECT le.uri, le.label, le.altLabel, le.vocabURI, ve.label AS vocabLabel, ve.altLabel as vocabAltLabel
-                FROM link_entities AS le
-					 LEFT JOIN link_entities AS ve ON le.vocabURI = ve.uri
-                WHERE (le.label LIKE "%'.$qlabel.'%"
-					 OR le.altLabel LIKE "%'.$qlabel.'%")
-					 '.$vocabTerm.'
-                LIMIT 20;';
-		
-		  
+        $exactLabel = $ocGenObj->checkExistsNonBlank("exact", $requestParams);
+		  if($exactLabel != false){
+				$sql = 'SELECT le.uri, le.label, le.altLabel, le.vocabURI, ve.label AS vocabLabel, ve.altLabel as vocabAltLabel
+						  FROM link_entities AS le
+						  LEFT JOIN link_entities AS ve ON le.vocabURI = ve.uri
+						  WHERE (le.label LIKE "'.$qlabel.'"
+						  OR le.altLabel LIKE "'.$qlabel.'")
+						  '.$vocabTerm.'
+						  LIMIT 20;';
+		  }
+		  else{
+				$sql = 'SELECT le.uri, le.label, le.altLabel, le.vocabURI, ve.label AS vocabLabel, ve.altLabel as vocabAltLabel
+						  FROM link_entities AS le
+						  LEFT JOIN link_entities AS ve ON le.vocabURI = ve.uri
+						  WHERE (le.label LIKE "%'.$qlabel.'%"
+						  OR le.altLabel LIKE "%'.$qlabel.'%")
+						  '.$vocabTerm.'
+						  LIMIT 20;';
+		  }
 		  
         $result = $db->fetchAll($sql, 2);
         if($result){
@@ -102,6 +119,45 @@ class Links_linkEntity {
 		  }
         return $output;
 	 }
+	 
+	 
+	 //adds an item to the database, returns its uuid if successful
+	 function createRecord($data = false){
+		  
+		  $uriObj = new infoURI; 
+		  $db = $this->startDB();
+		  $success = false;
+		  if(!is_array($data)){
+				$data = array("uri" => $this->uri,
+								  "label" => $this->label,
+								  "altLabel" => $this->altLabel,
+								  "vocabURI" => $this->vocabURI,
+								  "type" => false
+								  );	
+		  }
+		  
+		  $uri = $data["uri"];
+		  $uriType = $uriObj->checkEntityType($uri); //validation, only allow valid URIs for outside items
+		  if($uriType == "linked"){
+				$where = "uri = '".$data["uri"]."' ";
+				$n = $db->update("link_entities", $data, $where);
+				if($n<1){
+					 try{
+						  $db->insert("link_entities", $data);
+						  $success = true;
+					 } catch (Exception $e) {
+						  //first delete the URI
+					 }
+				}
+				else{
+					 $success = true;
+				}
+		  }
+		  return $success;
+	 }
+	 
+	 
+	 
 	 
 	 
 	 

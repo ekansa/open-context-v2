@@ -174,7 +174,36 @@ class EditController extends Zend_Controller_Action
 		  
 	 }
 	 
-	 //gets some information about a URI identified entity
+	 //adds an entity
+	 public function addEntityAction(){
+		  $requestParams =  $this->_request->getParams();
+		  $this->_helper->viewRenderer->setNoRender();
+		  
+		  if(!$this->getRequest()->isPost()){
+				$this->error405("POST"); //not a post, throw an error
+				exit;
+		  }
+		  else{
+				$genObj = new OCitems_General;
+				$linkEntityObj = new Links_linkEntity;
+				$data = $genObj->validateInput($requestParams, $linkEntityObj->expectedSchema);
+				if(!$data){
+					 $this->error400($genObj->errors); //throw an error explaining what was expected
+					 exit;
+				}
+				else{
+					 $ok = $linkEntityObj->createRecord($data);
+					 $output = array("result" => $ok,
+												"errors" => false,
+												"data" => $data);
+					 header('Content-Type: application/json; charset=utf8');
+					 echo $genObj->JSONoutputString($output);
+				}
+		  }
+	 }
+	 
+	 
+	 //searches for URI identified entities, constrained by text in labels, optionally vocabularies
 	 public function searchEntitiesAction(){
 		  $requestParams =  $this->_request->getParams();
 		  $this->_helper->viewRenderer->setNoRender();
@@ -200,7 +229,7 @@ class EditController extends Zend_Controller_Action
 		  
 	 }
 	 
-	 //gets some information about a URI identified entity
+	 //gets properities used with a given predicate
 	 public function predicatePropertiesAction(){
 		  $requestParams =  $this->_request->getParams();
 		  $this->_helper->viewRenderer->setNoRender();

@@ -14,8 +14,8 @@ class infoURI {
     public $uri;
 	 
 	 
-	 function lookupURI($possURI){
-		  $output = false;
+	 
+	 function checkIsURI($possURI){
 		  $ocGenObj = new OCitems_General;
 		  $isURI = false;
 		  if(substr($possURI, 0, 7) == "http://" || substr($possURI, 0, 8) == "https://"){
@@ -31,17 +31,47 @@ class infoURI {
 				}
 		  }
 		  
-		  if($isURI){
+		  if(!$isURI){
+				$possURI = false;
+		  }
+		  
+		  return $possURI;
+	 }
+	 
+	 //get the type of item for a URI identified entity 
+	 function checkEntityType($possURI, $checkIfURI = true){
+		  $entityType = false;
+		  if($checkIfURI){
+				$possURI = $this->checkIsURI($possURI);
+		  }
+		  if($possURI != false){
+				$ocGenObj = new OCitems_General;
 				$OCbaseURI = $ocGenObj->getCanonicalBaseURI();
 				if(strstr($possURI, $OCbaseURI) && !strstr($possURI, $OCbaseURI."vocabularies") ){
 					 //lookup an Open Context item
-					 $output = $this->lookupOCitemByURI($possURI);
+					 $entityType = "opencontext"; //an open context entity
 				}
 				else{
-					 //lookup an outside entity
-					 $linkEntityObj = new Links_linkEntity;
-					 $output = $linkEntityObj->getByURI($possURI);
+					 $entityType = "linked"; // a linked entity from another vocabulary
 				}
+		  }
+		  return $entityType;
+	 }
+	 
+	 //get information about en entity
+	 function lookupURI($possURI){
+		  
+		  $entityType = $this->checkEntityType($possURI);
+		  if($entityType == "opencontext"){
+				$output = $this->lookupOCitemByURI($possURI);
+		  }	
+		  elseif($entityType == "linked"){
+				//lookup an outside entity
+				$linkEntityObj = new Links_linkEntity;
+				$output = $linkEntityObj->getByURI($possURI);	
+		  }
+		  else{
+				$output = false;
 		  }
 		  
 		  return $output;

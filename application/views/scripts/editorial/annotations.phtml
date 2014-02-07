@@ -78,7 +78,7 @@ if(is_array($result) && !$subjectLabel){
 					 </div>
 					 <div class="col-md-3">
 						  <h4>Subject Entity UUID</h4>
-						  <h5><?php echo $this->uuid; ?></h5>
+						  <h5 id="subjectUUID"><?php echo $this->uuid; ?></h5>
 					 </div>
 					 <div class="col-md-2">
 						  <h4>Subject Entity Type</h4>
@@ -121,24 +121,24 @@ if(is_array($result) && !$subjectLabel){
 									 }
 									 ?>
 									 <form action="../edit/add-annotation" method="post" >
-										  <input type="hidden" name="uuid" value="<?php echo $this->uuid; ?>" />
-										  <input type="hidden" name="subjectType" value="<?php echo $subjectType; ?>" />
-										  <input type="hidden" name="projectUUID" value="<?php echo (string)$projectUUID; ?>" />
-										  <input type="hidden" name="sourceID" value="<?php echo $sourceID; ?>" />
+										  <input type="hidden" name="uuid" value="<?php echo $this->uuid; ?>" id="<?php echo "act-uuid-".$this->uuid; ?>" />
+										  <input type="hidden" name="subjectType" value="<?php echo $subjectType; ?>" id="<?php echo "act-st-".$this->uuid; ?>" />
+										  <input type="hidden" name="projectUUID" value="<?php echo (string)$projectUUID; ?>" id="<?php echo "act-proj-".$this->uuid; ?>" />
+										  <input type="hidden" name="sourceID" value="<?php echo $sourceID; ?>" id="<?php echo "act-si-".$this->uuid; ?>" />
 										  <tr>
-												<td><button class="btn" type="submit">+</button></td>
-												<td id="add-pred-label"></td>
-												<td><input onchange="javascript:getEntityByType('predicate');" class="form-control" type="text" name="predicateURI" id="add-pred-uri"/></td>
-												<td id="add-obj-label"></td>
-												<td><input onchange="javascript:getEntityByType('object');" class="form-control" type="text" name="objectURI" id="add-obj-uri"/></td>
+												<td><button class="btn btn-primary" type="submit" id="<?php echo "act-bt-".$this->uuid; ?>" disabled="disabled" >+</button></td>
+												<td id="<?php echo "pred-label-".$this->uuid; ?>"></td>
+												<td><input onchange="javascript:getEntityByType('predicate','<?php echo $this->uuid; ?>','<?php echo $subjectType; ?>');" class="form-control" type="text" name="predicateURI" id="<?php echo "pred-uri-".$this->uuid; ?>"/></td>
+												<td id="<?php echo "obj-label-".$this->uuid; ?>"></td>
+												<td><input onchange="javascript:getEntityByType('object','<?php echo $this->uuid; ?>','<?php echo $subjectType; ?>');" class="form-control" type="text" name="objectURI" id="<?php echo "obj-uri-".$this->uuid; ?>"/></td>
 										  </tr>
 									  </form>
 										  <tr>
 												<td></td>
 												<td><h5>New Predicate Entity</h5></td>
-												<td><div id="add-pred-entity"></div></td>
+												<td><div id="<?php echo "pred-entity-".$this->uuid; ?>"></div></td>
 												<td><h5>New Object Entity</h5></td>
-												<td><div id="add-obj-entity"></div></td>
+												<td><div id="<?php echo "obj-entity-".$this->uuid; ?>"></div></td>
 										  </tr>
 										  <tr>
 												<td></td>
@@ -203,17 +203,82 @@ if(is_array($result) && !$subjectLabel){
 								<div id="lookup-entities"></div>
 						  </div>
 						  
+						  <div class="panel-group" id="new-entity-accordion">
+								<div class="panel panel-default">
+									 <div class="panel-heading">
+										<h4 class="panel-title">
+										  <a data-toggle="collapse" data-parent="#new-entity-accordion" href="#new-entity-form">Add an entity</a>
+										</h4>
+									 </div>
+									 <div id="new-entity-form" class="panel-collapse collapse" style="padding: 2%;">
+										  <h5>New Entity Form</h5>
+										  <form class="form-horizontal" role="form">
+												<div class="form-group">
+												  <label for="new-entity-uri" class="col-sm-2 control-label">URI</label>
+												  <div class="col-sm-10">
+													 <input type="text" class="form-control" id="new-entity-uri" placeholder="New URI" value="" />
+												  </div>
+												</div>
+												<div class="form-group">
+												  <label for="new-entity-label" class="col-sm-2 control-label">Label</label>
+												  <div class="col-sm-10">
+													 <input type="text" class="form-control" id="new-entity-label" placeholder="Label" value="" />
+												  </div>
+												</div>
+												<div class="form-group">
+												  <label for="new-entity-altLabel" class="col-sm-2 control-label">Alt-Label</label>
+												  <div class="col-sm-10">
+													 <input type="text" class="form-control" id="new-entity-altLabel" placeholder="Alt-label" value="" />
+												  </div>
+												</div>
+												<div class="form-group">
+												  <label for="new-entity-vocabURI" class="col-sm-2 control-label">Vocabulary URI</label>
+												  <div class="col-sm-10">
+													 <input type="text" class="form-control" id="new-entity-vocabURI" placeholder="Vocab URI" value="" />
+												  </div>
+												</div>
+												<div class="form-group">
+													 <label class="checkbox-inline">
+														  <input type="radio" name="newEntityType" value="class" checked />Class (type)
+													 </label>
+													 <label class="checkbox-inline">
+														  <input type="radio" name="newEntityType" value="property" />Property (predicate)
+													 </label>
+													 <label class="checkbox-inline">
+														  <input type="radio" name="newEntityType" value="vocabulary" />Vocabulary
+													 </label>
+												</div>
+												<div class="form-group" style="padding-left:2%">
+													 <button class="btn btn-default" onclick="javascript:addEntity();" type="button" >Add Entity</button>
+												</div>
+										  </form>
+									 </div>
+								</div>
+						  </div>
+						  
 					 <?php
 					 if($subjectType == "predicate"){
 					 ?>
 						  <div style="padding-top:20px;">
 								<h4>Get Related Properties</h4>
 								<form class="form-inline" role="form">
-									 
+									 <div class="form-group">
 										  <input type="hidden" id="search-prop-predicateUUID" value="<?php echo $this->uuid; ?>">
 										  <input onkeyup="javascript:predicateProperties();" class="form-control" type="text" id="search-prop-term" value="" placeholder="Type to filter list" />
 										  <button class="btn btn-default" onclick="javascript:predicateProperties();" type="button" >Get Properties</button>
-									 
+									 </div>
+									 <h6>Apply entities as:</h6>
+									 <div class="form-group">
+										  <label class="checkbox-inline">
+												<input type="radio" name="applyEntities" value="subjectUUID" checked />Main item <em><?php echo $subjectLabel;?></em> (<?php echo $subjectType;?>)
+										  </label>
+										  <label class="checkbox-inline">
+												<input type="radio" name="applyEntities" value="selected-prop" />Selected property
+										  </label>
+										  <label class="checkbox-inline">
+												<input type="radio" name="applyEntities" value="preds-all-props" />All properties (predicate URI only)
+										  </label>
+									 </div>
 								</form>
 						  </div>
 					 <?php
