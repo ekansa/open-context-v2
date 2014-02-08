@@ -203,6 +203,7 @@ class OCitems_Item {
 				$JSON_LD["@context"] = array(
 					 "type" => "@type",
 					 "id" => "@id",
+					 "rdf" => "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
 					 "rdfs" => "http://www.w3.org/2000/01/rdf-schema#",
 					 "label" => "rdfs:label",
 					 "xsd" => "http://www.w3.org/2001/XMLSchema#",
@@ -223,7 +224,7 @@ class OCitems_Item {
 				$JSON_LD["label"] = $this->label;
 				$JSON_LD["uuid"] = $this->uuid;
 				if($this->itemClassURI){
-					 $JSON_LD["rdfs:type"][] = array("id" => $this->itemClassURI);
+					 $JSON_LD["rdf:type"][] = array("id" => $this->itemClassURI);
 				}
 				
 				
@@ -588,7 +589,7 @@ class OCitems_Item {
 				$persObj = new OCitems_Person;
 				$pres = $persObj->getByUUID($this->uuid);
 				if(is_array($pres)){
-					 $JSON_LD["rdfs:type"][] = array("id" => $persObj->foafType);
+					 $JSON_LD["rdf:type"][] = array("id" => $persObj->foafType);
 					 $JSON_LD[self::Predicate_familyName] = $persObj->surname;
 					 $JSON_LD[self::Predicate_givenName] = $persObj->givenName;
 				}
