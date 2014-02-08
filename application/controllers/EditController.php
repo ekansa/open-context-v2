@@ -137,9 +137,12 @@ class EditController extends Zend_Controller_Action
 					 exit;
 				}
 				else{
-					 $ok = $linkAnnotObj->deleteRecord($data);
+					 $result = $linkAnnotObj->deleteRecord($data);
+					 if(isset($requestParams["returnAnnotations"])){
+						  $result = $linkAnnotObj->getAnnotationsByUUID($requestParams["uuid"]); 
+					 }
 					 if(isset($requestParams["json"])){
-						  $output = array("result" => $ok,
+						  $output = array("result" => $result,
 												"errors" => false,
 												"requestParams" => $requestParams);
 						  header('Content-Type: application/json; charset=utf8');

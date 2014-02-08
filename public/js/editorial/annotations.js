@@ -1,3 +1,5 @@
+var SKOScloseMatchURI = "http://www.w3.org/2004/02/skos/core#closeMatch";
+var RDFtypeURI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
 var multUUIDtoDoList = []; //todo list for checking on entities
 var annotationItems = []; //array of objects with item readiness to annotate, but not yet qued for submission
@@ -497,7 +499,7 @@ function outputSubAnnotations(uuid, annotations){
             var hashID = annotations[i].hashID;
             
             outAnnotations += "<tr>";
-            outAnnotations += "<td><button onlick=\"javascript:deleteAnnotation('" + uuid + "', '" + hashID + "');\" class=\"btn btn-warning btn-xs\" >-</button></td>";
+            outAnnotations += "<td><button type=\"button\" onclick=\"javascript:deleteAnnotation('" + uuid + "', '" + hashID + "');\" class=\"btn btn-warning btn-xs\" >-</button></td>";
             outAnnotations += "<td><a target=\"_blank\" href=\"" + annotations[i].predicateURI + "\">" + annotations[i].predicateLabel + "</a></td>";
             outAnnotations += "<td>" + annotations[i].predicateURI + "</td>";
             outAnnotations += "<td><a target=\"_blank\" href=\"" + annotations[i].objectURI + "\">"  + annotations[i].objectLabel + "</td>";
@@ -509,10 +511,10 @@ function outputSubAnnotations(uuid, annotations){
     outAnnotations += "<tr>";
     outAnnotations += "<td><button id=\""+ prefixDomID_button + uuid + "\" class=\"btn btn-primary btn-xs\" disabled=\"disabled\">+</button></td>";
     outAnnotations += "<td id=\""+ prefixDomID_predLabel + uuid + "\"></td>";
-    outAnnotations += "<td><input style=\"font-size:65%;\" onchange=\"javascript:getEntityByType('predicate','" + uuid + "','property');\" class=\"form-control\" type=\"text\" name=\"predicateURI\" id=\"" + prefixDomID_predURI + uuid + "\"/></td>";
+    outAnnotations += "<td><input style=\"font-size:65%;\" onchange=\"javascript:getEntityByType('predicate','" + uuid + "','type');\" class=\"form-control\" type=\"text\" name=\"predicateURI\" id=\"" + prefixDomID_predURI + uuid + "\"/></td>";
     
     outAnnotations += "<td id=\""+ prefixDomID_objLabel + uuid + "\"></td>";
-    outAnnotations += "<td><input style=\"font-size:65%;\" onchange=\"javascript:getEntityByType('object','" + uuid + "','property');\" class=\"form-control\" type=\"text\" name=\"objectURI\" id=\"" + prefixDomID_objURI + uuid + "\"/></td>";
+    outAnnotations += "<td><input style=\"font-size:65%;\" onchange=\"javascript:getEntityByType('object','" + uuid + "','type');\" class=\"form-control\" type=\"text\" name=\"objectURI\" id=\"" + prefixDomID_objURI + uuid + "\"/></td>";
     
     outAnnotations += "</tr>";
     outAnnotations += "</tbody>";
@@ -617,6 +619,30 @@ function postItemAnnotationDone(response){
 }
 
 
+//submit a post request to delete an annotation
+function deleteAnnotation(uuid, hashID){
+    var rURI = "../../edit/delete-annotation";
+    var myAjax = new Ajax.Request(rURI,
+        {   method: 'post',
+            parameters:
+                {uuid: uuid,
+                hashID: hashID,
+                json: true,
+                returnAnnotations: true
+                },
+        onComplete: deleteAnnotationDone }
+    );
+}
+
+//handle the results of deleting an annotation
+function deleteAnnotationDone(response){
+    var respData = JSON.parse(response.responseText);
+    var uuid = respData.requestParams.uuid;
+    var annoDomID = predixDomID_typeAnno + uuid;
+    var annoDom = document.getElementById(annoDomID);
+    var annoHTML = outputSubAnnotations(uuid, respData.result);
+    annoDom.innerHTML = annoHTML;
+}
 
 
 
