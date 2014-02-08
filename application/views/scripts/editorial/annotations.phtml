@@ -94,7 +94,7 @@ if(is_array($result) && !$subjectLabel){
 						  <div id="annotations">
 								<table class="table table-condensed table-striped table-hover">
 									 <thead>
-										  <th style="width:8%;">Delete</th>
+										  <th style="width:8%;">+ / -</th>
 										  <th style="width:16%;">Predicate Label</th>
 										  <th style="width:30%;">Predicate URI</th>
 										  <th style="width:16%;">Object Label</th>
@@ -273,7 +273,7 @@ if(is_array($result) && !$subjectLabel){
 												<input type="radio" name="applyEntities" value="subjectUUID" checked />Main item <em><?php echo $subjectLabel;?></em> (<?php echo $subjectType;?>)
 										  </label>
 										  <label class="checkbox-inline">
-												<input type="radio" name="applyEntities" value="selected-prop" />Selected property
+												<input type="radio" name="applyEntities" value="selected-props" />Selected properties
 										  </label>
 										  <label class="checkbox-inline">
 												<input type="radio" name="applyEntities" value="preds-all-props" />All properties (predicate URI only)

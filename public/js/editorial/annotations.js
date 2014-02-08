@@ -1,6 +1,6 @@
 
-var multUUIDtoDoList = []; //doto list for checking on entities
-var annotationItems = []; //array of objects with item readiness to annotate
+var multUUIDtoDoList = []; //todo list for checking on entities
+var annotationItems = []; //array of objects with item readiness to annotate, but not yet qued for submission
 
 var prefixDomID_button = "act-bt-"; //prefix for buttons to submit a new annotation
 var prefixDomID_predURI = "pred-uri-"; //prefix for dom elements with predicate uris
@@ -9,11 +9,13 @@ var prefixDomID_predLabel = "pred-label-"; //prefix for dom elements with predic
 var prefixDomID_objLabel = "obj-label-"; //prefix for dom elements with object labels
 var prefixDomID_predEntity = "pred-entity-"; //prefix for dom elements for descriptions of predicate entities
 var prefixDomID_objEntity = "obj-entity-"; //prefix for dom elements for descriptions of object entities
+var predixDomID_propAnno = "prop-anno-"; //prefix for dom elements for property annotations
+var predixDomID_itemLabel = "item-label-"; //prefix for a subject item's label
 
 var selectedVocabs = false; //limits search for entities by a vocabulary
 var propertiesFound = false;
-var propertyUUIDs; //array of property uuids that are current
-
+var properties = []; //array of property objects that are current
+var submitAnnotationToDoList = []; //to do list for submitting item annotations
 
 //to do object for checking on entities
 function uuidToDo(uuid, subjectType, uri, uriEntityType, doneResult, entityChecked){
@@ -28,27 +30,27 @@ function uuidToDo(uuid, subjectType, uri, uriEntityType, doneResult, entityCheck
 }
 
 
-
 //documents annotation status for items
-function addUpdateItemStatus(uuid, subjectType, annoURI, annoType){
+function addUpdateItemStatus(uuid, subjectType, uri, uriEntityType){
     var uuidFound = false;
     for(var i = 0; i < annotationItems.length; i++){
         if(annotationItems[i].uuid == uuid){
-            if(annoType == "predicate"){
-                annotationItems[i].predicateURI = annoURI;
+            if(uriEntityType == "predicate"){
+                annotationItems[i].predicateURI = uri;
             }
             else{
-                annotationItems[i].objectURI = annoURI;
+                annotationItems[i].objectURI = uri;
             }
             uuidFound = true;
+            break;
         }
     }
     if(!uuidFound){
-        if(annoType == "predicate"){
-            var newAnnotationItem = new itemAnnotationStatus(uuid, subjectType, annoURI, false);
+        if(uriEntityType == "predicate"){
+            var newAnnotationItem = new itemAnnotationStatus(uuid, subjectType, uri, false);
         }
         else{
-            var newAnnotationItem = new itemAnnotationStatus(uuid, subjectType, false, annoURI);
+            var newAnnotationItem = new itemAnnotationStatus(uuid, subjectType, false, uri);
         }
         annotationItems.push(newAnnotationItem);
     }
@@ -75,24 +77,39 @@ function checkReadySubmissions(){
         var subjectType = annotationItems[i].subjectType;
         var domID = prefixDomID_button + uuid;
         if(annotationItems[i].predicateURI != false &&  annotationItems[i].objectURI != false){
-            if(subjectType != "property"){
-                document.getElementById(domID).removeAttribute("disabled");
+            document.getElementById(domID).removeAttribute("disabled");
+            if(subjectType == "property"){
+                var propSubmit = "javascript:itemAnnotate('" + uuid + "');";
+                document.getElementById(domID).setAttribute("onclick", propSubmit);
             }
         }
         else{
-            if(subjectType != "property"){
-                document.getElementById(domID).setAttribute("disabled", "disabled");
+            document.getElementById(domID).setAttribute("disabled", "disabled");
+            if(subjectType == "property"){
+                document.getElementById(domID).removeAttribute("onclick");
             }
         }
     }    
 }
 
+//verifies that a specific item is ready to annotate
+function checkItemReady(uuid){
+    var output = false;
+    for(var i = 0; i < annotationItems.length; i++){
+        if(uuid == annotationItems[i].uuid){
+            if(annotationItems[i].predicateURI != false &&  annotationItems[i].objectURI != false){
+                output = true;
+            }
+            break;
+        }
+    }
+    return output;
+}
 
 
-
-//checks an entity URI if it is recognized by open context
-function getEntityByType(uriEntityType, uuid, subjectType){
-    
+//get the user-input entity URI from the input element associated with the uuid and uriEnityType
+function getInputEntityURI(uuid, uriEntityType){
+    var uri = false;
     if(uriEntityType == "object"){
         var domID = prefixDomID_objURI + uuid;
     }
@@ -100,10 +117,20 @@ function getEntityByType(uriEntityType, uuid, subjectType){
         var domID = prefixDomID_predURI + uuid;
     }
     else{
-       exit();
+       uri = false;
     }
     var uriDom = document.getElementById(domID);
-    var uri = uriDom.value;
+    uri = uriDom.value;
+    
+    return uri;
+}
+
+
+
+//checks an entity URI if it is recognized by open context
+function getEntityByType(uriEntityType, uuid, subjectType){
+    
+    var uri = getInputEntityURI(uuid, uriEntityType);
     
     multUUIDtoDoList = [];
     var toDoItem = new uuidToDo(uuid, subjectType, uri, uriEntityType, false, false);
@@ -223,56 +250,6 @@ function getEntityDone(response){
 
 
 
-//displays results on checking on a linked entity
-function OLDgetEntityDone(response){
-    var output = false;
-    var respData = JSON.parse(response.responseText);
-    if(!respData.errors){
-        var result = respData.result;
-        if(entityType == "object"){
-            var actDomID = prefixDomID_objEntity + activeUUID;
-            var actSmallLabelDom = prefixDomIDobjLabel + activeUUID;
-        }
-        else if(entityType == "predicate"){
-            var actDomID = prefixDomID_predEntity + activeUUID;
-            var actSmallLabelDom = prefixDomID_predLabel + activeUUID;
-        }
-        else{
-            vocabEntity(result); //deal with the vocabulary entity
-        }
-        
-        var smallLabelDom = document.getElementById(actSmallLabelDom);
-        if(result != false){
-            smallLabelDom.innerHTML = result.label;
-            var outputMessage = "<h5>" + result.label + "</h5>";
-            if("vocabURI" in result){
-                outputMessage += "<p>Vocabulary: <br/>" + result.vocabURI +" (" + result.vocabLabel + ")</p>";
-            }
-            else{
-                outputMessage += "<p>Open Context Item: <br/>" + result.itemType;
-                outputMessage += "<a href=\""+ result.uri + "\">[Link]</a></p>";
-            }
-            
-            addUpdateItemStatus(activeUUID, activeSubjectType, result.uri, entityType); //note the status update
-            output = true;
-            addUpdateEntityStatus(result.uri, true, result.label);
-        }
-        else{
-            addUpdateItemStatus(activeUUID, activeSubjectType, false, entityType); //note the status update
-            addUpdateEntityStatus(activeEntityURI, false, false);
-            smallLabelDom.innerHTML = "";
-            var outputMessage = "<h5>Add new entity (form on right)</h5>";
-            newEntityForm(activeEntityURI);
-        }
-        
-        if(activeSubjectType != "property"){
-            var actDom = document.getElementById(actDomID);
-            actDom.innerHTML = outputMessage;
-        }
-    }
-    
-    return output; //returns true only if the entity was found
-}
 
 
 function newEntityForm(uri){
@@ -341,11 +318,29 @@ function selectEntity(uri, uriEntityType){
     if(propertiesFound){
         var applyEntities = getCheckedRadio("applyEntities");
         if(applyEntities != "subjectUUID"){
-            doMainSubjectUUID = false;   
+            
+            doMainSubjectUUID = false;
+            if(applyEntities == "selected-props"){
+                var selectedPropUUIDs = getCheckedBoxes("propUUID"); 
+            }
+            else{
+                var selectedPropUUIDs = [];
+                for(var i = 0; i < propertyUUIDs.length; i++){
+                    selectedPropUUIDs.push(propertyUUIDs[i].uuid);
+                }
+            }
+            
+            if(selectedPropUUIDs.length > 0){
+                var subjectType = "property";
+                for(var j = 0; j < selectedPropUUIDs.length; j++){
+                    var uuid = selectedPropUUIDs[j];
+                    var toDoItem = new uuidToDo(uuid, subjectType, uri, uriEntityType, false, false);
+                    multUUIDtoDoList.push(toDoItem);
+                }
+            }
         }
     }
     
-   
     
     if(doMainSubjectUUID){
         var subjectUUIDdom = document.getElementById('subjectUUID');
@@ -421,6 +416,15 @@ function addEntityDone(response){
 
 
 
+function propertyItem(uuid, subjectType, projectUUID, sourceID, label){
+    this.uuid = uuid;
+    this.subjectType = subjectType;
+    this.projectUUID = projectUUID;
+    this.sourceID = sourceID;
+    this.label = label;
+}
+
+
 //get list of properties (and their annotations) associated with an opencontext predicate item
 function predicateProperties(){
     
@@ -445,26 +449,27 @@ function predicatePropertiesDone(response){
     actDom.innerHTML = "";
     var respData = JSON.parse(response.responseText);
     if(respData.result != false){
-        propertyUUIDs = []; //make this global an array
+        properties = []; //make this global an array
         propertiesFound = true; //so that we can call upon 
         var result = respData.result;
         var outMessage = "<h4>Properties used with this Predicate</h4>";
-        outMessage += "<table class=\"table table-condensed table-striped table-hover\" style=\"width:95%; font-size:75%;\">";
-        outMessage += "<thead><th>UUID</th><th>Label</th><th>Annotations</th></thead>";
+        outMessage += "<table class=\"table table-condensed table-striped table-hover\" style=\"width:100%; font-size:75%;\">";
+        outMessage += "<thead><th style=\"width:15%;\">UUID</th><th style=\"width:20%;\">Label</th><th style=\"width:65%;\">Annotations</th></thead>";
         outMessage += "<tbody>";
         for(var i = 0; i < result.length; i++){
-            propertyUUIDs.push(result[i].uuid);
+            
+            var propItem = new propertyItem(result[i].uuid, result[i].itemType, result[i].projectUUID, result[i].sourceID, result[i].label);
+            properties.push(propItem);
+            
             var actLabel = result[i].label;
             var actURI = result[i].uri;
             outMessage += "<tr>";
             outMessage += "<td><a target=\"_bank\" href=\"" + actURI + "\">" + result[i].uuid + "</a></td>";
-            outMessage += "<td>" + actLabel + "</td>";
+            outMessage += "<td id=\"" + predixDomID_itemLabel + result[i].uuid + "\">" + actLabel + "<br/>";
+            outMessage += "<input type=\"checkbox\" name=\"propUUID\" value=\"" + result[i].uuid + "\" >" + "</td>";
             var annotations = result[i].annotations;
-            var outAnnotations = "";
-            if(annotations != false){
-                
-            }
-            outMessage += "<td>" + outAnnotations + "</td>"; //predicate labels
+            var outAnnotations = outputSubAnnotations(result[i].uuid, annotations);
+            outMessage += "<td id=\"" + predixDomID_propAnno + result[i].uuid + "\">" + outAnnotations + "</td>"; //predicate labels
             outMessage += "</tr>";
         }
         outMessage += "</tbody>";
@@ -478,6 +483,118 @@ function predicatePropertiesDone(response){
 }
 
 
+function outputSubAnnotations(uuid, annotations){
+    var outAnnotations = "<table class=\"table table-condensed\">";
+    outAnnotations += "<thead>";
+    outAnnotations += "<th>+/-</th>";
+    outAnnotations += "<th>Predicate Label</th>";
+    outAnnotations += "<th>Predicate URI</th>";
+    outAnnotations += "<th>Object Label</th>";
+    outAnnotations += "<th>Object URI</th>";
+    outAnnotations += "</thead>";
+    outAnnotations += "<tbody>";
+    if(annotations != false){
+        
+    }
+    
+    outAnnotations += "<tr>";
+    outAnnotations += "<td><button id=\""+ prefixDomID_button + uuid + "\" class=\"btn btn-primary btn-xs\" disabled=\"disabled\">+</button></td>";
+    outAnnotations += "<td id=\""+ prefixDomID_predLabel + uuid + "\"></td>";
+    outAnnotations += "<td><input style=\"font-size:65%;\" onchange=\"javascript:getEntityByType('predicate','" + uuid + "','property');\" class=\"form-control\" type=\"text\" name=\"predicateURI\" id=\"" + prefixDomID_predURI + uuid + "\"/></td>";
+    
+    outAnnotations += "<td id=\""+ prefixDomID_objLabel + uuid + "\"></td>";
+    outAnnotations += "<td><input style=\"font-size:65%;\" onchange=\"javascript:getEntityByType('object','" + uuid + "','property');\" class=\"form-control\" type=\"text\" name=\"objectURI\" id=\"" + prefixDomID_objURI + uuid + "\"/></td>";
+    
+    outAnnotations += "</tr>";
+    outAnnotations += "</tbody>";
+    outAnnotations += "</table>";
+    
+    return outAnnotations;
+}
+
+
+
+function submitAnnotationItem(uuid, subjectType, projectUUID, sourceID, predicateURI, objectURI, completed){
+    this.uuid = uuid;
+    this.subjectType = subjectType;
+    this.projectUUID = projectUUID;
+    this.sourceID = sourceID;
+    this.predicateURI = predicateURI;
+    this.objectURI = objectURI;
+    this.completed = completed;
+}
+
+
+function itemAnnotate(uuid){
+    var annotationReady = checkItemReady(uuid);
+    if(annotationReady){
+        submitAnnotationToDoList = []; //annotation items actually qued for submission
+        if(properties.length > 0){
+            for(var i = 0; i < properties.length; i++){
+                if(properties[i].uuid == uuid){
+                    var predicateURI = getInputEntityURI(uuid, "predicate");
+                    var objectURI = getInputEntityURI(uuid, "object");
+                    var annoItem = new submitAnnotationItem(uuid, properties[i].subjectType, properties[i].projectUUID, properties[i].sourceID, predicateURI, objectURI, false);                    
+                    submitAnnotationToDoList.push(annoItem); // add to the to do list for annotating items
+                    break;
+                }
+            }
+        }
+        
+        processSubmitAnnotationToDoList();
+    }
+}
+
+function processSubmitAnnotationToDoList(){
+    if(submitAnnotationToDoList.length > 0){
+        
+        alert("now here");
+        var someToDo = false;
+        for(var i = 0; i < submitAnnotationToDoList.length; i++){
+            var submitItem = submitAnnotationToDoList[i];
+            if(!submitItem.completed){
+                someToDo = true;
+                postItemAnnotation(submitItem.uuid, submitItem.subjectType, submitItem.projectUUID, submitItem.sourceID, submitItem.predicateURI, submitItem.objectURI); 
+            }
+        }
+        
+        if(!someToDo){
+            itemAnnotationToDoList = []; //reset the to-do list
+        }
+    }
+}
+
+function postItemAnnotation(uuid, subjectType, projectUUID, sourceID, predicateURI, objectURI){
+    var rURI = "../../edit/add-annotation";
+    var myAjax = new Ajax.Request(rURI,
+        {   method: 'post',
+            parameters:
+                {uuid: uuid,
+                subjectType: subjectType,
+                projectUUID: projectUUID,
+                sourceID: sourceID,
+                predicateURI: predicateURI,
+                objectURI: objectURI,
+                json: true,
+                returnAnnotations: true
+                },
+        onComplete: postItemAnnotationDone }
+    );
+}
+
+
+function postItemAnnotationDone(response){
+    var respData = JSON.parse(response.responseText);
+    var uuid = respData.requestParams.uuid;
+    var subjectType = respData.requestParams.subjectType;
+    addUpdateItemStatus(uuid, subjectType, false, "predicate"); //make the item predicate status false
+    addUpdateItemStatus(uuid, subjectType, false, "object"); //make the item object status false
+    
+    for(var i = 0; i < submitAnnotationToDoList.length; i++){
+        submitAnnotationToDoList[i].completed = true;
+    }
+    
+}
 
 
 
@@ -494,7 +611,17 @@ function getCheckedRadio(radioName) {
     return radioValue;
 }
 
-
+function getCheckedBoxes(boxName) {
+    var checkBoxes = document.getElementsByName(boxName);
+    var valueArray = [];
+    for(var i = 0; i < checkBoxes.length; i++){
+        if(checkBoxes[i].checked){
+            valueArray.push(checkBoxes[i].value);
+        }
+    }
+    
+    return valueArray;
+}
 
 
 

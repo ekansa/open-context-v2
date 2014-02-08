@@ -99,11 +99,15 @@ class EditController extends Zend_Controller_Action
 					 exit;
 				}
 				else{
-					 $ok = $linkAnnotObj->createRecord($data);
+					 $result = $linkAnnotObj->createRecord($data);
+					 if(isset($requestParams["returnAnnotations"])){
+						  $result = $linkAnnotObj->getAnnotationsByUUID($requestParams["uuid"]); 
+					 }
+					 
 					 if(isset($requestParams["json"])){
-						  $output = array("result" => $ok,
+						  $output = array("result" => $result,
 												"errors" => false,
-												"data" => $data);
+												"requestParams" => $requestParams);
 						  header('Content-Type: application/json; charset=utf8');
 						  echo $genObj->JSONoutputString($output);
 					 }
@@ -137,7 +141,7 @@ class EditController extends Zend_Controller_Action
 					 if(isset($requestParams["json"])){
 						  $output = array("result" => $ok,
 												"errors" => false,
-												"data" => $data);
+												"requestParams" => $requestParams);
 						  header('Content-Type: application/json; charset=utf8');
 						  echo $genObj->JSONoutputString($output);
 					 }
