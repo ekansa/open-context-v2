@@ -199,6 +199,10 @@ class OCitems_Item {
 				$this->projectUUID = $manifestObj->projectUUID;
 				$this->projectURI = $ocGenObj->generateItemURI($this->projectUUID, "project");
 				
+				if(strlen($manifestObj->classURI)>1){
+					 $this->itemClassURI = $manifestObj->classURI;
+				}
+				
 				$JSON_LD = array();
 				$JSON_LD["@context"] = array(
 					 "type" => "@type",
@@ -224,9 +228,9 @@ class OCitems_Item {
 				$JSON_LD["label"] = $this->label;
 				$JSON_LD["uuid"] = $this->uuid;
 				if($this->itemClassURI){
-					 $JSON_LD["rdf:type"][] = array("id" => $this->itemClassURI);
+					 $typeURI = $ocGenObj->makeURIfromAbbrev($this->itemClassURI);
+					 $JSON_LD = $this->addTypesJSON($JSON_LD, "oc-class", $typeURI);
 				}
-				
 				
 				$assertionsObj = new OCitems_Assertions;
 				$assertionsObj->getParentsByChildUUID($uuid);
@@ -258,6 +262,13 @@ class OCitems_Item {
 		  return $output;
 	 }
 	 
+	 function addTypesJSON($JSON_LD, $typeAlias, $typeURI){
+		  
+		  $JSON_LD["@context"][$typeAlias] = array("@id" => $typeURI);
+		  $JSON_LD["type"][] = $typeAlias;
+		  
+		  return $JSON_LD;
+	 }
 	 
 	 //make the JSON for describing the item's context
 	 function addContextsJSON($JSON_LD){
@@ -299,6 +310,7 @@ class OCitems_Item {
 				$res = $geoObj->getByUUID($this->uuid);
 				$resArray[$this->uuid] = $res;
 				if(is_array($res)){
+					 $this->geospace = $res;
 					 $geoUse = array("id" => $this->uri);
 					 $JSON_LD[self::Predicate_locationRef][] = $geoUse;
 				}
@@ -307,6 +319,7 @@ class OCitems_Item {
 				$res = $chronoObj->getByUUID($this->uuid);
 				$resArray[$this->uuid] = $res;
 				if(is_array($res)){
+					 $this->chronology = $res;
 					 $chronoUse = array("id" => $this->uri);
 					 $JSON_LD[self::Predicate_chronoRef][] = $chronoUse;
 				}
@@ -320,6 +333,7 @@ class OCitems_Item {
 								$res = $geoObj->getByUUID($parentUUID);
 								$resArray[$parentUUID] = $res;
 								if(is_array($res)){
+									 $this->geospace = $res;
 									 $geoUse = array("id" => $parentURI);
 								}
 						  }
@@ -327,6 +341,7 @@ class OCitems_Item {
 								$res = $chronoObj->getByUUID($parentUUID);
 								$resArray[$parentUUID] = $res;
 								if(is_array($res)){
+									 $this->chronology = $res;
 									 $chronoUse = array("id" => $parentURI);
 								}
 						  }
@@ -589,7 +604,7 @@ class OCitems_Item {
 				$persObj = new OCitems_Person;
 				$pres = $persObj->getByUUID($this->uuid);
 				if(is_array($pres)){
-					 $JSON_LD["rdf:type"][] = array("id" => $persObj->foafType);
+					 $JSON_LD["type"][] = array("id" => $persObj->foafType);
 					 $JSON_LD[self::Predicate_familyName] = $persObj->surname;
 					 $JSON_LD[self::Predicate_givenName] = $persObj->givenName;
 				}

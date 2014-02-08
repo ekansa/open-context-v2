@@ -134,6 +134,21 @@ class OCitems_General {
 		  return $uri;
 	 }
 	 
+	 //convert common URIs to common prefixs
+	 function makeURIfromAbbrev($abrev, $prefixDelim = ":"){
+		  $uri = $abrev;
+		  $abrevEx = explode($prefixDelim, $abrev);
+		  $usedPrefix = $abrevEx[0];
+		  $usedValue = $abrevEx[1];
+		  foreach($this->URIabbreviations as $uriKey => $prefix){
+				if($prefix == $usedPrefix){
+					 $uri = $uriKey.$usedValue;
+					 break;
+				}
+		  }
+		  return $uri;
+	 }
+	 
 	 
 	 function validateInput($inputArray, $expectedSchema){
 		  $validArray = array();
