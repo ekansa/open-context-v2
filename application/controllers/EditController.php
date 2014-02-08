@@ -21,7 +21,7 @@ class EditController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('OCitems_Geodata');
 		  Zend_Loader::loadClass('OCitems_Chronodata');
 		  Zend_Loader::loadClass('OCitems_LegacyIDs');
-		  Zend_Loader::loadClass('OCitems_Property');
+		  Zend_Loader::loadClass('OCitems_Type');
 		  Zend_Loader::loadClass('OCitems_String');
 		  Zend_Loader::loadClass('OCitems_Assertions');
 		  Zend_Loader::loadClass('OCitems_Manifest');
@@ -233,14 +233,14 @@ class EditController extends Zend_Controller_Action
 		  
 	 }
 	 
-	 //gets properities used with a given predicate
-	 public function predicatePropertiesAction(){
+	 //gets types used with a given predicate
+	 public function predicateTypesAction(){
 		  $requestParams =  $this->_request->getParams();
 		  $this->_helper->viewRenderer->setNoRender();
 		  
 		  $genObj = new OCitems_General;
 		  $genObj->startClock();
-		  $propertyObj = new OCitems_Property;
+		  $ocTypeObj = new OCitems_Type;
 		  
 		  if(!isset($requestParams["predicateUUID"])){
 				$errors = array("Need 'predicateUUID' parameter");
@@ -248,7 +248,7 @@ class EditController extends Zend_Controller_Action
 		  }
 		  else{
 				$predicateUUID = $requestParams["predicateUUID"];
-				$result = $propertyObj->getByPredicateUUID($predicateUUID, $requestParams);
+				$result = $ocTypeObj->getByPredicateUUID($predicateUUID, $requestParams);
 				$output = array("result" => $result,
 										  "errors" => false,
 										  "requestParams" => $requestParams);

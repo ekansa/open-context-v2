@@ -97,9 +97,9 @@ class infoURI {
 				$predicateObj = new OCitems_Predicate;
 				$output = $predicateObj->getByUUID($uuid);
 		  }
-		  elseif($itemType == "property"){
-				$propertyObj = new OCitems_Property;
-				$output = $propertyObj->getByUUID($uuid);
+		  elseif($itemType == "type"){
+				$ocTypeObj = new OCitems_Type;
+				$output = $ocTypeObj->getByUUID($uuid);
 		  }
 		  else{
 				$manifestObj = new OCitems_Manifest;

@@ -153,11 +153,11 @@ if(is_array($result) && !$subjectLabel){
 								<?php
 								if($subjectType == "predicate"){
 								?>
-								<div id="properties" style="padding:2%; background-color:#EEF3E2;">
+								<div id="ocTypes" style="padding:2%; background-color:#EEF3E2;">
 						  
 								</div>
 								<?php
-								}//end case with properties
+								}//end case with oc-types
 								?>
 						  </div>
 					 </div>
@@ -260,12 +260,12 @@ if(is_array($result) && !$subjectLabel){
 					 if($subjectType == "predicate"){
 					 ?>
 						  <div style="padding-top:20px;">
-								<h4>Get Related Properties</h4>
+								<h4>Get Related Descriptive Types</h4>
 								<form class="form-inline" role="form">
 									 <div class="form-group">
-										  <input type="hidden" id="search-prop-predicateUUID" value="<?php echo $this->uuid; ?>">
-										  <input onkeyup="javascript:predicateProperties();" class="form-control" type="text" id="search-prop-term" value="" placeholder="Type to filter list" />
-										  <button class="btn btn-default" onclick="javascript:predicateProperties();" type="button" >Get Properties</button>
+										  <input type="hidden" id="search-type-predicateUUID" value="<?php echo $this->uuid; ?>">
+										  <input onkeyup="javascript:predicateTypes();" class="form-control" type="text" id="search-type-term" value="" placeholder="Type to filter list" />
+										  <button class="btn btn-default" onclick="javascript:predicateTypes();" type="button" >Get Types</button>
 									 </div>
 									 <h6>Apply entities as:</h6>
 									 <div class="form-group">
@@ -273,10 +273,10 @@ if(is_array($result) && !$subjectLabel){
 												<input type="radio" name="applyEntities" value="subjectUUID" checked />Main item <em><?php echo $subjectLabel;?></em> (<?php echo $subjectType;?>)
 										  </label>
 										  <label class="checkbox-inline">
-												<input type="radio" name="applyEntities" value="selected-props" />Selected properties
+												<input type="radio" name="applyEntities" value="selected-types" />Selected types
 										  </label>
 										  <label class="checkbox-inline">
-												<input type="radio" name="applyEntities" value="preds-all-props" />All properties (predicate URI only)
+												<input type="radio" name="applyEntities" value="preds-all-types" />All types (predicate URI only)
 										  </label>
 									 </div>
 								</form>

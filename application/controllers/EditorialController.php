@@ -21,7 +21,7 @@ class EditorialController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('OCitems_Geodata');
 		  Zend_Loader::loadClass('OCitems_Chronodata');
 		  Zend_Loader::loadClass('OCitems_LegacyIDs');
-		  Zend_Loader::loadClass('OCitems_Property');
+		  Zend_Loader::loadClass('OCitems_Type');
 		  Zend_Loader::loadClass('OCitems_String');
 		  Zend_Loader::loadClass('OCitems_Assertions');
 		  Zend_Loader::loadClass('OCitems_Manifest');

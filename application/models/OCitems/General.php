@@ -19,7 +19,7 @@ class OCitems_General {
 												"documents" => "document",
 												"projects" => "project",
 												"persons" => "person",
-												"properties" => "property",
+												"types" => "type",
 												"predicates" => "predicate",
 												"tables" => "table"
 												);
@@ -30,7 +30,7 @@ class OCitems_General {
 																	 "person" => "link",
 																	 "project" => "link",
 																	 "table" => "link",
-																	 "property" => "variable",
+																	 "type" => "variable",
 																	 "xsd:integer" => "variable",
 																	 "xsd:decimal" => "variable",
 																	 "xsd:boolean" => "variable",

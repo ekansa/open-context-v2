@@ -21,7 +21,7 @@ class OCitems_Type {
 	 public $note;
     public $updated;
 	 
-	 const itemType = "property"; //open context itemtype
+	 const itemType = "type"; //open context itemtype
    
     //get data from database
     function getByUUID($uuid){
@@ -92,10 +92,11 @@ class OCitems_Type {
             $output = array();
 				
 				foreach($result as $row){
-					 $row["uri"] = $ocGenObj->generateItemURI($row["uuid"], "property");
+					 $row["itemType"] = self::itemType;
+					 $row["uri"] = $ocGenObj->generateItemURI($row["uuid"], self::itemType);
 					 if($getAnnotations){
 						  $linkAnnotObj = new Links_linkAnnotation;
-						  $row["annotations"] = $linkAnnotObj->getByUUID($row["uuid"]);
+						  $row["annotations"] = $linkAnnotObj->getAnnotationsByUUID($row["uuid"]);
 						  unset($linkAnnotObj);
 					 }
 					 $output[] = $row;

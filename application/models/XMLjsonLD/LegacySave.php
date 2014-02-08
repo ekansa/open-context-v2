@@ -980,19 +980,26 @@ class XMLjsonLD_LegacySave  {
 		  if(isset($actProperty["id"])){
 				$predicateUUID = $this->makeUUIDfromURI($varURI);
 				$propUUID = $actProperty["propUUID"];
-				$propLabel = $actProperty["value"];
-				$propertyObj = new OCitems_Property;
-				$existUUID = $propertyObj->getByPropLabel($predicateUUID, $propLabel);
+				$typeLabel = $actProperty["value"];
+				
+				$ocTypeObj = new OCitems_Type;
+				$existUUID = $ocTypeObj->getByLabel($predicateUUID, $typeLabel);
 				if(!$existUUID){
 					 
 					 $data = array("uuid" => $propUUID,
 										"projectUUID" => $projectUUID,
 										"sourceID" => self::defaultSourceID,
 										"predicateUUID" => $predicateUUID,
-										"label" => $propLabel
+										"label" => $typeLabel
 										);
 					 
-					 $output = $propertyObj->createRecord($data);
+					 if(strlen($typeLabel)>200){
+						  $data["label"] = substr($typeLabel, 0, 200);
+						  $data["note"] = $typeLabel;
+					 }
+					 
+					 
+					 $output = $ocTypeObj->createRecord($data);
 				
 				}
 				else{

@@ -9,12 +9,12 @@ var prefixDomID_predLabel = "pred-label-"; //prefix for dom elements with predic
 var prefixDomID_objLabel = "obj-label-"; //prefix for dom elements with object labels
 var prefixDomID_predEntity = "pred-entity-"; //prefix for dom elements for descriptions of predicate entities
 var prefixDomID_objEntity = "obj-entity-"; //prefix for dom elements for descriptions of object entities
-var predixDomID_propAnno = "prop-anno-"; //prefix for dom elements for property annotations
+var predixDomID_typeAnno = "type-anno-"; //prefix for dom elements for property annotations
 var predixDomID_itemLabel = "item-label-"; //prefix for a subject item's label
 
 var selectedVocabs = false; //limits search for entities by a vocabulary
-var propertiesFound = false;
-var properties = []; //array of property objects that are current
+var ocTypesFound = false;
+var ocTypes = []; //array of type objects that are current
 var submitAnnotationToDoList = []; //to do list for submitting item annotations
 
 //to do object for checking on entities
@@ -78,14 +78,14 @@ function checkReadySubmissions(){
         var domID = prefixDomID_button + uuid;
         if(annotationItems[i].predicateURI != false &&  annotationItems[i].objectURI != false){
             document.getElementById(domID).removeAttribute("disabled");
-            if(subjectType == "property"){
+            if(subjectType == "type"){
                 var propSubmit = "javascript:itemAnnotate('" + uuid + "');";
                 document.getElementById(domID).setAttribute("onclick", propSubmit);
             }
         }
         else{
             document.getElementById(domID).setAttribute("disabled", "disabled");
-            if(subjectType == "property"){
+            if(subjectType == "type"){
                 document.getElementById(domID).removeAttribute("onclick");
             }
         }
@@ -145,7 +145,6 @@ function processEntityToDoList(){
         for(var i = 0; i < multUUIDtoDoList.length; i++){
             var toDoItem = multUUIDtoDoList[i];
             if(!toDoItem.entityChecked){
-                //alert("not checked");
                 getEntity(toDoItem.uri);
             }
             else{
@@ -191,7 +190,7 @@ function processEntityToDoList(){
                         newEntityForm(toDoItem.uri);
                     }
                     
-                    if(toDoItem.subjectType != "property"){
+                    if(toDoItem.subjectType != "type"){
                         var actDom = document.getElementById(actDomID);
                         actDom.innerHTML = outputMessage;
                     }
@@ -315,25 +314,25 @@ function selectEntity(uri, uriEntityType){
     var doMainSubjectUUID = true;
     multUUIDtoDoList = [];
     
-    if(propertiesFound){
+    if(ocTypesFound){
         var applyEntities = getCheckedRadio("applyEntities");
         if(applyEntities != "subjectUUID"){
             
             doMainSubjectUUID = false;
-            if(applyEntities == "selected-props"){
-                var selectedPropUUIDs = getCheckedBoxes("propUUID"); 
+            if(applyEntities == "selected-types"){
+                var selectedTypeUUIDs = getCheckedBoxes("typeUUID"); 
             }
             else{
-                var selectedPropUUIDs = [];
-                for(var i = 0; i < propertyUUIDs.length; i++){
-                    selectedPropUUIDs.push(propertyUUIDs[i].uuid);
+                var selectedTypeUUIDs = [];
+                for(var i = 0; i < ocTypes.length; i++){
+                    selectedTypeUUIDs.push(ocTypes[i].uuid);
                 }
             }
             
-            if(selectedPropUUIDs.length > 0){
-                var subjectType = "property";
-                for(var j = 0; j < selectedPropUUIDs.length; j++){
-                    var uuid = selectedPropUUIDs[j];
+            if(selectedTypeUUIDs.length > 0){
+                var subjectType = "type";
+                for(var j = 0; j < selectedTypeUUIDs.length; j++){
+                    var uuid = selectedTypeUUIDs[j];
                     var toDoItem = new uuidToDo(uuid, subjectType, uri, uriEntityType, false, false);
                     multUUIDtoDoList.push(toDoItem);
                 }
@@ -416,7 +415,7 @@ function addEntityDone(response){
 
 
 
-function propertyItem(uuid, subjectType, projectUUID, sourceID, label){
+function typeItem(uuid, subjectType, projectUUID, sourceID, label){
     this.uuid = uuid;
     this.subjectType = subjectType;
     this.projectUUID = projectUUID;
@@ -425,14 +424,14 @@ function propertyItem(uuid, subjectType, projectUUID, sourceID, label){
 }
 
 
-//get list of properties (and their annotations) associated with an opencontext predicate item
-function predicateProperties(){
+//get list of ocTypes (and their annotations) associated with an opencontext predicate item
+function predicateTypes(){
     
-    var searchTermDom = document.getElementById("search-prop-term");
+    var searchTermDom = document.getElementById("search-type-term");
     var searchTerm = searchTermDom.value;
-    var predicateUUIDdom = document.getElementById("search-prop-predicateUUID");
+    var predicateUUIDdom = document.getElementById("search-type-predicateUUID");
     var predicateUUID = predicateUUIDdom.value
-    var rURI = "../../edit/predicate-properties";
+    var rURI = "../../edit/predicate-types";
     var myAjax = new Ajax.Request(rURI,
         {   method: 'get',
             parameters:
@@ -440,36 +439,36 @@ function predicateProperties(){
                 q: searchTerm,
                 getAnnotations: true
                 },
-        onComplete: predicatePropertiesDone }
+        onComplete: predicateTypesDone }
     );    
 }
 
-function predicatePropertiesDone(response){
-    var actDom = document.getElementById("properties");
+function predicateTypesDone(response){
+    var actDom = document.getElementById("ocTypes");
     actDom.innerHTML = "";
     var respData = JSON.parse(response.responseText);
     if(respData.result != false){
-        properties = []; //make this global an array
-        propertiesFound = true; //so that we can call upon 
+        ocTypes = []; //make this global an array
+        ocTypesFound = true; //so that we can call upon 
         var result = respData.result;
-        var outMessage = "<h4>Properties used with this Predicate</h4>";
+        var outMessage = "<h4>Types used with this Predicate</h4>";
         outMessage += "<table class=\"table table-condensed table-striped table-hover\" style=\"width:100%; font-size:75%;\">";
         outMessage += "<thead><th style=\"width:15%;\">UUID</th><th style=\"width:20%;\">Label</th><th style=\"width:65%;\">Annotations</th></thead>";
         outMessage += "<tbody>";
         for(var i = 0; i < result.length; i++){
             
-            var propItem = new propertyItem(result[i].uuid, result[i].itemType, result[i].projectUUID, result[i].sourceID, result[i].label);
-            properties.push(propItem);
+            var typeObj = new typeItem(result[i].uuid, result[i].itemType, result[i].projectUUID, result[i].sourceID, result[i].label);
+            ocTypes.push(typeObj);
             
             var actLabel = result[i].label;
             var actURI = result[i].uri;
             outMessage += "<tr>";
             outMessage += "<td><a target=\"_bank\" href=\"" + actURI + "\">" + result[i].uuid + "</a></td>";
-            outMessage += "<td id=\"" + predixDomID_itemLabel + result[i].uuid + "\">" + actLabel + "<br/>";
-            outMessage += "<input type=\"checkbox\" name=\"propUUID\" value=\"" + result[i].uuid + "\" >" + "</td>";
+            outMessage += "<td id=\"" + predixDomID_itemLabel + result[i].uuid + "\"><h4>" + actLabel + "</h4>";
+            outMessage += "<input type=\"checkbox\" name=\"typeUUID\" value=\"" + result[i].uuid + "\" >" + "</td>";
             var annotations = result[i].annotations;
             var outAnnotations = outputSubAnnotations(result[i].uuid, annotations);
-            outMessage += "<td id=\"" + predixDomID_propAnno + result[i].uuid + "\">" + outAnnotations + "</td>"; //predicate labels
+            outMessage += "<td id=\"" + predixDomID_typeAnno + result[i].uuid + "\">" + outAnnotations + "</td>"; //predicate labels
             outMessage += "</tr>";
         }
         outMessage += "</tbody>";
@@ -477,8 +476,8 @@ function predicatePropertiesDone(response){
         actDom.innerHTML = outMessage;
     }
     else{
-        propertyUUIDs = []; //make this global an array that is empty
-        propertiesFound = false; //so that we can call upon 
+        ocTypes = []; //make this global an array that is empty
+        ocTypesFound = false; //so that we can call upon 
     }
 }
 
@@ -494,7 +493,17 @@ function outputSubAnnotations(uuid, annotations){
     outAnnotations += "</thead>";
     outAnnotations += "<tbody>";
     if(annotations != false){
-        
+        for(var i = 0; i < annotations.length; i++){
+            var hashID = annotations[i].hashID;
+            
+            outAnnotations += "<tr>";
+            outAnnotations += "<td><button onlick=\"javascript:deleteAnnotation('" + uuid + "', '" + hashID + "');\" class=\"btn btn-warning btn-xs\" >-</button></td>";
+            outAnnotations += "<td><a target=\"_blank\" href=\"" + annotations[i].predicateURI + "\">" + annotations[i].predicateLabel + "</a></td>";
+            outAnnotations += "<td>" + annotations[i].predicateURI + "</td>";
+            outAnnotations += "<td><a target=\"_blank\" href=\"" + annotations[i].objectURI + "\">"  + annotations[i].objectLabel + "</td>";
+            outAnnotations += "<td>" + annotations[i].objectURI + "</td>";
+            outAnnotations += "</tr>";
+        }
     }
     
     outAnnotations += "<tr>";
@@ -525,16 +534,17 @@ function submitAnnotationItem(uuid, subjectType, projectUUID, sourceID, predicat
 }
 
 
+//add an item to the annotation todo list, the process the todo list
 function itemAnnotate(uuid){
     var annotationReady = checkItemReady(uuid);
     if(annotationReady){
         submitAnnotationToDoList = []; //annotation items actually qued for submission
-        if(properties.length > 0){
-            for(var i = 0; i < properties.length; i++){
-                if(properties[i].uuid == uuid){
+        if(ocTypes.length > 0){
+            for(var i = 0; i < ocTypes.length; i++){
+                if(ocTypes[i].uuid == uuid){
                     var predicateURI = getInputEntityURI(uuid, "predicate");
                     var objectURI = getInputEntityURI(uuid, "object");
-                    var annoItem = new submitAnnotationItem(uuid, properties[i].subjectType, properties[i].projectUUID, properties[i].sourceID, predicateURI, objectURI, false);                    
+                    var annoItem = new submitAnnotationItem(uuid, ocTypes[i].subjectType, ocTypes[i].projectUUID, ocTypes[i].sourceID, predicateURI, objectURI, false);                    
                     submitAnnotationToDoList.push(annoItem); // add to the to do list for annotating items
                     break;
                 }
@@ -545,10 +555,10 @@ function itemAnnotate(uuid){
     }
 }
 
+//iterate through the submit annotation todo list and post annotations
 function processSubmitAnnotationToDoList(){
     if(submitAnnotationToDoList.length > 0){
         
-        alert("now here");
         var someToDo = false;
         for(var i = 0; i < submitAnnotationToDoList.length; i++){
             var submitItem = submitAnnotationToDoList[i];
@@ -564,6 +574,7 @@ function processSubmitAnnotationToDoList(){
     }
 }
 
+//submit a post request to create a new annotation
 function postItemAnnotation(uuid, subjectType, projectUUID, sourceID, predicateURI, objectURI){
     var rURI = "../../edit/add-annotation";
     var myAjax = new Ajax.Request(rURI,
@@ -583,6 +594,7 @@ function postItemAnnotation(uuid, subjectType, projectUUID, sourceID, predicateU
 }
 
 
+//handle the results of posting an item Annotation
 function postItemAnnotationDone(response){
     var respData = JSON.parse(response.responseText);
     var uuid = respData.requestParams.uuid;
@@ -590,10 +602,18 @@ function postItemAnnotationDone(response){
     addUpdateItemStatus(uuid, subjectType, false, "predicate"); //make the item predicate status false
     addUpdateItemStatus(uuid, subjectType, false, "object"); //make the item object status false
     
+    var annoDomID = predixDomID_typeAnno + uuid;
+    var annoDom = document.getElementById(annoDomID);
+    var annoHTML = outputSubAnnotations(uuid, respData.result);
+    annoDom.innerHTML = annoHTML;
+    
     for(var i = 0; i < submitAnnotationToDoList.length; i++){
-        submitAnnotationToDoList[i].completed = true;
+        if(submitAnnotationToDoList[i].uuid == uuid){
+            submitAnnotationToDoList[i].completed = true; //note the item has been completed
+        }
     }
     
+    processSubmitAnnotationToDoList(); //continue processing the rest of the annotations on the todo list
 }
 
 
