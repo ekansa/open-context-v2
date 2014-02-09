@@ -58,6 +58,8 @@ class OCitems_Item {
 	 public $geospace; //array of geospatial data for the item
 	 public $chronology; //array of chronological information for the item
 	 
+	 public $addSelfGeoJSONonly = false;
+	 
 	 const Predicate_hasContextPath = "oc-gen:has-context-path"; //has context
 	 const Predicate_hasPathItems = "oc-gen:has-path-items"; //has parent context items
 	 const Predicate_pathDes = "oc-gen:path-des"; //path has a description 
@@ -66,6 +68,7 @@ class OCitems_Item {
 	 const Predicate_hasContents = "oc-gen:has-contents"; //has children items
 	 const Predicate_contains = "oc-gen:contains"; //contains (list of child items)
 	
+	 const Predicate_locationRefLabel = "oc-gen:locationRefLabel"; //label of referenced location
 	 const Predicate_locationRef = "oc-gen:locationRef"; //location reference, points to URI of item (or parent context) providing locational data
 	 const Predicate_chronoRef = "oc-gen:chronoRef"; //chronological reference, points to URI of item (or parent context) providing chronology data
 	
@@ -137,6 +140,24 @@ class OCitems_Item {
 		  
         return $output;
     }
+	 
+	 //make the long JSON from scratch, from a freshly gnerated short JSON
+	 function getLongGeneratedByUUID($uuid){
+		  
+		  $uuid = $this->security_check($uuid);
+        $output = false; //not found
+		  $manifestObj = new OCitems_Manifest;
+		  $this->manifest = $manifestObj->getByUUID($uuid);
+		  if(is_array($this->manifest)){
+				$this->shortJSON = $this->generateShortByUUID($uuid);
+				if(is_array($this->shortJSON)){
+					 $manifestObj->addViewCount(); //add to the view count
+					 $this->shortToLongJSON();
+					 $output = true;
+				}
+		  }
+		  return $output;
+	 }
 	 
     
 	 //convert short to long JSON, adding related data
@@ -229,7 +250,7 @@ class OCitems_Item {
 				$JSON_LD["uuid"] = $this->uuid;
 				if($this->itemClassURI){
 					 $typeURI = $ocGenObj->makeURIfromAbbrev($this->itemClassURI);
-					 $JSON_LD = $this->addTypesJSON($JSON_LD, "oc-class", $typeURI);
+					 $JSON_LD = $this->addTypesJSON($JSON_LD, $typeURI);
 				}
 				
 				$assertionsObj = new OCitems_Assertions;
@@ -253,6 +274,8 @@ class OCitems_Item {
 				$JSON_LD = $this->addDCpeopleJSON($JSON_LD); //add creators and contributors
 				$JSON_LD = $this->addStableIdentifiersJSON($JSON_LD); //add stable identifiers
 				
+				$JSON_LD = $this->addGeoJSON($JSON_LD); //add geoJSON to the item
+				
 				$JSON_LD[self::Predicate_dcTermsPublished] = $this->published;
 				$JSON_LD[self::Predicate_dcTermsIsPartOf][] = array("id" => $this->projectURI);
 				
@@ -262,10 +285,9 @@ class OCitems_Item {
 		  return $output;
 	 }
 	 
-	 function addTypesJSON($JSON_LD, $typeAlias, $typeURI){
+	 function addTypesJSON($JSON_LD, $typeURI){
 		  
-		  $JSON_LD["@context"][$typeAlias] = array("@id" => $typeURI);
-		  $JSON_LD["type"][] = $typeAlias;
+		  $JSON_LD["oc-gen:type"][] = array("@id" => $typeURI);
 		  
 		  return $JSON_LD;
 	 }
@@ -639,7 +661,80 @@ class OCitems_Item {
 	 }
 	 
 	 
-    function security_check($input){
+    
+	 
+	 function addGeoJSON($JSON_LD){
+		  
+		  if(is_array($this->geospace)){
+				
+				$ocGenObj = new OCitems_General;
+				$uriObj = new infoURI;
+				
+				$geoSpace = $this->geospace;
+				if($geoSpace["uuid"] == $this->uuid || !$this->addSelfGeoJSONonly){
+					 
+					 $itemGeoFeature = array();
+					 $itemGeoFeature["id"] = "#geo-feature";
+					 $itemGeoFeature["type"] = "Feature";
+					 
+					 $geometryFound = false;
+					 if(is_array($geoSpace["geomObj"])){
+						  if(isset($geoSpace["geomObj"]["geometry"])){
+								$itemGeoFeature["geometry"] = $geoSpace["geomObj"]["geometry"];
+								$geometryFound = true;
+						  }
+						  else{
+								foreach($geoSpace["geomObj"] as $geoObj){
+									 if(isset($geoObj["geometry"])){
+										  $itemGeoFeature["geometry"] = $geoObj["geometry"];
+										  $geometryFound = true;
+										  break;
+									 }
+								}
+						  }
+					 }
+					 
+					 if(!$geometryFound || ($geoSpace["uuid"] != $this->uuid)){
+						  $itemGeoFeature["geometry"] = array("type" => "Point",
+																		  "coordinates" => array($geoSpace["longitude"],
+																										 $geoSpace["latitude"])
+																		  ); //remember geojson coordinate array!
+					 }
+					 
+					 $itemGeoFeature["geometry"]["id"] = "#geo-geometry";
+					 
+					 $itemGeoProperties = array();
+					 if($geoSpace["uuid"] != $this->uuid){
+						  $itemGeoProperties["oc-gen:geoReferenceType"] = "inferred";
+						  $sRes = $uriObj->lookupOCitem($geoSpace["uuid"], "subject");
+						  if(is_array($sRes)){
+								$itemGeoProperties[self::Predicate_locationRefLabel] = $sRes["label"];
+						  }
+						  $itemGeoProperties[self::Predicate_locationRef] = $ocGenObj->generateItemURI($geoSpace["uuid"], "subject");
+					 }
+					 else{
+						  $itemGeoProperties["oc-gen:geoReferenceType"] = "self";
+					 }
+					 $itemGeoFeature["properties"] = $itemGeoProperties;
+					 
+					 
+					 $JSON_LD["@context"]["FeatureCollection"] = "http://geojson.org/geojson-spec.html#feature-collection-objects";
+					 $JSON_LD["@context"]["Feature"] = "http://geovocab.org/spatial#Feature";
+					 $JSON_LD["@context"]["features"] = "oc-gen:geojson-hasfeatures";
+					 $JSON_LD["@context"]["properties"] = "oc-gen:geojson-hasproperties";
+					 $JSON_LD["@context"]["geometry"] = "http://geovocab.org/geometry#geometry";
+					 $JSON_LD["@context"]["Point"] = "http://geovocab.org/geometry#Point";
+					 $JSON_LD["@context"]["Polygon"] = "http://geovocab.org/geometry#Polygon";
+					 $JSON_LD["type"] = "FeatureCollection";
+					 $JSON_LD["features"][] = $itemGeoFeature;
+				}
+		  }
+		  
+		  return $JSON_LD;
+	 }
+	 
+	 
+	 function security_check($input){
         $badArray = array("DROP", "SELECT", "#", "--", "DELETE", "INSERT", "UPDATE", "ALTER", "=");
         foreach($badArray as $bad_word){
             if(stristr($input, $bad_word) != false){

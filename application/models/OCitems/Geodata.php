@@ -17,7 +17,7 @@ class OCitems_Geodata {
     public $latitude;
 	 public $longitude;
 	 public $geoJSON;
-	 public $geoObj;
+	 public $geomObj;
     public $updated;
     
    
@@ -37,23 +37,28 @@ class OCitems_Geodata {
 		
         $result = $db->fetchAll($sql, 2);
         if($result){
-            $output = $result[0];
+				
+				$result[0]["latitude"] += 0;
+				$result[0]["longitude"] += 0;
+				
 				$this->uuid = $uuid;
 				$this->projectUUID = $result[0]["projectUUID"];
 				$this->path = $result[0]["path"];
 				$this->featureType = $result[0]["ftype"];
 				$this->latitude = $result[0]["latitude"];
 				$this->longitude = $result[0]["longitude"];
-				
+				$result[0]["geoObj"] = false;
 				if(strlen($result[0]["geoJSON"])>0){
-					 $geoObj = Zend_Json::decode($result[0]["geoJSON"]);
-					 if(is_array($geoObj)){
+					 $geomObj = json_decode($result[0]["geoJSON"], 1);
+					 if(is_array($geomObj)){ //we have a geometry object
+						  $result[0]["geomObj"] = $geomObj;
 						  $this->geoJSON = $result[0]["geoJSON"];
-						  $this->geoObj = $geoObj;
+						  $this->geomObj = $geomObj;
 					 }
 				}
 				
 				$this->updated = $result[0]["updated"];
+				$output = $result[0];
 				//$this->getItemData($uuid);
 		  }
         return $output;
