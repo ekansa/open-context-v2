@@ -217,7 +217,7 @@ class LegacyController extends Zend_Controller_Action
 		  
 	 }
 	 
-	  public function convertToDoListAction(){
+	 public function convertToDoListAction(){
 		  
 		  $this->_helper->viewRenderer->setNoRender();
 		  
@@ -260,23 +260,22 @@ class LegacyController extends Zend_Controller_Action
 	 }
 	 
 	 
-	 public function cacheViewAction(){
+	 public function legacyLinksAction(){
 		  
 		  $this->_helper->viewRenderer->setNoRender();
 		  
-		  Zend_Loader::loadClass('OCitems_DataCache');
-		  if(isset($_GET["uuid"])){
-				$uuid = $_GET["uuid"];
-		  }
-		  else{
-				$uuid = "FC96A49E-FE12-488B-4EFF-02D4E147B885";
-		  }
-		 
-		  $dataCacheObj = new OCitems_DataCache;
-		  $dataCacheObj->getByUUID($uuid);
+		  Zend_Loader::loadClass('XMLjsonLD_LegacyLinks');
+		  Zend_Loader::loadClass('OCitems_LegacyIDs');
+		  Zend_Loader::loadClass('Links_linkAnnotation');
 		  
+		  Zend_Loader::loadClass('OCitems_General');
+		  Zend_Loader::loadClass('infoURI');
+		  
+		  $legacyLinksObj = new XMLjsonLD_LegacyLinks;
+		  $output =  $legacyLinksObj->convertVariableConsistsOfAnnotations();
 		  header('Content-Type: application/json; charset=utf8');
-		  echo $dataCacheObj->content;
+		  $genObj = new OCitems_General;
+		  echo $genObj->JSONoutputString($output);
 	 }
    
 }
