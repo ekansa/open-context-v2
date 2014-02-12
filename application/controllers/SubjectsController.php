@@ -6,10 +6,22 @@ class SubjectsController extends Zend_Controller_Action
 {
     
 	 function init(){
+		  Zend_Loader::loadClass('OCitems_General');
 		  Zend_Loader::loadClass('OCitems_Item');
 		  Zend_Loader::loadClass('OCitems_Manifest');
 		  Zend_Loader::loadClass('OCitems_DataCache');
-		  Zend_Loader::loadClass('OCitems_General');
+		  Zend_Loader::loadClass('OCitems_Assertions');
+		  Zend_Loader::loadClass('OCitems_String');
+		  Zend_Loader::loadClass('OCitems_Geodata');
+		  Zend_Loader::loadClass('OCitems_Chronodata');
+		  Zend_Loader::loadClass('OCitems_Predicate');
+		  Zend_Loader::loadClass('OCitems_Type');
+		  Zend_Loader::loadClass('OCitems_Identifiers');
+		  Zend_Loader::loadClass('OCitems_MediaFile');
+		  Zend_Loader::loadClass('Links_linkAnnotation');
+		  Zend_Loader::loadClass('Links_linkEntity');
+		  Zend_Loader::loadClass('infoURI');
+		  Zend_Loader::loadClass('GlobalMapTiles');
     }
 	 
 	 public function jsonShortAction(){
@@ -17,9 +29,7 @@ class SubjectsController extends Zend_Controller_Action
 		  $requestParams =  $this->_request->getParams();
 		  $this->_helper->viewRenderer->setNoRender();
 		  
-		  Zend_Loader::loadClass('OCitems_Item');
-		  Zend_Loader::loadClass('OCitems_Manifest');
-		  Zend_Loader::loadClass('OCitems_DataCache');
+		  $this->init(); //load classes
 		  
 		  if(isset($requestParams["uuid"])){
 				$uuid = $requestParams["uuid"];
@@ -41,22 +51,7 @@ class SubjectsController extends Zend_Controller_Action
 		  $requestParams =  $this->_request->getParams();
 		  $this->_helper->viewRenderer->setNoRender();
 		  
-		  Zend_Loader::loadClass('OCitems_Item');
-		  Zend_Loader::loadClass('OCitems_Manifest');
-		  Zend_Loader::loadClass('OCitems_DataCache');
-		  Zend_Loader::loadClass('OCitems_Manifest');
-		  Zend_Loader::loadClass('OCitems_DataCache');
-		  Zend_Loader::loadClass('OCitems_Assertions');
-		  Zend_Loader::loadClass('OCitems_String');
-		  Zend_Loader::loadClass('OCitems_Geodata');
-		  Zend_Loader::loadClass('OCitems_Chronodata');
-		  Zend_Loader::loadClass('OCitems_Predicate');
-		  Zend_Loader::loadClass('OCitems_Type');
-		  Zend_Loader::loadClass('OCitems_MediaFile');
-		  Zend_Loader::loadClass('OCitems_Identifiers');
-		  Zend_Loader::loadClass('Links_linkAnnotation');
-		  Zend_Loader::loadClass('Links_linkEntity');
-		  Zend_Loader::loadClass('infoURI');
+		  $this->init(); //load classes
 		  
 		  if(isset($requestParams["uuid"])){
 				$uuid = $requestParams["uuid"];
@@ -79,19 +74,7 @@ class SubjectsController extends Zend_Controller_Action
 		  $requestParams =  $this->_request->getParams();
 		  $this->_helper->viewRenderer->setNoRender();
 		  
-		  Zend_Loader::loadClass('OCitems_Item');
-		  Zend_Loader::loadClass('OCitems_Manifest');
-		  Zend_Loader::loadClass('OCitems_DataCache');
-		  Zend_Loader::loadClass('OCitems_Assertions');
-		  Zend_Loader::loadClass('OCitems_String');
-		  Zend_Loader::loadClass('OCitems_Geodata');
-		  Zend_Loader::loadClass('OCitems_Chronodata');
-		  Zend_Loader::loadClass('OCitems_Predicate');
-		  Zend_Loader::loadClass('OCitems_Type');
-		  Zend_Loader::loadClass('OCitems_Identifiers');
-		  Zend_Loader::loadClass('Links_linkAnnotation');
-		  Zend_Loader::loadClass('Links_linkEntity');
-		  Zend_Loader::loadClass('infoURI');
+		  $this->init(); //load classes
 		  
 		  
 		  if(isset($requestParams["uuid"])){
@@ -114,22 +97,7 @@ class SubjectsController extends Zend_Controller_Action
 		  $requestParams =  $this->_request->getParams();
 		  $this->_helper->viewRenderer->setNoRender();
 		  
-		  Zend_Loader::loadClass('OCitems_Item');
-		  Zend_Loader::loadClass('OCitems_Manifest');
-		  Zend_Loader::loadClass('OCitems_DataCache');
-		  Zend_Loader::loadClass('OCitems_Manifest');
-		  Zend_Loader::loadClass('OCitems_DataCache');
-		  Zend_Loader::loadClass('OCitems_Assertions');
-		  Zend_Loader::loadClass('OCitems_String');
-		  Zend_Loader::loadClass('OCitems_Geodata');
-		  Zend_Loader::loadClass('OCitems_Chronodata');
-		  Zend_Loader::loadClass('OCitems_Predicate');
-		  Zend_Loader::loadClass('OCitems_Type');
-		  Zend_Loader::loadClass('OCitems_MediaFile');
-		  Zend_Loader::loadClass('OCitems_Identifiers');
-		  Zend_Loader::loadClass('Links_linkAnnotation');
-		  Zend_Loader::loadClass('Links_linkEntity');
-		  Zend_Loader::loadClass('infoURI');
+		  $this->init(); //load classes
 		  
 		  if(isset($requestParams["uuid"])){
 				$uuid = $requestParams["uuid"];
