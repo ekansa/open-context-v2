@@ -57,11 +57,16 @@ class OCitems_Item {
 	 public $observations; //observation array (has observation metadata, properties, notes, links, and linked data)
 	 public $assertedPredicates; //array of predicates (variables + links) and their abbrevations. Useful for annotating them
 	 public $assertedObjects; //array of objects indentified in observations about an item. Useful for annotation them. 
-	 public $annotationEntities; //array of entities used to annotate the item.
+	 
 	 public $geospace; //array of geospatial data for the item
 	 public $chronology; //array of chronological information for the item
 	 
-	 public $addSelfGeoJSONonly = false;
+	 public $addSelfGeoJSONonly = false; //add GeoJSON data only if the record itself has geo data assigned (don't do an inference)
+	 public $addExternalEntityInfo = false; //add labeling and some other data about entities referenced by this item
+	 
+	 public $infoURIs = array(); //uri keys with array of useful information, so we don't look up the same uri label multiple times.
+	 public $singleInstanceInfoURIs = array(); //uri keys where additional information would be redundant, only provide once.
+	 
 	 
 	 /* Array of standard namespaces used for open context items
 	 */
@@ -80,10 +85,12 @@ class OCitems_Item {
 					 "oc-gen" => "http://opencontext.org/vocabularies/oc-general/");
 	 
 	 
+	 const skipInfoURIkey = "skip";
+	 
 	 const Predicate_hasContextPath = "oc-gen:has-context-path"; //has context
 	 const Predicate_hasPathItems = "oc-gen:has-path-items"; //has parent context items
 	 const Predicate_pathDes = "oc-gen:path-des"; //path has a description 
-	 const contextPathNodePrefix = "context-path-"; //prefix for naming context path nodes
+	 const contextPathNodePrefix = "#context-path-"; //prefix for naming context path nodes
    
 	 const Predicate_hasContents = "oc-gen:has-contents"; //has children items
 	 const Predicate_contains = "oc-gen:contains"; //contains (list of child items)
@@ -143,6 +150,7 @@ class OCitems_Item {
 	 //get data from database
     function getLongByUUID($uuid){
         
+		  $this->addExternalEntityInfo = true;
         $uuid = $this->security_check($uuid);
         $output = false; //not found
         
@@ -164,6 +172,7 @@ class OCitems_Item {
 	 //make the long JSON from scratch, from a freshly gnerated short JSON
 	 function getLongGeneratedByUUID($uuid){
 		  
+		  $this->addExternalEntityInfo = true;
 		  $uuid = $this->security_check($uuid);
         $output = false; //not found
 		  $manifestObj = new OCitems_Manifest;
@@ -200,16 +209,30 @@ class OCitems_Item {
 				foreach($arrayNode as $key => $actVals){
 					 if(!is_array($actVals)){
 						  $newArrayNode[$key] = $actVals;
-						  if($key == "id" || $key == "@id"){
-								$deRef = $uriObj->lookupURI($actVals);
-								if(is_array($deRef)){
-									 if(isset($deRef["label"])){
-										  $newArrayNode["label"] = $deRef["label"];
+						  if($key === "id" || $key === "@id"){ //only look at ID keys
+								if(substr_count($actVals, ":") == 1){ //make sure their is only ":", otherwise not an ID to lookup 
+									 $deRef = $this->getInfoForURI($actVals);
+									 if(!is_array($deRef)){
+										  $deRef = $uriObj->lookupURI($actVals);
+									 }
+									 if(is_array($deRef)){
+										  if(isset($deRef["label"])){
+												$newArrayNode["label"] = $deRef["label"];
+												$this->noteLabelForURI($actVals, $deRef);
+										  }
 									 }
 								}
 						  }
 					 }
 					 else{
+						  if($this->addExternalEntityInfo){
+								if($key === "id" || $key === "@id"){
+									 if(isset($actVals[self::skipInfoURIkey])){
+										  $actVals = $actVals[self::skipInfoURIkey];
+									 }
+								}
+						  }
+						  
 						  $newActVals = $this->recursiveNodeExpand($actVals);
 						  $newArrayNode[$key] = $newActVals;
 					 }
@@ -262,6 +285,8 @@ class OCitems_Item {
 				
 				$JSON_LD["id"] = $this->uri;
 				$JSON_LD["label"] = $this->label;
+				$this->noteLabelForURI($this->uri, array("label" => $this->label));
+				
 				$JSON_LD["uuid"] = $this->uuid;
 				if($this->itemClassURI){
 					 $typeURI = $ocGenObj->makeURIfromAbbrev($this->itemClassURI);
@@ -776,12 +801,16 @@ class OCitems_Item {
 					 $uuid = $predArray["uuid"];
 					 $actAnnotations = $linkAnnotObj->getAnnotationsByUUID($uuid);
 					 if(is_array($actAnnotations)){
-						  
-						  $graphAnnotations = array("@id" => $assertedPredicateURI);
+						  if($this->addExternalEntityInfo){
+								$graphAnnotations = array("@id" => array(self::skipInfoURIkey => $assertedPredicateURI));
+						  }
+						  else{
+								$graphAnnotations = array("@id" => $assertedPredicateURI);
+						  }
 						  foreach($actAnnotations as $actAnno){
 								$predicate = $ocGenObj->abbreviateURI($actAnno["predicateURI"], $this->standardNamespaces);
 								$object =  $ocGenObj->abbreviateURI($actAnno["objectURI"], $this->standardNamespaces);
-								$graphAnnotations[$predicate] = array("@id" => $object); //add the annotation to the predicate
+								$graphAnnotations[$predicate][] = array("@id" => $object); //add the annotation to the predicate
 						  }
 						  
 						  $JSON_LD["@graph"][] = $graphAnnotations;
@@ -793,11 +822,16 @@ class OCitems_Item {
 				foreach($this->assertedObjects as $uuid => $uri){
 					 $actAnnotations = $linkAnnotObj->getAnnotationsByUUID($uuid);
 					 if(is_array($actAnnotations)){
-						  $graphAnnotations = array("@id" =>  $uri);
+						  if($this->addExternalEntityInfo){
+								$graphAnnotations = array("@id" => array(self::skipInfoURIkey => $uri));
+						  }
+						  else{
+								$graphAnnotations = array("@id" =>  $uri);
+						  }
 						  foreach($actAnnotations as $actAnno){
 								$predicate = $ocGenObj->abbreviateURI($actAnno["predicateURI"], $this->standardNamespaces);
 								$object =  $ocGenObj->abbreviateURI($actAnno["objectURI"], $this->standardNamespaces);
-								$graphAnnotations[$predicate] = array("@id" => $object); //add the annotation to the predicate
+								$graphAnnotations[$predicate][] = array("@id" => $object); //add the annotation to the predicate
 						  }
 						  
 						  $JSON_LD["@graph"][] = $graphAnnotations;
@@ -806,6 +840,25 @@ class OCitems_Item {
 		  }
 		  
 		  return $JSON_LD;
+	 }
+	 
+	 //note the label for a given uri in memory
+	 function noteLabelForURI($uri, $info){	  
+		  $infoURIs = $this->infoURIs;
+		  $infoURIs[$uri] = $info;
+		  $this->infoURIs = $infoURIs;
+	 }
+	 
+	 //get the label for a given URI
+	 function getInfoForURI($uri){
+		  $info = false;
+		  if(!is_array($uri) && $uri != null){
+				$infoURIs = $this->infoURIs;
+				if(array_key_exists($uri, $infoURIs)){
+					 $info = $infoURIs[$uri];
+				}
+		  }
+		  return $info;
 	 }
 	 	 
 	 function security_check($input){
