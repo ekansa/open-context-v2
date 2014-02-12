@@ -588,12 +588,12 @@ class XMLjsonLD_XpathBasics  {
 					 $data = array("uuid" => $refUUID,
 							 "projectUUID" => $this->projectUUID,
 							 "ftype" => "point",
-							 "lat" => $lat,
-							 "lon" => $lon
+							 "latitude" => $lat,
+							 "longitude" => $lon
 							 );
 					 
 					 $geoObj = new OCitems_Geodata;
-					 $geoObj->createItem($data);
+					 $geoObj->createRecord($data);
 				}
 				
 				if($refUUID != false && $lat != false && $lon != false){

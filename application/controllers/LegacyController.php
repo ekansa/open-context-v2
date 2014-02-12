@@ -260,6 +260,26 @@ class LegacyController extends Zend_Controller_Action
 	 }
 	 
 	 
+	 
+	  public function legacyGeoAction(){
+		  
+		  $this->_helper->viewRenderer->setNoRender();
+		  
+		  Zend_Loader::loadClass('XMLjsonLD_LegacyGeo');
+		  Zend_Loader::loadClass('OCitems_LegacyIDs');
+		  Zend_Loader::loadClass('OCitems_Geodata');
+		  
+		  Zend_Loader::loadClass('OCitems_General');
+		  Zend_Loader::loadClass('infoURI');
+		  
+		  $legacyGeoObj = new XMLjsonLD_LegacyGeo;
+		  $output =  $legacyGeoObj->convertOldGeo();
+		  header('Content-Type: application/json; charset=utf8');
+		  $genObj = new OCitems_General;
+		  echo $genObj->JSONoutputString($output);
+	 }
+	 
+	 
 	 public function legacyLinksAction(){
 		  
 		  $this->_helper->viewRenderer->setNoRender();
@@ -272,7 +292,7 @@ class LegacyController extends Zend_Controller_Action
 		  Zend_Loader::loadClass('infoURI');
 		  
 		  $legacyLinksObj = new XMLjsonLD_LegacyLinks;
-		  $output =  $legacyLinksObj->convertVariableConsistsOfAnnotations();
+		  $output =  $legacyLinksObj->convertTypeAnnotations();
 		  header('Content-Type: application/json; charset=utf8');
 		  $genObj = new OCitems_General;
 		  echo $genObj->JSONoutputString($output);

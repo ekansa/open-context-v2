@@ -47,7 +47,7 @@ class OCitems_Geodata {
 				$this->featureType = $result[0]["ftype"];
 				$this->latitude = $result[0]["latitude"];
 				$this->longitude = $result[0]["longitude"];
-				$result[0]["geoObj"] = false;
+				$result[0]["geomObj"] = false;
 				if(strlen($result[0]["geoJSON"])>0){
 					 $geomObj = json_decode($result[0]["geoJSON"], 1);
 					 if(is_array($geomObj)){ //we have a geometry object
@@ -66,7 +66,7 @@ class OCitems_Geodata {
     
 	 
 	 //adds an item to the database
-	 function createItem($data = false){
+	 function createRecord($data = false){
 		 
 		  $db = $this->startDB();
 		  $success = false;
@@ -88,6 +88,8 @@ class OCitems_Geodata {
 					 $db->insert("oc_geodata", $data);
 					 $success = true;
 				} catch (Exception $e) {
+					 //echo (string)$e;
+					 //die;
 					 $success = false;
 				}
 		  
