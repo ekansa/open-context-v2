@@ -61,11 +61,14 @@ class OCitems_Item {
 	 public $geospace; //array of geospatial data for the item
 	 public $chronology; //array of chronological information for the item
 	 
-	 public $addSelfGeoJSONonly = false; //add GeoJSON data only if the record itself has geo data assigned (don't do an inference)
+	
 	 public $addExternalEntityInfo = false; //add labeling and some other data about entities referenced by this item
-	 
 	 public $infoURIs = array(); //uri keys with array of useful information, so we don't look up the same uri label multiple times.
-	 public $singleInstanceInfoURIs = array(); //uri keys where additional information would be redundant, only provide once.
+	 
+	 public $addSelfGeoJSONonly = false; //add GeoJSON data only if the record itself has geo data assigned (don't do an inference)
+	 public $addPointFeaturesIfPolygon = true; //add a GeoJSON point feature even if an item has a polygon feature
+	 
+	 
 	 
 	 
 	 /* Array of standard namespaces used for open context items
@@ -90,7 +93,7 @@ class OCitems_Item {
 	 const Predicate_hasContextPath = "oc-gen:has-context-path"; //has context
 	 const Predicate_hasPathItems = "oc-gen:has-path-items"; //has parent context items
 	 const Predicate_pathDes = "oc-gen:path-des"; //path has a description 
-	 const contextPathNodePrefix = "#context-path-"; //prefix for naming context path nodes
+	 const nodePrefix_contextPath = "#context-path-"; //prefix for naming context path nodes
    
 	 const Predicate_hasContents = "oc-gen:has-contents"; //has children items
 	 const Predicate_contains = "oc-gen:contains"; //contains (list of child items)
@@ -126,6 +129,14 @@ class OCitems_Item {
 	 
 	 const Predicate_familyName = "foaf:familyName";
 	 const Predicate_givenName = "foaf:givenName";
+	 
+	 const Predicate_geoPropRefType = "oc-gen:geoReferenceType"; //predicate for geo data assigned to the item iteself or inferred through containment
+	 const nodePrefix_geoJSONfeature = "#geo-feature-"; //prefix for node ids for geoJSON features
+	 const nodePrefix_geoJSONgeometry = "#geo-geometry-"; //prefix for node ids for geoJSON geometries
+	 const nodePrefix_geoJSONproperties = "#geo-props-"; //prefix for node ids for geoJSON properties
+	 const Predicate_geoPropSpecificity = "rdfs:comment"; //for notes about the specificity of a region
+	 const Predicate_geoPropNote = "skos:note"; //for notes about a georeference
+	 
 	 
     //get data from database
     function getShortByUUID($uuid){
@@ -341,7 +352,7 @@ class OCitems_Item {
 				foreach($this->contexts as $treeNodeID => $parentURIs){
 					 $treeNodeEx = explode("-", $treeNodeID );
 					 $treeNumber = $treeNodeEx[count($treeNodeEx)-1];
-					 $contextNodeID = self::contextPathNodePrefix.$treeNumber;
+					 $contextNodeID = self::nodePrefix_contextPath.$treeNumber;
 					 if($treeNumber == 1){
 						  $pathDes = "default";
 					 }
@@ -719,58 +730,13 @@ class OCitems_Item {
 	 function addGeoJSON($JSON_LD){
 		  
 		  if(is_array($this->geospace)){
-				
-				$ocGenObj = new OCitems_General;
-				$uriObj = new infoURI;
-				
 				$geoSpace = $this->geospace;
 				if($geoSpace["uuid"] == $this->uuid || !$this->addSelfGeoJSONonly){
 					 
-					 $itemGeoFeature = array();
-					 $itemGeoFeature["id"] = "#geo-feature";
-					 $itemGeoFeature["type"] = "Feature";
-					 
-					 $geometryFound = false;
-					 if(is_array($geoSpace["geomObj"])){
-						  if(isset($geoSpace["geomObj"]["geometry"])){
-								$itemGeoFeature["geometry"] = $geoSpace["geomObj"]["geometry"];
-								$geometryFound = true;
-						  }
-						  else{
-								foreach($geoSpace["geomObj"] as $geoObj){
-									 if(isset($geoObj["geometry"])){
-										  $itemGeoFeature["geometry"] = $geoObj["geometry"];
-										  $geometryFound = true;
-										  break;
-									 }
-								}
-						  }
-					 }
-					 
-					 if(!$geometryFound || ($geoSpace["uuid"] != $this->uuid)){
-						  $itemGeoFeature["geometry"] = array("type" => "Point",
-																		  "coordinates" => array($geoSpace["longitude"],
-																										 $geoSpace["latitude"])
-																		  ); //remember geojson coordinate array!
-					 }
-					 
-					 $itemGeoFeature["geometry"]["id"] = "#geo-geometry";
-					 
-					 $itemGeoProperties = array();
-					 $itemGeoProperties["id"] = "#geoJSON-properties";
-					 if($geoSpace["uuid"] != $this->uuid){
-						  $itemGeoProperties["oc-gen:geoReferenceType"] = "inferred";
-						  $sRes = $uriObj->lookupOCitem($geoSpace["uuid"], "subject");
-						  if(is_array($sRes)){
-								$itemGeoProperties[self::Predicate_locationRefLabel] = $sRes["label"];
-						  }
-						  $itemGeoProperties[self::Predicate_locationRef] = $ocGenObj->generateItemURI($geoSpace["uuid"], "subject");
-					 }
-					 else{
-						  $itemGeoProperties["oc-gen:geoReferenceType"] = "self";
-					 }
-					 $itemGeoFeature["properties"] = $itemGeoProperties;
-					 
+					 $itemGeoFeatures = array();
+					 $itemGeoFeatures = $this->geoJSONaddReducedPrecisionGeoTile($geoSpace, $itemGeoFeatures);
+					 $itemGeoFeatures = $this->geoJSONaddPolygon($geoSpace, $itemGeoFeatures);
+					 $itemGeoFeatures = $this->geoJSONaddPoint($geoSpace, $itemGeoFeatures);
 					 
 					 $JSON_LD["@context"]["FeatureCollection"] = "http://geojson.org/geojson-spec.html#feature-collection-objects";
 					 $JSON_LD["@context"]["Feature"] = "http://geovocab.org/spatial#Feature";
@@ -780,12 +746,157 @@ class OCitems_Item {
 					 $JSON_LD["@context"]["Point"] = "http://geovocab.org/geometry#Point";
 					 $JSON_LD["@context"]["Polygon"] = "http://geovocab.org/geometry#Polygon";
 					 $JSON_LD["type"] = "FeatureCollection";
-					 $JSON_LD["features"][] = $itemGeoFeature;
+					 $JSON_LD["features"]= $itemGeoFeatures;
 				}
 		  }
 		  
 		  return $JSON_LD;
 	 }
+	 
+	 
+	 function geoJSONaddPolygon($geoSpace, $itemGeoFeatures){
+	 	  
+		  $geometryFound = false;
+		  if(is_array($geoSpace["geomObj"])){
+				if(isset($geoSpace["geomObj"]["geometry"])){
+					 $geometryFound = $geoSpace["geomObj"]["geometry"];
+				}
+				else{
+					 foreach($geoSpace["geomObj"] as $geoObj){
+						  if(isset($geoObj["geometry"])){
+								$geometryFound = $geoObj["geometry"];
+								break;
+						  }
+					 }
+				}
+		  }
+		  
+		  if(is_array($geometryFound)){
+				$activeFeatureNumber = count($itemGeoFeatures) + 1;
+				$itemGeoFeature = array();
+				$itemGeoFeature["id"] = self::nodePrefix_geoJSONfeature.$activeFeatureNumber;
+				$itemGeoFeature["type"] = "Feature";
+				$itemGeoFeature["geometry"] = $geometryFound;
+				$itemGeoFeature["geometry"]["id"] = self::nodePrefix_geoJSONgeometry.$activeFeatureNumber;
+				$itemGeoFeature["properties"] = $itemGeoFeature["properties"] = $this->geoJSONmakeProperties($geoSpace, "Polygon", $activeFeatureNumber);
+				$itemGeoFeatures[] = $itemGeoFeature;
+		  }
+
+		  return $itemGeoFeatures;
+	 }
+	 
+	 function geoJSONaddPoint($geoSpace, $itemGeoFeatures){
+	 	  
+		  $makePoint = true;
+		  if(!$this->addPointFeaturesIfPolygon){
+				if(is_array($geoSpace["geomObj"])){
+					 if(isset($geoSpace["geomObj"]["geometry"])){
+						  $makePoint = false;
+					 }
+					 else{
+						  foreach($geoSpace["geomObj"] as $geoObj){
+								if(isset($geoObj["geometry"])){
+									 $makePoint = false;
+									 break;
+								}
+						  }
+					 }
+				}
+		  }
+		  
+		  if($makePoint){
+				$activeFeatureNumber = count($itemGeoFeatures) + 1;
+				$itemGeoFeature = array();
+				$itemGeoFeature["id"] = self::nodePrefix_geoJSONfeature.$activeFeatureNumber;
+				$itemGeoFeature["type"] = "Feature";
+				$itemGeoFeature["geometry"]["type"] = "Point";
+				$itemGeoFeature["geometry"]["id"] = self::nodePrefix_geoJSONgeometry.$activeFeatureNumber;
+				$itemGeoFeature["geometry"]["coordinates"] = array($geoSpace["longitude"],
+																				$geoSpace["latitude"]);
+				$itemGeoFeature["properties"] = $itemGeoFeature["properties"] = $this->geoJSONmakeProperties($geoSpace, "Point", $activeFeatureNumber);
+				$itemGeoFeatures[] = $itemGeoFeature;
+		  }
+
+		  return $itemGeoFeatures;
+	 }
+	 
+	 
+	 //generate a map tile polygon for a less specific point
+	 function geoJSONaddReducedPrecisionGeoTile($geoSpace, $itemGeoFeatures){
+		  
+		  if($geoSpace["specificity"] < 0){
+				
+				$activeFeatureNumber = count($itemGeoFeatures) + 1;
+				
+				//item has reduced precision geographic data
+				$itemGeoFeature = array();
+				$itemGeoFeature["id"] = self::nodePrefix_geoJSONfeature.$activeFeatureNumber;
+				$itemGeoFeature["type"] = "Feature";
+				$itemGeoFeature["geometry"]["type"] = "Polygon";
+				$itemGeoFeature["geometry"]["id"] = self::nodePrefix_geoJSONgeometry.$activeFeatureNumber;
+				
+				$coordinateArray = array();
+				$polyArray = array();
+				
+				$geoObj = new GlobalMapTiles;
+				$quadTreeTile = $geoObj->LatLonToQuadTree($geoSpace["latitude"], $geoSpace["longitude"], abs($geoSpace["specificity"]));
+				$geoArray = $geoObj->QuadTreeToLatLon($quadTreeTile);
+				
+				$polyArray[] = array( $geoArray[1], $geoArray[0]);
+				$polyArray[] = array( $geoArray[3], $geoArray[0]);
+				$polyArray[] = array( $geoArray[3], $geoArray[2]);
+				$polyArray[] = array( $geoArray[1], $geoArray[2]);
+				$coordinateArray[] = $polyArray;
+				$itemGeoFeature["geometry"]["coordinates"] = $coordinateArray;
+				$itemGeoFeature["properties"] = $this->geoJSONmakeProperties($geoSpace, "Polygon", $activeFeatureNumber);
+				$itemGeoFeatures[] = $itemGeoFeature;
+		  }
+		  
+		  return $itemGeoFeatures;
+	 }
+	 
+	 //make properties to describe a GeoJSON feature
+	 function geoJSONmakeProperties($geoSpace, $featureType, $activeFeatureNumber){
+		  
+		  $ocGenObj = new OCitems_General;
+		  $uriObj = new infoURI;
+		  
+		  $itemGeoProperties = array();
+		  $itemGeoProperties["id"] = self::nodePrefix_geoJSONproperties.$activeFeatureNumber;
+		  if($geoSpace["uuid"] != $this->uuid){
+				$itemGeoProperties[self::Predicate_geoPropRefType] = "inferred";
+				$sRes = $uriObj->lookupOCitem($geoSpace["uuid"], "subject");
+				if(is_array($sRes)){
+					 $itemGeoProperties[self::Predicate_locationRefLabel] = $sRes["label"];
+				}
+				$itemGeoProperties[self::Predicate_locationRef] = $ocGenObj->generateItemURI($geoSpace["uuid"], "subject");
+		  }
+		  else{
+				$itemGeoProperties[self::Predicate_geoPropRefType] = "self";
+		  }
+		  
+		  if($geoSpace["specificity"] < 0){
+				if($featureType == "Polygon"){
+					 $itemGeoProperties[self::Predicate_geoPropSpecificity] = "Item location available with intentionally reduced accuracy within this region";
+				}
+				else{
+					 $itemGeoProperties[self::Predicate_geoPropSpecificity] = "Item location provided with intentionally reduced accuracy";
+				}
+		  }
+		  else{
+				$itemGeoProperties[self::Predicate_geoPropSpecificity] = "Item location provided to best current knowledge with no intentional reduction in accuracy";
+		  }
+		  
+		  if(strlen($geoSpace["note"])>1){
+				$itemGeoProperties[self::Predicate_geoPropNote] = $geoSpace["note"];
+		  }
+		   
+		  return $itemGeoProperties;
+	 }
+	 
+	 
+	 
+	 
 	 
 	 
 	 //adds simple annotations to the data
