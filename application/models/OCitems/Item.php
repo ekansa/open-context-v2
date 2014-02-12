@@ -207,9 +207,18 @@ class OCitems_Item {
 		  if(is_array($arrayNode)){
 				$newArrayNode = array();
 				foreach($arrayNode as $key => $actVals){
+					 
+					 $getInfo = true;
+					 if($this->addExternalEntityInfo){
+						  if(isset($actVals[self::skipInfoURIkey])){
+								$actVals = $actVals[self::skipInfoURIkey];
+								$getInfo = false;
+						  }
+					 }
+					 
 					 if(!is_array($actVals)){
 						  $newArrayNode[$key] = $actVals;
-						  if($key === "id" || $key === "@id"){ //only look at ID keys
+						  if($getInfo && ($key === "id" || $key === "@id")){ //only look at ID keys
 								if(substr_count($actVals, ":") == 1){ //make sure their is only ":", otherwise not an ID to lookup 
 									 $deRef = $this->getInfoForURI($actVals);
 									 if(!is_array($deRef)){
@@ -225,14 +234,6 @@ class OCitems_Item {
 						  }
 					 }
 					 else{
-						  if($this->addExternalEntityInfo){
-								if($key === "id" || $key === "@id"){
-									 if(isset($actVals[self::skipInfoURIkey])){
-										  $actVals = $actVals[self::skipInfoURIkey];
-									 }
-								}
-						  }
-						  
 						  $newActVals = $this->recursiveNodeExpand($actVals);
 						  $newArrayNode[$key] = $newActVals;
 					 }
