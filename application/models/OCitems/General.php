@@ -12,7 +12,17 @@ class OCitems_General {
 	 public $localBaseURI; //the base uri for this local instance used for development and testing 
 	 public $canonicalBaseURI; //the cannonical URI for the live deployment
 	 
-	 public $URIabbreviations = array("http://opencontext.org/vocabularies/oc-general/" => "oc-gen");
+	 /*
+	 public $URIabbreviations = array("http://opencontext.org/vocabularies/oc-general/" => "oc-gen",
+												 "http://www.w3.org/2000/01/rdf-schema#" => "rdfs",
+												 "http://www.w3.org/2004/02/skos/core#" => "skos"
+												 );
+	 */
+	 
+	 public $URIabbreviations = array("oc-gen" => "http://opencontext.org/vocabularies/oc-general/",
+												 "rdfs" => "http://www.w3.org/2000/01/rdf-schema#",
+												 "skos" => "http://www.w3.org/2004/02/skos/core#"
+												 );
 	 
 	 public $typeURImappings = array("subjects" => "subject",
 												"media" => "media",
@@ -125,7 +135,25 @@ class OCitems_General {
 	 }
 	 
 	 //convert common URIs to common prefixs
-	 function abbreviateURI($uri, $prefixDelim = ":"){
+	 function abbreviateURI($uri, $URIabbreviations = false, $prefixDelim = ":"){
+		  if(stristr($uri, "http://") || stristr($uri, "https://")){
+				
+				if(!$URIabbreviations){
+					 $URIabbreviations = $this->URIabbreviations;
+				}
+				
+				foreach($URIabbreviations as $abrevKey => $actURI){
+					 if(strstr($uri, $actURI)){
+						  $uri = str_replace($actURI, $abrevKey.$prefixDelim, $uri );
+						  break;
+					 }
+				}
+		  }
+		  return $uri;
+	 }
+	 
+	 //convert common URIs to common prefixs
+	 function OLDabbreviateURI($uri, $prefixDelim = ":"){
 		  if(stristr($uri, "http://") || stristr($uri, "https://")){
 				foreach($this->URIabbreviations as $uriKey => $abrev){
 					 $uri = str_replace($uriKey, $abrev.$prefixDelim, $uri );
@@ -134,8 +162,29 @@ class OCitems_General {
 		  return $uri;
 	 }
 	 
+	 
 	 //convert common URIs to common prefixs
-	 function makeURIfromAbbrev($abrev, $prefixDelim = ":"){
+	 function makeURIfromAbbrev($abrev, $URIabbreviations = false, $prefixDelim = ":"){
+		  $uri = $abrev;
+		  $abrevEx = explode($prefixDelim, $abrev);
+		  $usedPrefix = $abrevEx[0];
+		  $usedValue = $abrevEx[1];
+		  
+		  if(!$URIabbreviations){
+				$URIabbreviations = $this->URIabbreviations;
+		  }
+		  
+		  foreach($URIabbreviations as $abrevKey => $actURI){
+				if($abrevKey == $usedPrefix){
+					 $uri = $actURI.$usedValue;
+					 break;
+				}
+		  }
+		  return $uri;
+	 }
+	 
+	  //convert common URIs to common prefixs
+	 function OLDmakeURIfromAbbrev($abrev, $prefixDelim = ":"){
 		  $uri = $abrev;
 		  $abrevEx = explode($prefixDelim, $abrev);
 		  $usedPrefix = $abrevEx[0];

@@ -55,10 +55,30 @@ class OCitems_Item {
 	 public $contexts; //context array (for subjects)
 	 public $children; //children array (for subjects)
 	 public $observations; //observation array (has observation metadata, properties, notes, links, and linked data)
+	 public $assertedPredicates; //array of predicates (variables + links) and their abbrevations. Useful for annotating them
+	 public $assertedObjects; //array of objects indentified in observations about an item. Useful for annotation them. 
+	 public $annotationEntities; //array of entities used to annotate the item.
 	 public $geospace; //array of geospatial data for the item
 	 public $chronology; //array of chronological information for the item
 	 
 	 public $addSelfGeoJSONonly = false;
+	 
+	 /* Array of standard namespaces used for open context items
+	 */
+	 public $standardNamespaces = array("rdf" => "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+					 "rdfs" => "http://www.w3.org/2000/01/rdf-schema#",
+					 "label" => "rdfs:label",
+					 "xsd" => "http://www.w3.org/2001/XMLSchema#",
+					 "skos" => "http://www.w3.org/2004/02/skos/core#",
+					 "owl" => "http://www.w3.org/2002/07/owl#",
+					 "dc-elems" => "http://purl.org/dc/elements/1.1/",
+					 "dc-terms" => "http://purl.org/dc/terms/",
+					 "uuid" => "dc-terms:identifier",
+					 "bibo" => "http://purl.org/ontology/bibo/",
+					 "foaf" => "http://xmlns.com/foaf/0.1/",
+					 "cidoc-crm" => "http://www.cidoc-crm.org/cidoc-crm/",
+					 "oc-gen" => "http://opencontext.org/vocabularies/oc-general/");
+	 
 	 
 	 const Predicate_hasContextPath = "oc-gen:has-context-path"; //has context
 	 const Predicate_hasPathItems = "oc-gen:has-path-items"; //has parent context items
@@ -226,24 +246,19 @@ class OCitems_Item {
 				
 				$JSON_LD = array();
 				$JSON_LD["@context"] = array(
-					 "type" => "@type",
 					 "id" => "@id",
-					 "rdf" => "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-					 "rdfs" => "http://www.w3.org/2000/01/rdf-schema#",
-					 "label" => "rdfs:label",
-					 "xsd" => "http://www.w3.org/2001/XMLSchema#",
-					 "skos" => "http://www.w3.org/2004/02/skos/core#",
-					 "owl" => "http://www.w3.org/2002/07/owl#",
-					 "dc-elems" => "http://purl.org/dc/elements/1.1/",
-					 "dc-terms" => "http://purl.org/dc/terms/",
-					 "uuid" => "dc-terms:identifier",
-					 "bibo" => "http://purl.org/ontology/bibo/",
-					 "foaf" => "http://xmlns.com/foaf/0.1/",
-					 "cidoc-crm" => "http://www.cidoc-crm.org/cidoc-crm/",
-					 "oc-gen" => "http://opencontext.org/vocabularies/oc-general/"
-					 );
+					 "type" => "@type");
 				
+				//add standard namespaces
+				foreach($this->standardNamespaces as $abrevKey => $actURI){
+					 $JSON_LD["@context"][$abrevKey] =  $actURI;
+				}
 				
+				/*
+				$JSON_LD["@context"]["skos:closeMatch"] = array("@type" => "@id");
+				$JSON_LD["@context"]["skos:related"] = array("@type" => "@id");
+				$JSON_LD["@context"]["rdfs:range"] = array("@type" => "@id");
+				*/
 				
 				$JSON_LD["id"] = $this->uri;
 				$JSON_LD["label"] = $this->label;
@@ -278,6 +293,8 @@ class OCitems_Item {
 				
 				$JSON_LD[self::Predicate_dcTermsPublished] = $this->published;
 				$JSON_LD[self::Predicate_dcTermsIsPartOf][] = array("id" => $this->projectURI);
+				
+				$JSON_LD = $this->addSimpleAnnotationsJSON($JSON_LD);
 				
 				$output = $JSON_LD;
 		  }
@@ -442,6 +459,8 @@ class OCitems_Item {
 				$dcRels["contributors"] = array();
 				$dcCreators = array();
 				$dcContributors = array();
+				$assertedPredicates = array();
+				$assertedObjects = array();
 				
 				foreach($this->assertions as $row){
 					 if($row["predicateUUID"] != self::Predicate_contains){
@@ -482,7 +501,7 @@ class OCitems_Item {
 									 if(!array_key_exists($predicateURI, $vars)){
 										  $actVarNumber = count($vars) + 1;
 										  $predicateShort = "var-".$actVarNumber;
-										  $vars[$predicateURI] = array("type" => $actType, "abrev" => $predicateShort);
+										  $vars[$predicateURI] = array("type" => $actType, "abrev" => $predicateShort, "uuid" => $row["predicateUUID"]);
 									 }
 									 else{
 										  $predicateShort = $vars[$predicateURI]["abrev"];
@@ -492,7 +511,7 @@ class OCitems_Item {
 									 if(!array_key_exists($predicateURI, $links)){
 										  $actLinkNumber = count($links) + 1;
 										  $predicateShort = "link-".$actLinkNumber;
-										  $links[$predicateURI] = array("type" => $actType, "abrev" => $predicateShort);
+										  $links[$predicateURI] = array("type" => $actType, "abrev" => $predicateShort, "uuid" => $row["predicateUUID"]);
 										  if($linkAnnotObj->DCcreatorCheck($row["predicateUUID"])){
 												$dcRels["creators"][] = $predicateURI;
 										  }
@@ -530,21 +549,29 @@ class OCitems_Item {
 								if(in_array($predicateURI, $dcRels["contributors"])){
 									 $dcContributors[] = array("id" => $objectURI);
 								}
+								$assertedObjects[$row["objectUUID"]] = $objectURI;
+								$this->assertedObjects = $assertedObjects;
 						  }
 					 }
 				}
 				
+				
 				if(count($vars)>0){
 					 foreach($vars as $predicateURIkey => $predArray){
+						  $assertedPredicates[$predicateURIkey] = $predArray;
 						  $predicateShort = $predArray["abrev"];
 						  $JSON_LD["@context"][$predicateShort] = array("@id" => $predicateURIkey, "@type" => $predArray["type"]);
 					 }
 				}
 				if(count($links)>0){
 					 foreach($links as $predicateURIkey => $predArray){
+						  $assertedPredicates[$predicateURIkey] = $predArray;
 						  $predicateShort = $predArray["abrev"];
 						  $JSON_LD["@context"][$predicateShort] = array("@id" => $predicateURIkey, "@type" => $predArray["type"]);
 					 }
+				}
+				if(count($assertedPredicates)>0){
+					 $this->assertedPredicates = $assertedPredicates;
 				}
 				
 				if(count($obsArray)>0){
@@ -662,7 +689,7 @@ class OCitems_Item {
 	 
 	 
     
-	 
+	 //adds GeoJSON organized geospatial data
 	 function addGeoJSON($JSON_LD){
 		  
 		  if(is_array($this->geospace)){
@@ -704,6 +731,7 @@ class OCitems_Item {
 					 $itemGeoFeature["geometry"]["id"] = "#geo-geometry";
 					 
 					 $itemGeoProperties = array();
+					 $itemGeoProperties["id"] = "#geoJSON-properties";
 					 if($geoSpace["uuid"] != $this->uuid){
 						  $itemGeoProperties["oc-gen:geoReferenceType"] = "inferred";
 						  $sRes = $uriObj->lookupOCitem($geoSpace["uuid"], "subject");
@@ -734,6 +762,52 @@ class OCitems_Item {
 	 }
 	 
 	 
+	 //adds simple annotations to the data
+	 function addSimpleAnnotationsJSON($JSON_LD){
+		  
+		  $ocGenObj = new OCitems_General;
+		  $linkAnnotObj = new Links_linkAnnotation;
+		  $linkAnnotObj->lookUpLabels = false; //don't look up the labels to linked entities
+		  
+		  $this->annotationEntities = array();
+		  if(is_array($this->assertedPredicates)){
+				foreach($this->assertedPredicates as $assertedPredicateURI => $predArray){
+					 $predicateAbrev = $predArray["abrev"];
+					 $uuid = $predArray["uuid"];
+					 $actAnnotations = $linkAnnotObj->getAnnotationsByUUID($uuid);
+					 if(is_array($actAnnotations)){
+						  
+						  $graphAnnotations = array("@id" => $assertedPredicateURI);
+						  foreach($actAnnotations as $actAnno){
+								$predicate = $ocGenObj->abbreviateURI($actAnno["predicateURI"], $this->standardNamespaces);
+								$object =  $ocGenObj->abbreviateURI($actAnno["objectURI"], $this->standardNamespaces);
+								$graphAnnotations[$predicate] = array("@id" => $object); //add the annotation to the predicate
+						  }
+						  
+						  $JSON_LD["@graph"][] = $graphAnnotations;
+					 }
+				}
+		  }
+		  
+		  if(is_array($this->assertedObjects)){
+				foreach($this->assertedObjects as $uuid => $uri){
+					 $actAnnotations = $linkAnnotObj->getAnnotationsByUUID($uuid);
+					 if(is_array($actAnnotations)){
+						  $graphAnnotations = array("@id" =>  $uri);
+						  foreach($actAnnotations as $actAnno){
+								$predicate = $ocGenObj->abbreviateURI($actAnno["predicateURI"], $this->standardNamespaces);
+								$object =  $ocGenObj->abbreviateURI($actAnno["objectURI"], $this->standardNamespaces);
+								$graphAnnotations[$predicate] = array("@id" => $object); //add the annotation to the predicate
+						  }
+						  
+						  $JSON_LD["@graph"][] = $graphAnnotations;
+					 }
+				}
+		  }
+		  
+		  return $JSON_LD;
+	 }
+	 	 
 	 function security_check($input){
         $badArray = array("DROP", "SELECT", "#", "--", "DELETE", "INSERT", "UPDATE", "ALTER", "=");
         foreach($badArray as $bad_word){

@@ -22,6 +22,8 @@ class Links_linkAnnotation {
 	 public $creatorUUID; // itentifier of a person responsible for making the annotation
 	 public $updated;
 	 
+	 public $lookUpLabels = true; //look up the labels to the linked entities
+	 
 	 const SKOScloseMatch = "http://www.w3.org/2004/02/skos/core#closeMatch";
 	 const DCtermsCreator = "http://purl.org/dc/terms/creator";
 	 const DCtermsContributor = "http://purl.org/dc/terms/contributor";
@@ -111,20 +113,22 @@ class Links_linkAnnotation {
 				$uriObj = new infoURI;
             foreach($result as $row){
 					 $actRecord = $row;
-					 $actRecord["subjectLabel"] = false;
-					 $actRecord["predicateLabel"] = false;
-					 $actRecord["objectLabel"] = false;
-					 $sRes = $uriObj->lookupOCitem($uuid, $row["subjectType"]);
-					 if(is_array($sRes)){
-						  $actRecord["subjectLabel"] = $sRes["label"];
-					 }
-					 $pRes = $uriObj->lookupURI($row["predicateURI"]);
-					 if(is_array($pRes)){
-						  $actRecord["predicateLabel"] = $pRes["label"];
-					 }
-					 $pRes = $uriObj->lookupURI($row["objectURI"]);
-					 if(is_array($pRes)){
-						  $actRecord["objectLabel"] = $pRes["label"];
+					 if($this->lookUpLabels){
+						  $actRecord["subjectLabel"] = false;
+						  $actRecord["predicateLabel"] = false;
+						  $actRecord["objectLabel"] = false;
+						  $sRes = $uriObj->lookupOCitem($uuid, $row["subjectType"]);
+						  if(is_array($sRes)){
+								$actRecord["subjectLabel"] = $sRes["label"];
+						  }
+						  $pRes = $uriObj->lookupURI($row["predicateURI"]);
+						  if(is_array($pRes)){
+								$actRecord["predicateLabel"] = $pRes["label"];
+						  }
+						  $pRes = $uriObj->lookupURI($row["objectURI"]);
+						  if(is_array($pRes)){
+								$actRecord["objectLabel"] = $pRes["label"];
+						  }
 					 }
 					 $output[] = $actRecord; 
 				}
