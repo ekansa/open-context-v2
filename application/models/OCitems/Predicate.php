@@ -33,6 +33,8 @@ class OCitems_Predicate {
    
     const itemType = "predicate"; //Open Context itemtype
    
+	 
+	
    
     //get data from database
     function getByUUID($uuid){
@@ -107,6 +109,21 @@ class OCitems_Predicate {
 	 }
 	 
 	 
+	 function updatePredicateDataType($uuid, $newDataType){
+		  $db = $this->startDB();
+		  $success = false;
+		  
+		  if($this->validateDataType($newDataType)){
+				$where = "uuid = '$uuid' ";
+				$data = array("dataType" => $newDataType);
+				$db->update("oc_predicates", $data, $where);
+				$success = true;
+		  }
+		  
+		  return $success;
+	 }
+	 
+	 
 	 
 	 //adds an item to the database
 	 function createRecord($data = false){
@@ -131,14 +148,37 @@ class OCitems_Predicate {
 				}
 		  }
 		  
-		  try{
-				$db->insert("oc_predicates", $data);
-				$success = true;
-		  } catch (Exception $e) {
-				$success = false;
+		  if($this->validateDataType($data["dataType"])){
+				try{
+					 $db->insert("oc_predicates", $data);
+					 $success = true;
+				} catch (Exception $e) {
+					 $success = false;
+				}
 		  }
+		  
 		  return $success;
 	 }
+	 
+	 
+	 
+	 //validate a data type
+	 function validateDataType($dataType){
+		  
+		  $ocGenObj = new OCitems_General;
+		  $dataTypes = $ocGenObj->getDataTypes();
+		  
+		  if(in_array($dataType, $dataTypes)){
+				$valid = true;
+		  }
+		  else{
+				$valid = false;
+		  }
+		  
+		  return $valid;
+	 }
+	 
+	 
 	 
 	 
     function security_check($input){

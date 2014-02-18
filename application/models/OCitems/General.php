@@ -43,10 +43,29 @@ class OCitems_General {
 																	 "type" => "variable",
 																	 "xsd:integer" => "variable",
 																	 "xsd:decimal" => "variable",
+																	 "xsd:double" => "variable",
 																	 "xsd:boolean" => "variable",
 																	 "xsd:date" => "variable",
 																	 "xsd:string" => "variable"
 																	 );
+	 
+	 //dataTypes for Predicates
+	 const stringLiteral = "xsd:string"; 
+	 const integerLiteral = "xsd:integer"; //numeric
+	 const decimalLiteral = "xsd:double"; //numeric
+	 const booleanLiteral = "xsd:boolean"; //numeric
+	 const dateLiteral = "xsd:date";
+	 const typeObject = "type";
+	 
+	 //itemTypes for Assertions
+	 const subjectType = "subject";
+	 const mediaType = "media";
+	 const personType = "person";
+	 const documentType = "document";
+	 const projectType = "project";
+	 const tableType = "table";
+	 const vocabularyType = "vocabulary";
+	 
 	 
 	 public $errors;
 	 
@@ -357,6 +376,65 @@ class OCitems_General {
 				$outputArray["elapsedTime"] = $this->endTime - $this->startTime;
 		  }
 		  return $outputArray;
+	 }
+	 
+	 
+	
+	 function getStringDataType(){
+		  return self::stringLiteral;
+	 }
+	 
+	 function getBooleanDataType(){
+		  return self::booleanLiteral;
+	 }
+	 
+	 function getIntegerDataType(){
+		  return self::integerLiteral;
+	 }
+	 
+	 function getDoubleDataType(){
+		  return self::decimalLiteral;
+	 }
+	 
+	 function getDecimalDataType(){
+		  return self::decimalLiteral;
+	 }
+	 
+	 function getDateDataType(){
+		  return self::dateLiteral;
+	 }
+	 
+	 function getTypeDataType(){
+		  return self::typeObject;
+	 }
+	 
+	 
+	 //gets all datatypes
+	 function getDataTypes(){
+		 
+		  $typeArray = array(self::stringLiteral,
+									self::booleanLiteral,
+									self::integerLiteral,
+									self::decimalLiteral,
+									self::dateLiteral,
+									self::typeObject);
+		  
+		  return $typeArray;
+	 }
+	 
+	 //gets all item types
+	 function getItemTypes(){
+		 
+		  $typeArray = array(self::subjectType,
+									self::mediaType,
+									self::documentType,
+									self::personType,
+									self::projectType,
+									self::tableType,
+									self::vocabularyType,
+									self::typeObject);
+		  
+		  return $typeArray;
 	 }
 	 
     

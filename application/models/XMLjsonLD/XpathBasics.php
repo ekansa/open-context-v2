@@ -21,7 +21,7 @@ class XMLjsonLD_XpathBasics  {
 	 const projectBaseURI = "http://opencontext.org/projects/";
 	 
 	 const integerLiteral = "xsd:integer";
-	 const decimalLiteral = "xsd:decimal";
+	 const decimalLiteral = "xsd:double";
 	 const booleanLiteral = "xsd:boolean";
 	 const dateLiteral = "xsd:date";
 	 const stringLiteral = "xsd:string";

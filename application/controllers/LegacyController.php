@@ -261,7 +261,7 @@ class LegacyController extends Zend_Controller_Action
 	 
 	 
 	 
-	  public function legacyGeoAction(){
+	 public function legacyGeoAction(){
 		  
 		  $this->_helper->viewRenderer->setNoRender();
 		  
@@ -298,5 +298,24 @@ class LegacyController extends Zend_Controller_Action
 		  echo $genObj->JSONoutputString($output);
 	 }
    
+	
+	 public function legacyPropsAction(){
+		  
+		  $this->_helper->viewRenderer->setNoRender();
+		  
+		  Zend_Loader::loadClass('XMLjsonLD_LegacyProps');
+		  Zend_Loader::loadClass('OCitems_LegacyIDs');
+		  
+		  Zend_Loader::loadClass('OCitems_General');
+		  Zend_Loader::loadClass('infoURI');
+		  
+		  $legacyPropsObj = new XMLjsonLD_LegacyProps;
+		  $legacyPropsObj->baseURL = "http://opencontext/properties/";
+		  $output =  $legacyPropsObj->convertLongProps();
+		  header('Content-Type: application/json; charset=utf8');
+		  $genObj = new OCitems_General;
+		  echo $genObj->JSONoutputString($output);
+	 }
+	
 }
 

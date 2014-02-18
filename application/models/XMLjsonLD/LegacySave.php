@@ -24,7 +24,7 @@ class XMLjsonLD_LegacySave  {
 	 
 	 const stringLiteral = "xsd:string"; 
 	 const integerLiteral = "xsd:integer"; //numeric
-	 const decimalLiteral = "xsd:decimal"; //numeric
+	 const decimalLiteral = "xsd:double"; //numeric
 	 const booleanLiteral = "xsd:boolean"; //numeric
 	 const dateLiteral = "xsd:date";
 	 

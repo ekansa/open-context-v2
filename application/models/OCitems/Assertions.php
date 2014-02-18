@@ -11,18 +11,32 @@ class OCitems_Assertions {
 	 
 	 const containsPredicate = "oc-gen:contains";
 	 
+	 const stringLiteral = "xsd:string"; 
+	 const integerLiteral = "xsd:integer"; //numeric
+	 const decimalLiteral = "xsd:double"; //numeric
+	 const booleanLiteral = "xsd:boolean"; //numeric
+	 const dateLiteral = "xsd:date";
+	 const typeObject = "type";
 	 
     //get data from database
-    function getByUUID($uuid){
+    function getByUUID($uuid, $visibileOnly = true){
         
         $uuid = $this->security_check($uuid);
         $output = false; //not found
         
         $db = $this->startDB();
         
+		  if($visibileOnly){
+				$visibilityCond = " AND visibility = 1 ";
+		  }
+		  else{
+				$visibilityCond = "";
+		  }
+		  
         $sql = 'SELECT *
                 FROM oc_assertions
                 WHERE uuid = "'.$uuid.'"
+					 '.$visibilityCond.' 
 					 ORDER BY sort
                 ';
 		
@@ -36,16 +50,26 @@ class OCitems_Assertions {
 	 
 	 
 	 //make an array of parent items from the database, defaults to making URIs of these
-    function getParentsByChildUUID($uuid, $recursive = true, $makeURIs = true){
+    function getParentsByChildUUID($uuid, $recursive = true, $makeURIs = true, $visibileOnly = true){
         
 		  $ocGenObj = new OCitems_General;
 		  $this->recurseCount++;
         $uuid = $this->security_check($uuid);
         $db = $this->startDB();
         
+		  if($visibileOnly){
+				$visibilityCond = " AND visibility = 1 ";
+		  }
+		  else{
+				$visibilityCond = "";
+		  }
+		  
+		  
+		  
         $sql = 'SELECT uuid AS parentUUID, subjectType, obsNode
                 FROM oc_assertions
                 WHERE objectUUID = "'.$uuid.'" AND predicateUUID = "'.self::containsPredicate.'"
+					 '.$visibilityCond.'
 					 ORDER BY sort;
                 ';
 		
@@ -112,6 +136,128 @@ class OCitems_Assertions {
 	 }
 	 
 	 
+	 //get an assertion by it's hashID
+	 function getByHashID($hashID){
+		  $output = false;
+		  $db = $this->startDB();
+		  $sql = "SELECT * FROM oc_assertions WHERE hashID = '$hashID' LIMIT 1; ";
+		  $result = $db->fetchAll($sql, 2);
+		  
+        if($result){
+				$output = $result[0];
+		  }
+		  
+		  return $output;
+	 }
+	 
+	 
+	 
+	 //get assertions that have a given Object UUID
+	 function getByObjectUUID($objectUUID, $predicateUUIDs = false){
+		  
+		  $output = false;
+		  $db = $this->startDB();
+		  
+		  $ocGenObj = new OCitems_General;
+		  $predicateClause = "";
+		  if($predicateUUIDs != false){
+				$predicateCond = $ocGenObj->makeORcondition($predicateUUIDs, "predicateUUID");
+				if($predicateCond != false){
+					 $predicateClause = " AND ($predicateCond) ";
+				}
+		  }
+		  
+		  $sql = "SELECT * FROM oc_assertions WHERE objectUUID = '$objectUUID' $predicateClause ";
+		  $result = $db->fetchAll($sql, 2);
+		  
+        if($result){
+				$output = $result;
+		  }
+		  return $output;
+	 }
+	 
+	 
+	 //get assertions that have a given Predicate UUID(s)
+	 function getByPredicateUUID($predicateUUIDs){
+		  
+		  $output = false;
+		  $db = $this->startDB();
+		  
+		  $ocGenObj = new OCitems_General;
+		  $predicateCond = $ocGenObj->makeORcondition($predicateUUIDs, "predicateUUID");
+		  
+		  $sql = "SELECT * FROM oc_assertions WHERE $predicateCond ";
+		  $result = $db->fetchAll($sql, 2);
+		  
+        if($result){
+				$output = $result;
+		  }
+		  return $output;
+	 }
+	 
+	 
+	 
+	 function updateObjectUUIDtoString($oldObjectUUID, $newObjectUUID, $predicateUUIDs = false){
+		  
+		  $ocGenObj = new OCitems_General;
+		  
+		  $output = $this->updateObjectUUID($oldObjectUUID, $newObjectUUID, $ocGenObj->getStringType(), false, false, $predicateUUIDs);
+		  return $output;
+	 }
+	 
+	 
+	 
+	 //change an object of an assertion.
+	 function updateObjectUUID($oldObjectUUID, $newObjectUUID, $newObjectType, $newDataNum = false, $newDataDate = false, $predicateUUIDs = false){
+		  $output = false;
+		  if($this->validateObjectType($newObjectType)){
+				$db = $this->startDB();
+				$output = array();
+				$output["done"] = 0;
+				$assertions = $this->getByObjectUUID($oldObjectUUID, $predicateUUIDs);
+				if(is_array($assertions)){
+					 foreach($assertions as $aOld){
+						  $oldHashID = $aOld["hashID"];
+						  $uuid = $aOld["uuid"];
+						  $obsNum = $aOld["obsNum"];
+						  $predicateUUID = $aOld["predicateUUID"];
+						  
+						  $where = "hashID = '$oldHashID' ";
+						  $newHashID = $this->makeHashID($uuid, $obsNum, $predicateUUID, $newObjectUUID, $newDataNum, $newDataDate);
+						  $data = array("hashID" => $newHashID,
+											 "objectUUID" => $newObjectUUID,
+											 "objectType" =>  $newObjectType
+											 );
+								
+						  if($newObjectType == self::decimalLiteral || $newObjectType == self::integerLiteral || $newObjectType == self::booleanLiteral){
+								$data["dataNum"] = $newDataNum;
+						  }
+						  elseif($newObjectType == self::dateLiteral){
+								$data["dataDate"] = $newDataDate;
+						  }
+						  
+						  $doUpdate = true;
+						  if($newHashID != $oldHashID){
+								if($this->getByHashID($newHashID)){
+									 $doUpdate = false;
+									 $output["errors"][] = array("oldHashID" => $oldHashID, "newHashID" => $newHashID, "note" => "new hashID already exists!");
+								}
+						  }
+						  
+						  if($doUpdate){
+								$db->update("oc_assertions", $data, $where);
+								$output["done"]++;
+						  }
+					 }
+				}
+		  }
+		  return $output;
+	 }
+	 
+	 
+	 
+	 
+	 
 	 //generate a hashID for the item
 	 function makeHashID($uuid, $obsNum, $predicateUUID, $objectUUID, $dataNum = false, $dataDate = false){
 		  return sha1($uuid." ".$obsNum." ".$predicateUUID." ".$objectUUID." ".$dataNum." ".$dataDate);
@@ -121,7 +267,7 @@ class OCitems_Assertions {
 	 
 	 //adds an item to the database
 	 function createRecord($data){
-		 
+		  
 		  $db = $this->startDB();
 		  $success = false;
 		  if(is_array($data)){
@@ -137,20 +283,72 @@ class OCitems_Assertions {
 					 }
 				}
 				
-				
-				try{
-					 $db->insert("oc_assertions", $data);
-					 $success = true;
-				} catch (Exception $e) {
-					 //echo (string)$e;
-					 //die;
-					 $success = false;
+				if($this->validateAssertionTypes($data["subjectType"], $data["objectType"])){
+					 try{
+						  $db->insert("oc_assertions", $data);
+						  $success = true;
+					 } catch (Exception $e) {
+						  //echo (string)$e;
+						  //die;
+						  $success = false;
+					 }
 				}
-				
 		  }
 		  
 		  return $success;
 	 }
+	 
+	 
+	 function validateAssertionTypes($subjectType, $objectType){
+		  $valid = false;
+		  if($this->validateSubjectType($subjectType)){
+				if($this->validateObjectType($objectType)){
+					 $valid = true;
+				}
+		  }
+		  return $valid;
+	 }
+	 
+	 
+	 
+	 
+	 //validate a subject type of an assertion
+	 function validateSubjectType($subjectType){
+		  
+		  $ocGenObj = new OCitems_General;
+		  $itemTypes = $ocGenObj->getItemTypes();
+		  if(in_array($objectType, $itemTypes)){
+				$valid = true;
+		  }
+		  else{
+				$valid = false;
+		  }
+		  
+		  return $valid;
+	 }
+	 
+	 
+	 //validate an object type
+	 function validateObjectType($objectType){
+		  
+		  $ocGenObj = new OCitems_General;
+		  $itemTypes = $ocGenObj->getItemTypes();
+		  $dataTypes = $ocGenObj->getDataTypes();
+		  
+		  if(in_array($objectType, $itemTypes)){
+				$valid = true;
+		  }
+		  elseif(in_array($objectType, $dataTypes)){
+				$valid = true;
+		  }
+		  else{
+				$valid = false;
+		  }
+		  
+		  return $valid;
+	 }
+	 
+	 
 	 
 	 
     function security_check($input){

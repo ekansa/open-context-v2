@@ -103,14 +103,34 @@ class OCitems_Manifest {
 				}
 		  }
 		  
-		  try{
-				$db->insert("oc_manifest", $data);
-				$success = true;
-		  } catch (Exception $e) {
-				$success = false;
+		  if($this->validateItemType($data["itemType"]){
+				try{
+					 $db->insert("oc_manifest", $data);
+					 $success = true;
+				} catch (Exception $e) {
+					 $success = false;
+				}
 		  }
 		  return $success;
 	 }
+	 
+	 
+	 
+	 //validate a subject type of an assertion
+	 function validateItemType($itemType){
+		  
+		  $ocGenObj = new OCitems_General;
+		  $itemTypes = $ocGenObj->getItemTypes();
+		  if(in_array($itemType, $itemTypes)){
+				$valid = true;
+		  }
+		  else{
+				$valid = false;
+		  }
+		  
+		  return $valid;
+	 }
+	 
 	 
 	 
     function security_check($input){

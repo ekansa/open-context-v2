@@ -40,6 +40,30 @@ class OCitems_LegacyIDs {
 		  }
         return $output;
     }
+	 
+	 //get data from database
+    function getByNewUUID($newUUID){
+        
+        $oldUUID = $this->security_check($newUUID);
+        $output = false; //not found
+        
+        $db = $this->startDB();
+        
+        $sql = 'SELECT *
+                FROM oc_legacyids
+                WHERE newUUID = "'.$oldUUID.'"
+                LIMIT 1';
+		
+        $result = $db->fetchAll($sql, 2);
+        if($result){
+            $output = $result[0];
+				$this->oldUUID = $result[0]["oldUUID"];
+				$this->newUUID = $result[0]["newUUID"];
+				$this->type = $result[0]["type"];
+				$this->updated = $result[0]["updated"];
+		  }
+        return $output;
+    }
     
 	 
 	 //adds an item to the database, returns true if successful
