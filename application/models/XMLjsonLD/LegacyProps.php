@@ -11,6 +11,7 @@ class XMLjsonLD_LegacyProps  {
 	 
 	 function convertLongProps(){
 		  
+		  $stringObj = new OCitems_String;
 		  $db = $this->startDB();
 		 
 		  $output = array();
@@ -18,14 +19,16 @@ class XMLjsonLD_LegacyProps  {
 		  //get old  geospatial data
 		  $sql = "SELECT * 
 		  FROM  oc_types 
-		  WHERE CHAR_LENGTH( label ) >= 100
-		  LIMIT 10; ";
+		  WHERE CHAR_LENGTH( label ) >= 199
+		  ";
 		  
 		  $result = $db->fetchAll($sql, 2);
         if($result){
 				foreach($result as $row){
 					 $uuid = $row["uuid"];
 					 $propUUID = $this->originalID($row["uuid"]);
+					 $projectUUID = $row["projectUUID"];
+					 $sourceID = $row["sourceID"];
 					 
 					 $url = $this->baseURL.$propUUID.".json";
 					 @$jsonData = file_get_contents($url);
@@ -34,16 +37,28 @@ class XMLjsonLD_LegacyProps  {
 						  if(is_array($json)){
 								
 								$where = "uuid = '$uuid' ";
-								$propValue = $json["value"];
-								if(strlen($propValue)> 100){
-									 $where = "uuid = '$uuid' ";
-									 $data = array("label" => $this->textSnippet($propValue, 75),
-														"note" => $propValue);
-									 
-									 $output[$uuid] = $data;
-									 //$db->update("oc_types", $data, $where);
+								$content = $json["value"];
+								
+								$contentUUID = false;
+								$stringExists = $stringObj->getByContent($content, $projectUUID);
+								if(is_array($stringExists)){
+									 $contentUUID = $stringExists["uuid"];
+								}
+								else{
+									 $stringData = array("projectUUID" => $projectUUID,
+																"sourceID" => $sourceID,
+																"content" => $content);
+									 $contentUUID = $stringObj->createRecord($stringData);
 								}
 								
+								if($contentUUID != false){
+									 $where = "uuid = '$uuid' ";
+									 $data = array("label" => $this->textSnippet($content),
+														"contentUUID" => $contentUUID);
+									 $db->update("oc_types", $data, $where);
+									 $output["count"]++;
+									 $output[$uuid] = $data;
+								}
 						  }
 					 }
 				}
@@ -51,6 +66,98 @@ class XMLjsonLD_LegacyProps  {
 		  
 		  return $output;
 	 }
+	 
+	 function addContentUUIDs(){
+		  
+		  $stringObj = new OCitems_String;
+		  $db = $this->startDB();
+		 
+		  $output = array();
+		  $output["count"] = 0;
+		  //get old  geospatial data
+		  $sql = "SELECT * 
+		  FROM  oc_types 
+		  WHERE contentUUID = ''
+		  ";
+		  
+		  $result = $db->fetchAll($sql, 2);
+        if($result){
+				foreach($result as $row){
+					 $uuid = $row["uuid"];
+					 $projectUUID = $row["projectUUID"];
+					 $sourceID = $row["sourceID"];
+					 
+					 $content = $row["label"];
+					 
+					 $contentUUID = false;
+					 $stringExists = $stringObj->getByContent($content, $projectUUID);
+					 if(is_array($stringExists)){
+						  $contentUUID = $stringExists["uuid"];
+					 }
+					 else{
+						  $stringData = array("projectUUID" => $projectUUID,
+													 "sourceID" => $sourceID,
+													 "content" => $content);
+						  $contentUUID = $stringObj->createRecord($stringData);
+					 }
+					 
+					 if($contentUUID != false){
+						  $where = "uuid = '$uuid' ";
+						  $data = array("contentUUID" => $contentUUID);
+						  $db->update("oc_types", $data, $where);
+						  $output["count"]++;
+						  //$output[$uuid] = $data;
+					 }
+				}
+		  }
+		  
+		  return $output;
+	 }
+	 
+	 
+	 function updateDuplicateProps(){
+		  $db = $this->startDB();
+		 
+		  $assertionsObj = new OCitems_Assertions;
+		  $output = array();
+		  
+		  $sql = "SELECT uuid, predicateUUID, contentUUID, CONCAT(predicateUUID, ' ', contentUUID) as varVal, count(uuid) as uuidCount
+					 FROM oc_types
+					 WHERE 1
+					 GROUP BY varVal
+					 ORDER BY uuidCount DESC
+					 LIMIT 15;";
+		  
+		  $result = $db->fetchAll($sql, 2);
+        if($result){
+				foreach($result as $row){
+					 $goodUUID =  $row["uuid"];
+					 $predicateUUID = $row["predicateUUID"];
+					 $contentUUID = $row["contentUUID"];
+					 
+					 $sql = "SELECT uuid FROM oc_types WHERE predicateUUID = '$predicateUUID' AND contentUUID = '$contentUUID' ;";
+					 $resultB = $db->fetchAll($sql, 2);
+					 if($resultB){
+						  foreach($result as $rowB){
+								if($rowB["uuid"] != $goodUUID){
+									 $badUUID = $rowB["uuid"];
+									 $res = $assertionsObj->updateObjectUUID($badUUID, $goodUUID);
+									 $output[$goodUUID][] = array("badUUID" => $badUUID, "update-result" => $res);
+									 
+									 if(!isset($res["errors"])){
+										  $where = "uuid = '$badUUID' ";
+										  $db->delete("oc_types", $where);
+									 }
+								}
+						  }
+					 }
+				}
+		  }
+		  
+		  return $output;
+	 }
+	 
+	 
 	 
 	 
 	 function convertLongPredicates(){

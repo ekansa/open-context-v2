@@ -983,7 +983,7 @@ class XMLjsonLD_LegacySave  {
 				$typeLabel = $actProperty["value"];
 				
 				$ocTypeObj = new OCitems_Type;
-				$existUUID = $ocTypeObj->getByLabel($predicateUUID, $typeLabel);
+				$existUUID = $ocTypeObj->getByContent($typeLabel, $predicateUUID,  $projectUUID);
 				if(!$existUUID){
 					 
 					 $data = array("uuid" => $propUUID,
@@ -992,12 +992,6 @@ class XMLjsonLD_LegacySave  {
 										"predicateUUID" => $predicateUUID,
 										"label" => $typeLabel
 										);
-					 
-					 if(strlen($typeLabel)>200){
-						  $data["label"] = substr($typeLabel, 0, 200);
-						  $data["note"] = $typeLabel;
-					 }
-					 
 					 
 					 $output = $ocTypeObj->createRecord($data);
 				

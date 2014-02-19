@@ -304,14 +304,18 @@ class LegacyController extends Zend_Controller_Action
 		  $this->_helper->viewRenderer->setNoRender();
 		  
 		  Zend_Loader::loadClass('XMLjsonLD_LegacyProps');
+		  Zend_Loader::loadClass('OCitems_String');
 		  Zend_Loader::loadClass('OCitems_LegacyIDs');
-		  
+		  Zend_Loader::loadClass('OCitems_Assertions');
 		  Zend_Loader::loadClass('OCitems_General');
 		  Zend_Loader::loadClass('infoURI');
 		  
 		  $legacyPropsObj = new XMLjsonLD_LegacyProps;
 		  $legacyPropsObj->baseURL = "http://opencontext/properties/";
-		  $output =  $legacyPropsObj->convertLongProps();
+		  $output = array();
+		  $output["long"] =  $legacyPropsObj->convertLongProps();
+		  $output["normal"] = $legacyPropsObj->addContentUUIDs();
+		  $output["duplicates"] = $legacyPropsObj->updateDuplicateProps();
 		  header('Content-Type: application/json; charset=utf8');
 		  $genObj = new OCitems_General;
 		  echo $genObj->JSONoutputString($output);

@@ -103,7 +103,7 @@ class OCitems_Manifest {
 				}
 		  }
 		  
-		  if($this->validateItemType($data["itemType"]){
+		  if($this->validateItemType($data["itemType"])){
 				try{
 					 $db->insert("oc_manifest", $data);
 					 $success = true;

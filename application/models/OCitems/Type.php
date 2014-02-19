@@ -18,7 +18,8 @@ class OCitems_Type {
 	 public $predicateUUID;
 	 public $rank; //rank of the property, useful for ordinal values
 	 public $label;
-	 public $note;
+	 public $contentUUID; //uuid of the content
+	 public $content; //string content (for long properties)
     public $updated;
 	 
 	 const itemType = "type"; //open context itemtype
@@ -32,9 +33,11 @@ class OCitems_Type {
         
         $db = $this->startDB();
         
-        $sql = 'SELECT *
-                FROM oc_types
-                WHERE uuid = "'.$uuid.'"
+        $sql = 'SELECT ot.uuid, ot.hashID, ot.projectUUID, ot.sourceID, ot.predicateUUID,
+					 ot.rank, ot.label, ot.contentUUID, os.content, ot.updated
+                FROM oc_types AS ot
+					 JOIN oc_strings AS os ON ot.contentUUID = os.uuid
+                WHERE ot.uuid = "'.$uuid.'"
                 LIMIT 1';
 		
         $result = $db->fetchAll($sql, 2);
@@ -47,7 +50,8 @@ class OCitems_Type {
 				$this->predicateUUID = $result[0]["predicateUUID"];
 				$this->rank = $result[0]["rank"];
 				$this->label = $result[0]["label"];
-				$this->note  = $result[0]["note"];
+				$this->contentUUID  = $result[0]["content"];
+				$this->content  = $result[0]["contentUUID"];
 				$this->updated = $result[0]["updated"];
 				$this->uri = $ocGenObj->generateItemURI($this->uuid, self::itemType);
 				$result[0]["itemType"] = self::itemType;
@@ -71,7 +75,7 @@ class OCitems_Type {
         if(is_array($requestParams)){
 				$label = $ocGenObj->checkExistsNonBlank("q", $requestParams);
 				if($label != false){
-					 $labelTerm = " AND (label LIKE '%".addslashes($label)."%') ";
+					 $labelTerm = " AND (ot.label LIKE '%".addslashes($label)."%') ";
 				}
 				$gAnnot = $ocGenObj->checkExistsNonBlank("getAnnotations", $requestParams);
 				if($gAnnot != false){
@@ -80,9 +84,11 @@ class OCitems_Type {
 		  }
 		  
 		  
-        $sql = 'SELECT *
-                FROM oc_types
-                WHERE predicateUUID = "'.$predicateUUID.'"
+        $sql = 'SELECT ot.uuid, ot.hashID, ot.projectUUID, ot.sourceID, ot.predicateUUID,
+					 ot.rank, ot.label, ot.contentUUID, os.content, ot.updated
+                FROM oc_types AS ot
+					 JOIN oc_strings AS os ON ot.contentUUID = os.uuid
+                WHERE ot.predicateUUID = "'.$predicateUUID.'"
 					 '.$labelTerm.'
 					 ORDER BY rank, label
 					 ';
@@ -107,23 +113,40 @@ class OCitems_Type {
 	 
 	 
 	 
-	 function makeHashID($predicateUUID, $label){
+	 function makeHashID($predicateUUID, $contentUUID){
 		  $label= trim($label);
-		  return sha1($predicateUUID." ".$label);
+		  return sha1($predicateUUID." ".$contentUUID);
 	 }
 	 
 	 
-	 function getByLabel($predicateUUID, $typeLabel){
+	 //get a type record by it's content, predicateUUID and it's project
+	 function getByContent($content, $predicateUUID, $projectUUID){
 		  
 		  $db = $this->startDB();
-		  
-		  $hashID = $this->makeHashID($predicateUUID, $typeLabel);
 		  $output = false;
-		  $sql = "SELECT * FROM oc_types WHERE hashID = '$hashID' LIMIT 1; ";
+		  $contentUUID = $this->getContentStringUUID($content, $projectUUID);
+		  if( $contentUUID != false){
+				$output = $this->getByPredicateContentUUIDs($predicateUUID, $contentUUID);
+		  }
+        return $output;
+	 }
+	 
+	 
+	 //get a type record by it's predicate and it's content UUIDs
+	 function getByPredicateContentUUIDs($predicateUUID, $contentUUID){
+		  $output = false;
+		  
+		  $hashID = $this->makeHashID($predicateUUID, $contentUUID);
+			  
+		  $sql = "SELECT ot.uuid, ot.hashID, ot.projectUUID, ot.sourceID, ot.predicateUUID,
+				ot.rank, ot.label, ot.contentUUID, os.content, ot.updated
+				FROM oc_types AS ot
+				JOIN oc_strings AS os ON ot.contentUUID = os.uuid
+				WHERE ot.hashID = '$hashID' LIMIT 1; ";
 		  
 		  $result = $db->fetchAll($sql, 2);
-        if($result){
-            $output = $result[0];
+		  if($result){
+				
 				$this->uuid = $result[0]["uuid"];
 				$this->hashID = $result[0]["hashID"];
 				$this->projectUUID = $result[0]["projectUUID"];
@@ -131,11 +154,38 @@ class OCitems_Type {
 				$this->predicateUUID = $result[0]["predicateUUID"];
 				$this->rank = $result[0]["rank"];
 				$this->label = $result[0]["label"];
-				$this->note  = $result[0]["note"];
+				$this->contentUUID = $result[0]["contentUUID"];
+				$this->content  = $result[0]["content"];
 				$this->updated = $result[0]["updated"];
-				//$this->getItemData($uuid);
+				
+				$output = $result[0];
 		  }
-        return $output;
+		  
+		  return $output;
+	 }
+	 
+	 
+	 function getContentStringUUID($content, $projectUUID){
+		  $output = false;
+		  $stringObj = new OCitems_String;
+		  $stringExists = $stringObj->getByContent($content, $projectUUID);
+		  if(is_array($stringExists)){
+				$output = $stringExists["uuid"];
+		  }
+		  return $output;
+	 }
+	 
+	 function getMakeContentStringUUID($content, $projectUUID, $sourceID){
+		  $contentUUID = $this->getContentStringUUID($content, $projectUUID);
+		  if(!$contentUUID){
+				$stringObj = new OCitems_String;
+				$stringData = array(		"projectUUID" => $projectUUID,
+												"sourceID" => $sourceID,
+												"content" => $content);
+				
+				$contentUUID = $stringObj->createRecord($stringData);
+		  }
+		  return $contentUUID;
 	 }
 	 
 	 
@@ -154,7 +204,7 @@ class OCitems_Type {
 								  "predicateUUID" => $this->predicateUUID,
 								  "rank" => $this->rank,
 								  "label" => $this->label,
-								  "note" => $this->note
+								  "contentUUID" => $this->contentUUID
 								  );	
 		  }
 		  else{
@@ -168,7 +218,17 @@ class OCitems_Type {
 				$data["uuid"] = $ocGenObj->generateUUID();
 		  }
 		  
-		  $data["hashID"] = $this->makeHashID($data["predicateUUID"], $data["label"]);
+		  if(!isset($data["contentUUID"])){
+				$data["contentUUID"] = false;
+		  }
+		  if($data["contentUUID"]){
+				$data["contentUUID"] = $this->getMakeContentStringUUID($data["label"], $data["projectUUID"], $data["sourceID"]);
+		  }
+		  if(strlen($data["label"]>=199)){
+				$data["label"] = $this->textSnippet($data["label"]);
+		  }
+		  
+		  $data["hashID"] = $this->makeHashID($data["predicateUUID"], $data["contentUUID"]);
 	 
 		  foreach($data as $key => $value){
 				if(is_array($value)){
@@ -185,6 +245,42 @@ class OCitems_Type {
 		  }
 		  return $success;
 	 }
+	 
+	 
+	 
+	 function textSnippet($text, $maxLength = 110, $suffix = "..."){
+		  $actLen = $maxLength;
+		  $snippetDone = false;
+		  while(!$snippetDone){
+				$snippet = substr($text, 0, $actLen);
+				$lastChar = substr($snippet, -1);
+				if($lastChar == " " || $lastChar == "." || $lastChar == "," || $lastChar == ":" || $lastChar == ";"){
+					 $snippet = substr($text, 0, $actLen - 1);
+					 $snippet .= $suffix;
+					 $snippetDone = true;
+					 break;
+				}
+				else{
+					 $actLen = $actLen - 1;
+				}
+		  }
+		  
+		  return $snippet;
+	 }
+	 
+
+	 function updateHashIDs(){
+		  
+		  //a maintenance query to keep hashIDs in synch with the content
+		  $db = $this->startDB();
+		  
+		  $sql = 'UPDATE oc_types 
+					 SET hashID = SHA1(CONCAT(predicateUUID, " ", contentUUID))
+					 WHERE 1;';
+		  
+		  $db->query($sql);
+	 }
+	 
 	 
 	 
     function security_check($input){

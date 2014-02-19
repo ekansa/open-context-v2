@@ -208,9 +208,15 @@ class OCitems_Assertions {
 	 
 	 
 	 //change an object of an assertion.
-	 function updateObjectUUID($oldObjectUUID, $newObjectUUID, $newObjectType, $newDataNum = false, $newDataDate = false, $predicateUUIDs = false){
+	 function updateObjectUUID($oldObjectUUID, $newObjectUUID, $newObjectType = false, $newDataNum = false, $newDataDate = false, $predicateUUIDs = false){
 		  $output = false;
-		  if($this->validateObjectType($newObjectType)){
+		  
+		  $doUpdate = true;
+		  if($newObjectType != false){
+				$doUpdate = $this->validateObjectType($newObjectType);
+		  }
+		  
+		  if($doUpdate){
 				$db = $this->startDB();
 				$output = array();
 				$output["done"] = 0;
@@ -221,6 +227,9 @@ class OCitems_Assertions {
 						  $uuid = $aOld["uuid"];
 						  $obsNum = $aOld["obsNum"];
 						  $predicateUUID = $aOld["predicateUUID"];
+						  if(!$newObjectType){
+								$newObjectType = $aOld["objectType"]; // don't change the object type
+						  }
 						  
 						  $where = "hashID = '$oldHashID' ";
 						  $newHashID = $this->makeHashID($uuid, $obsNum, $predicateUUID, $newObjectUUID, $newDataNum, $newDataDate);

@@ -36,46 +36,12 @@ class Edit_Types  {
 					 $projectUUID = $row["projectUUID"];
 					 $sourceID = $row["sourceID"];
 					 $label = $row["label"];
-					 $note = $row["note"];
-					 if(strlen($note) < 1){
-						  $note = $label;
-					 }
-					 if($useTypeNoteAsString){
-						  $content = $note;
-					 }
-					 else{
-						  $content = $label;
-					 }
+					 $contentUUID = $row["contentUUID"];
 					 
-					 $stringUUID = false;
-					 $stringExists = $stringObj->getByContent($content, $projectUUID);
-					 if(is_array($stringExists)){
-						  $stringUUID = $stringExists["uuid"];
-						  //string already exists in the string table.
-						  
-					 }
-					 else{
-						  //string does not exist in the string table, add it
-						  
-						  $stringData = array("uuid" => $uuid,
-													 "projectUUID" => $projectUUID,
-													 "sourceID" => $sourceID,
-													 "content" => $content
-													 );
-						  $stringOK = $stringObj->createRecord($stringData);
-						  if($stringOK != false){
-								$stringUUID = $uuid;
-						  }
-					 }
-					 
-					 if($stringUUID != false){
+					 if($contentUUID != false){
 						  //now update the assertions to point to indicate that the objects of assertions are strings
-						  $assertionChange = $assertionsObj->updateObjectUUIDtoString($uuid, $stringUUID, $predicateUUID);
-						  if(!isset($assertionChange["errors"])){
-								$output["typesChanged"]++;
-								$ocTypeObj->deleteByUUID($uuid);
-						  }
-						  else{
+						  $assertionChange = $assertionsObj->updateObjectUUIDtoString($uuid, $contentUUID, $predicateUUID);
+						  if(isset($assertionChange["errors"])){
 								$output["errors"][] = array("typeUUID" => $uuid, "error" => $assertionChange);
 						  }
 					 }
@@ -110,32 +76,42 @@ class Edit_Types  {
 		  $assertions = $assertionsObj->getByPredicateUUID($predicateUUID);
 		  if(is_array($assertions)){
 				foreach($assertions as $row){
-					 $uuid = $row["uuid"];
+					 $contentUUID
 					 $projectUUID = $row["projectUUID"];
 					 $sourceID = $row["sourceID"];
-					 $stringUUID = $row["objectUUID"];
+					 $contentUUID = $row["objectUUID"];
 					 $objectType = $row["objectType"];
 					 
-					 $content = false;
-					 
-					 $stringExists = $stringObj->getByUUID($stringUUID);
-					 if(is_array($stringExists)){
-						  $content = $stringExists["content"];
+					 $typeUUID = false;
+					 $typeRes = $ocTypeObj->getByPredicateContentUUIDs($predicateUUID, $contentUUID);
+					 if(is_array($typeRes)){
+						  $typeUUID = $typeRes["uuid"];
 					 }
-					 
-					 if( $content != false){
-						  
-						  $note = false;
-						  if(strlen($content)<100){
-								$label = $content;
+					 else{
+						  $content = false;
+						  $stringExists = $stringObj->getByUUID($contentUUID);
+						  if(is_array($stringExists)){
+								$content = $stringExists["content"];
+								
+								$typeData = array("projectUUID" => $projectUUID,
+														"sourceID" => $sourceID,
+														"predicateUUID" => $predicateUUID,
+														"rank" => false,
+														"label" => $content,
+														"contentUUID" => $contentUUID
+														)
+								
+								$typeUUID = $ocTypeObj->createRecord($typeData);
 						  }
 						  else{
-								$label = $this->textSnippet($content);
+								$output["errors"][] = array("objectUUID" => $contentUUID, "error" => "Can't find content");
 						  }
-						  
+					 }
+					 
+					 if($typeUUID != false){
 						  
 						  //now update the assertions to point to indicate that the objects of assertions are strings
-						  $assertionChange = $assertionsObj->updateObjectUUIDtoString($uuid, $stringUUID, $predicateUUID);
+						  $assertionChange = $assertionsObj->updateObjectUUID($contentUUID, $typeUUID, self::typeObject);
 						  if(!isset($assertionChange["errors"])){
 								$output["typesChanged"]++;
 								$ocTypeObj->deleteByUUID($uuid);
