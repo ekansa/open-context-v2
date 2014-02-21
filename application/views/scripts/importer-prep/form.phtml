@@ -1,0 +1,83 @@
+<?php
+
+$genObj = new OCitems_General;
+$uriObj = new infoURI;
+
+
+$projectUUID = $this->projectUUID; 
+$sourceID = $this->sourceID;
+
+
+?>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Importer: Set Field Relationships</title>
+        <link href="../../bootstrap/css/bootstrap.css"  rel="stylesheet" type="text/css" />
+        <link href="../../bootstrap/css/bootstrap-theme.css"  rel="stylesheet" type="text/css" />
+		  
+		  <!-- general javascript -->
+		  <script src="../../js/general/jquery.js" type="text/javascript" ></script>
+		  <script src="../../js/general/json2.js" type="text/javascript" ></script>
+        <script src="../../js/general/utils.js" type="text/javascript" ></script>
+        <script src="../../js/general/prototype.js" type="text/javascript" ></script>
+		  <!-- end of general javascript -->
+		  <!--
+		 http://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js
+		 -->
+		  <script src="../../bootstrap/js/bootstrap.min.js" type="text/javascript" ></script>
+		  <script src="../../js/editorial/annotations.js" type="text/javascript" ></script>
+		  
+    </head>
+    <body id="docBody">
+		  <div class="container-fluid" style="padding: 0 15px;">
+				<div class="row">
+					 <div class="col-md-4">
+						  <h1>Field Linking</h1>
+					 </div>
+					 <div class="col-md-4">
+						  <h3><?php echo $this->uploadTabObj->label; ?></h3>
+					 </div>
+					 <div class="col-md-4">
+						  <h3><?php echo  $this->sourceID; ?></h3>
+					 </div>
+				</div>
+				<div class="row">
+					 <div class="col-md-8">
+						  <h3>Add Parent / Child Relationship</h3>
+						  <form action="../../importer-prep/add-field-containment" method="post">
+								<input type="hidden" name="sourceID" value="<?php echo $this->sourceID; ?>" />
+								<input type="hidden" name="projectUUID" value="<?php echo $this->projectUUID; ?>" />
+								<input type="hidden" name="json" value="1" />
+								<input type="text" name="subjectField" value="" />
+								<input type="text" name="objectField" value="" />
+								<button type="submit">Submit</button>
+						  </form>
+						  
+					 </div>
+					 <div class="col-md-4">
+					 
+					 </div>
+					 
+				</div>
+				<div class="row">
+					 <div class="col-md-8">
+						  <h3>Process Containment</h3>
+						  <form action="../../importer-prep/process-containment" method="post">
+								<input type="hidden" name="sourceID" value="<?php echo $this->sourceID; ?>" />
+								<input type="hidden" name="projectUUID" value="<?php echo $this->projectUUID; ?>" />
+								<input type="hidden" name="json" value="1" />
+								<input type="text" name="startID" value="" />
+								<button type="submit">Submit</button>
+						  </form>
+						  
+					 </div>
+					 <div class="col-md-4">
+					 
+					 </div>
+					 
+				</div>
+		  </div>
+	 </body>    
+</html>
