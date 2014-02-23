@@ -219,7 +219,7 @@ function processEntityToDoList(){
 
 //gets entities on a URI
 function getEntity(uri){
-    var rURI = "../../edit/get-entity";
+    var rURI = "../../edit-annotations/get-entity";
     var myAjax = new Ajax.Request(rURI,
         {   method: 'get',
             parameters:
@@ -274,7 +274,7 @@ function searchEntities(){
         var vocab = selectedVocabs;
         selectedVocabs = false;
     }
-    var rURI = "../../edit/search-entities";
+    var rURI = "../../edit-annotations/search-entities";
     var myAjax = new Ajax.Request(rURI,
         {   method: 'get',
             parameters:
@@ -370,7 +370,7 @@ function addEntity(){
     
     var entityType = getCheckedRadio("newEntityType");
     
-    var rURI = "../../edit/add-entity";
+    var rURI = "../../edit-annotations/add-entity";
    
     var myAjax = new Ajax.Request(rURI,
         {   method: 'post',
@@ -433,7 +433,7 @@ function predicateTypes(){
     var searchTerm = searchTermDom.value;
     var predicateUUIDdom = document.getElementById("search-type-predicateUUID");
     var predicateUUID = predicateUUIDdom.value
-    var rURI = "../../edit/predicate-types";
+    var rURI = "../../edit-annotations/predicate-types";
     var myAjax = new Ajax.Request(rURI,
         {   method: 'get',
             parameters:
@@ -578,7 +578,7 @@ function processSubmitAnnotationToDoList(){
 
 //submit a post request to create a new annotation
 function postItemAnnotation(uuid, subjectType, projectUUID, sourceID, predicateURI, objectURI){
-    var rURI = "../../edit/add-annotation";
+    var rURI = "../../edit-annotations/add-annotation";
     var myAjax = new Ajax.Request(rURI,
         {   method: 'post',
             parameters:
@@ -621,7 +621,7 @@ function postItemAnnotationDone(response){
 
 //submit a post request to delete an annotation
 function deleteAnnotation(uuid, hashID){
-    var rURI = "../../edit/delete-annotation";
+    var rURI = "../../edit-annotations/delete-annotation";
     var myAjax = new Ajax.Request(rURI,
         {   method: 'post',
             parameters:

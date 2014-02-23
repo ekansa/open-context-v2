@@ -6,7 +6,7 @@ ini_set("memory_limit", "1024M");
 // set maximum execution time to no limit
 ini_set("max_execution_time", "0");
 
-class EditController extends Zend_Controller_Action
+class EditAnnotationsController extends Zend_Controller_Action
 {
     function init(){
 		  Zend_Loader::loadClass('XMLjsonLD_Item');

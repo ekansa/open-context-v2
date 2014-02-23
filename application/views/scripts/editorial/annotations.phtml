@@ -104,7 +104,7 @@ if(is_array($result) && !$subjectLabel){
 									 <?php
 									 if(is_array($result)){
 										  foreach($result as $row){
-												echo "<form action=\"../edit/delete-annotation\" method=\"post\" >";
+												echo "<form action=\"../../edit-annotations/delete-annotation\" method=\"post\" >";
 												echo "<input type=\"hidden\" name=\"uuid\" value=\"".$this->uuid."\" />";
 												echo "<input type=\"hidden\" name=\"hashID\" value=\"".$row["hashID"]."\" />";
 												echo "<tr id=\"".$row["hashID"]."\">".chr(13);
@@ -120,7 +120,7 @@ if(is_array($result) && !$subjectLabel){
 										  }
 									 }
 									 ?>
-									 <form action="../edit/add-annotation" method="post" >
+									 <form action="../../edit-annotations/add-annotation" method="post" >
 										  <input type="hidden" name="uuid" value="<?php echo $this->uuid; ?>" id="<?php echo "act-uuid-".$this->uuid; ?>" />
 										  <input type="hidden" name="subjectType" value="<?php echo $subjectType; ?>" id="<?php echo "act-st-".$this->uuid; ?>" />
 										  <input type="hidden" name="projectUUID" value="<?php echo (string)$projectUUID; ?>" id="<?php echo "act-proj-".$this->uuid; ?>" />
