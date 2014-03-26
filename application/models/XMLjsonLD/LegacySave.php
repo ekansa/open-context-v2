@@ -141,10 +141,12 @@ class XMLjsonLD_LegacySave  {
 	 function toDoList($type){
 		  $db = $this->startDB();
 		  
-		  $sql = "SELECT * FROM oc_todo WHERE type = '$type' AND done = 0; ";
-		  
+		  $sql = "SELECT * FROM oc_todo WHERE type = '$type' AND done = 0 LIMIT 0,2 ; ";
+		  //echo $sql;
+		  //die;
 		  $result = $db->fetchAll($sql, 2);
         if($result){
+				$errorCount = 0;
 				foreach($result as $row){
 					 $itemUUID = $row["uuid"];
 					 $currentDone = $this->doneURIs;
@@ -167,6 +169,14 @@ class XMLjsonLD_LegacySave  {
 						  $data = array("done" => 1);
 						  $where = "uuid = '$itemUUID' ";
 						  $db->update("oc_todo", $data, $where);
+					 }
+					 elseif(is_array($this->errors)){
+						  if(count($this->errors) > $errorCount){
+								$data = array("done" => -1);
+								$where = "uuid = '$itemUUID' ";
+								$db->update("oc_todo", $data, $where);
+								$errorCount = count($this->errors);
+						  }
 					 }
 				}
 		  }
@@ -202,7 +212,7 @@ class XMLjsonLD_LegacySave  {
 				@$xmlString = file_get_contents($itemURL);
 				if($xmlString != false){
 					 
-					 
+					 /*
 					 $xmlString = str_replace('<?xml version="1.0"?>', '<?xml version="1.0" encoding="UTF-8" ?>', $xmlString);
 					 
 					 $xmlString = tidy_repair_string($xmlString,
@@ -211,11 +221,12 @@ class XMLjsonLD_LegacySave  {
 												'input-xml' => true,
 												'output-xml' => true 
 										  ));
+					 */
+					 @$itemXML = simplexml_load_string($xmlString);
 					 
-					 $itemXML = simplexml_load_string($xmlString);
-					 /*
+					 
 					 if(!$itemXML){
-						  echo "here";
+						 // echo "here";
 						  $xmlString = tidy_repair_string($xmlString,
 										  array( 
 												'doctype' => "omit",
@@ -225,23 +236,28 @@ class XMLjsonLD_LegacySave  {
 						  
 						  @$itemXML = simplexml_load_string($xmlString);
 						  if(!$itemXML){
-								echo "bad XML ";
-								echo $xmlString ;
-								die;
+								//echo "bad XML ".$itemURL;
+								//echo $xmlString ;
+								//die;
 						  }
 						  
 					 }
-					 */
 					 
 					 if($itemXML != false){
+						  
 						  $jsonLDObj = new XMLjsonLD_Item;
 						  $xpathsObj = new XMLjsonLD_XpathBasics;
 						  $jsonLDObj = $xpathsObj->URIconvert($itemURL , $jsonLDObj);
 						  $jsonLDObj->uri = $itemURL;
 						  $jsonLDObj->uri = $jsonLDObj->validateURI($jsonLDObj->uri);
+		  
 						  $this->assertionSort = 1;
+						  
+						  die;
 						  $this->saveContainmentData($jsonLDObj);
 						  $this->saveObservationData($jsonLDObj);
+						 
+						  
 						 
 						  if($this->changedUUIDs){
 								//UUIDs changed (removed redundant information), parse XML again with updated UUIDs
@@ -352,7 +368,8 @@ class XMLjsonLD_LegacySave  {
 						  $this->assertionSort = 1;
 						  $this->saveContainmentData($jsonLDObj);
 						  $this->saveObservationData($jsonLDObj);
-						 
+						  echo "here";
+						  die;
 						  if($this->changedUUIDs){
 								//UUIDs changed (removed redundant information), parse XML again with updated UUIDs
 								$this->changedUUIDs = false;
@@ -1032,7 +1049,7 @@ class XMLjsonLD_LegacySave  {
 				$data["obsNode"]= $obsNode;
 				$data["obsNum"]= $obsNumKey;
 				$data["sort"]= $this->assertionSort;
-				$data["visibility"]= 0;
+				$data["visibility"]= 1;
 				$data["predicateUUID"] = $this->makeUUIDfromURI($varURI);
 				$data["objectUUID"] = false;
 				$data["dataNum"] = false;
@@ -1086,7 +1103,7 @@ class XMLjsonLD_LegacySave  {
 				$data["obsNode"]= $obsNode;
 				$data["obsNum"]= $obsNumKey;
 				$data["sort"]= $this->assertionSort;
-				$data["visibility"]= 0;
+				$data["visibility"]= 1;
 				$data["predicateUUID"] = self::notePredicateUUID;
 				$data["objectUUID"] = $stringUUID;
 				$data["objectType"] = self::stringLiteral;
@@ -1116,7 +1133,7 @@ class XMLjsonLD_LegacySave  {
 				$data["obsNode"]= $obsNode;
 				$data["obsNum"]= $obsNumKey;
 				$data["sort"]= $this->assertionSort;
-				$data["visibility"]= 0;
+				$data["visibility"]= 1;
 				$data["predicateUUID"] = $this->makeUUIDfromURI($predicateURI);
 				$data["objectUUID"] = $this->makeUUIDfromURI($objectURI);
 				$data["objectType"] = $this->makeTypeFromURI($objectURI);

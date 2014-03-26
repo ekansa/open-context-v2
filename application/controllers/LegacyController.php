@@ -171,7 +171,7 @@ class LegacyController extends Zend_Controller_Action
 				$legacySaveObj->maxLimit = true;
 		  }
 		  
-		  $listURL = "http://opencontext/sets/.json?recs=100";
+		  $listURL = "http://opencontext/sets/.json?proj=Bade+Museum||Missouri+Site+Files||South+Carolina+SHPO&recs=100";
 		  $legacySaveObj->retrieveBaseSubjectURI = "http://opencontext/subjects/";
 		  $legacySaveObj->JSONlist($listURL);
 		  $output = array("done" => $legacySaveObj->doneURIs, "errors" => $legacySaveObj->errors);
@@ -253,7 +253,7 @@ class LegacyController extends Zend_Controller_Action
 		  $legacySaveObj->retrieveBasePersonURI = "http://opencontext.org/persons/";
 		  $legacySaveObj->retrieveBaseProjectURI = "http://opencontext.org/projects/";
 		  
-		  $legacySaveObj->toDoList("project");
+		  $legacySaveObj->toDoList("subject");
 		  $output = array("done" => $legacySaveObj->doneURIs, "existing" => $legacySaveObj->existingURIs, "errors" => $legacySaveObj->errors);
 		  header('Content-Type: application/json; charset=utf8');
 		  echo json_encode($output,  JSON_PRETTY_PRINT);

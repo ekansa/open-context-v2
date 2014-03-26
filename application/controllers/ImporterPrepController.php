@@ -196,6 +196,15 @@ class ImporterPrepController extends Zend_Controller_Action
 		  $this->view->uploadTabObj = $uploadTabObj;
 	 }
 	 
+	 public function testAction(){
+		  $requestParams =  $this->_request->getParams();
+		  $this->view->requestParams = $requestParams;
+	 }
+	 
+	 public function ajaxAction(){
+		  $requestParams =  $this->_request->getParams();
+		  $this->view->requestParams = $requestParams;
+	 }
 	 
 }
 

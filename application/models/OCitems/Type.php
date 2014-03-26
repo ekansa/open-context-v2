@@ -114,7 +114,6 @@ class OCitems_Type {
 	 
 	 
 	 function makeHashID($predicateUUID, $contentUUID){
-		  $label= trim($label);
 		  return sha1($predicateUUID." ".$contentUUID);
 	 }
 	 
@@ -135,7 +134,7 @@ class OCitems_Type {
 	 //get a type record by it's predicate and it's content UUIDs
 	 function getByPredicateContentUUIDs($predicateUUID, $contentUUID){
 		  $output = false;
-		  
+		  $db = $this->startDB();
 		  $hashID = $this->makeHashID($predicateUUID, $contentUUID);
 			  
 		  $sql = "SELECT ot.uuid, ot.hashID, ot.projectUUID, ot.sourceID, ot.predicateUUID,

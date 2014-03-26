@@ -326,7 +326,7 @@ class OCitems_Assertions {
 		  
 		  $ocGenObj = new OCitems_General;
 		  $itemTypes = $ocGenObj->getItemTypes();
-		  if(in_array($objectType, $itemTypes)){
+		  if(in_array($subjectType, $itemTypes)){
 				$valid = true;
 		  }
 		  else{
