@@ -149,7 +149,8 @@ class Importer_Refine  {
 											 "fieldNumber" => $fieldNumber,
 											 "cellIndex" => $col["cellIndex"],
 											 "label" => $col["name"],
-											 "originalName" => $col["originalName"]
+											 "originalName" => $col["originalName"],
+											 "ignore" => 0
 											 );
 						  
 						  $db->insert("imp_fields", $data);
