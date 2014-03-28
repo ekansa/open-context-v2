@@ -105,100 +105,16 @@ class Importer_Refine  {
 		  $output = false;
 		  $this->projectUUID = $requestParams["projectUUID"];
 		  $this->refineProjectID = $requestParams["refineProjectID"];
-		  
-		  $db = $this->startDB();
 		  $model = $this->getModelData(); //gets the project model (schema) from Refine
 		  if(is_array($model)){
-				$output = array();
 				$this->sourceID = $this->refineProjectIDtoSourceID($this->refineProjectID);
-				$fieldNumber = 1;
-				foreach($model["columnModel"]["columns"] as $col){
-					 $sql = "SELECT *
-					 FROM imp_fields
-					 WHERE projectUUID = '".$this->projectUUID."'
-					 AND sourceID = '".$this->sourceID."' 
-					 AND originalName = '".$col["originalName"]."'
-					 AND cellIndex = ".$col["cellIndex"]."
-					 LIMIT 1
-					 ";
-					 
-					 $result = $db->fetchAll($sql, 2);
-					 if($result){
-						  //this particular field already exists, time to update its fieldNumber, cell index, and current name
-						  $fieldID = $result[0]["id"];
-						  $ignore = $result[0]["ignore"];
-						  
-						  $where = "id = ".$fieldID;
-						  
-						  $data = array("fieldNumber" => $fieldNumber,
-											 "cellIndex" => $col["cellIndex"],
-											 "label" => $col["name"]
-											 );
-						  
-						  if($ignore == 1){
-								$data["ignore"] = 0; //turn a field marked for being ignored back on
-						  }
-						  
-						  $db->update("imp_fields", $data, $where);
-						  $output["updated"][] = $data;
-					 }
-					 else{
-						  //add a new field
-						  $data = array("projectUUID" => $this->projectUUID,
-											 "sourceID" => $this->sourceID,
-											 "fieldNumber" => $fieldNumber,
-											 "cellIndex" => $col["cellIndex"],
-											 "label" => $col["name"],
-											 "originalName" => $col["originalName"],
-											 "ignore" => 0
-											 );
-						  
-						  $db->insert("imp_fields", $data);
-						  $output["inserted"][] = $data;
-					 }
-					 
-				$fieldNumber++;
-				}
-				
-				$output = $this->checkMissingFields($output); // check to see if any fields were deleted, and if so mark to be ignored
+				$fieldsObj = new Importer_Fields;
+				$fieldsObj->projectUUID = $this->projectUUID;
+				$fieldsObj->sourceID = $this->sourceID;
+				$output = $fieldsObj->loadUpdateRefineModel($model);
 		  }//end case with a model;
 		  
 		  return $output;
-	 }
-	 
-	 
-	 function checkMissingFields($fieldData){
-		  if(isset($fieldData["updated"])){
-				$db = $this->startDB();
-				$updatedFields = $fieldData["updated"];
-				
-				$sql = "SELECT *
-					 FROM imp_fields
-					 WHERE projectUUID = '".$this->projectUUID."'
-					 AND sourceID = '".$this->sourceID."'
-					 ";
-				$result = $db->fetchAll($sql, 2);
-				if($result){	 
-					 foreach($result as $row){
-						  $found = false;
-						  foreach($updatedFields as $upField){
-								if($upField["cellIndex"] == $row["cellIndex"]){
-									 $found = true;
-								}
-						  }
-						  
-						  if(!$found){
-								//a field that was originally loaded no longer exists, we need to mark it to be ignored
-								$where = "id = ".$row["id"];
-								$data = array("ignore" => 1);
-								$db->update("imp_fields", $data, $where);
-								$fieldData["ignoring"][] = $row;
-						  }
-					 }
-				}
-		  }
-		  
-		  return $fieldData;
 	 }
 	 
 	 
@@ -225,6 +141,40 @@ class Importer_Refine  {
 		  }
 		  return $rowData;
 	 }
+	 
+	 
+	 //get a list of projects from Refine
+	 function getProjectsData(){
+		  $data = false;
+		  $url = self::baseRefineURL."/command/core/get-all-project-metadata";
+		  @$jsonString = file_get_contents($url);
+		  if($jsonString){
+				$data = json_decode($jsonString, true);
+		  }
+		  return $data;
+	 }
+	 
+	 //reorder projects by modified time
+	 function reorderProjectData($data){
+		  $output = false;
+		  if(isset($data["projects"])){
+				$tArray = array();
+				$output = array();
+				foreach($data["projects"] as $projKey => $parray){
+					 $mod = strtotime($parray["modified"]);
+					 $tArray[$projKey] = $mod;
+				}
+				arsort($tArray); //sorts by time, high to low
+				foreach($tArray as $projKey => $mod){
+					 $output["projects"][$projKey] = $data["projects"][$projKey];
+				}
+		  }
+		  return $output;
+	 }
+	 
+	 
+	 
+	 
 	 
 	 //convert an open-context source ID to a Refine project ID
 	 function sourceIDtoRefineProjectID($sourceID){

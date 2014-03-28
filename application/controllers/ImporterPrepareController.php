@@ -11,6 +11,8 @@ class ImporterPrepareController extends Zend_Controller_Action
     function init(){
 		  Zend_Loader::loadClass('Importer_FieldLinks');
 		  Zend_Loader::loadClass('Importer_Refine');
+		  Zend_Loader::loadClass('Importer_Fields');
+		  Zend_Loader::loadClass('Importer_SourceTab');
 		  Zend_Loader::loadClass('OCitems_General');
 		  Zend_Loader::loadClass('infoURI');
     }
@@ -37,6 +39,12 @@ class ImporterPrepareController extends Zend_Controller_Action
 		  $genObj = new OCitems_General;
 		  echo $genObj->JSONoutputString($output);
 	 }
+	 
+	 public function getRefineProjectsAction(){
+		  $this->_helper->viewRenderer->setNoRender();
+		  
+	 }
+	 
 	 
 	 public function loadRefineProjectSchemaAction(){
 		  $requestParams =  $this->_request->getParams();
