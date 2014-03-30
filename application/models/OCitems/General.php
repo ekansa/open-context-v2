@@ -56,6 +56,7 @@ class OCitems_General {
 	 const booleanLiteral = "xsd:boolean"; //numeric
 	 const dateLiteral = "xsd:date";
 	 const typeObject = "type";
+	 const idObject = "id"; //any uri identified object (for linking relations)
 	 
 	 //itemTypes for Assertions
 	 const subjectType = "subject";
@@ -417,7 +418,8 @@ class OCitems_General {
 									self::integerLiteral,
 									self::decimalLiteral,
 									self::dateLiteral,
-									self::typeObject);
+									self::typeObject,
+									self::idObject);
 		  
 		  return $typeArray;
 	 }

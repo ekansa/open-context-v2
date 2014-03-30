@@ -914,6 +914,7 @@ class XMLjsonLD_XpathBasics  {
 		  
 		  $predicateObj = new OCitems_Predicate;
 		  $predData = $predicateObj->getByLabel($relationLabel, $projectUUIDs, "link");
+		  
 		  if(is_array($predData)){
 				$uri = self::predicateBaseURI.$predicateObj->uuid;
 		  }
@@ -930,12 +931,13 @@ class XMLjsonLD_XpathBasics  {
 								  "projectUUID" => $this->projectUUID,
 								  "sourceID" => $sourceID,
 								  "archaeoMLtype" => "link",
-								  "dataType" => "uri",
+								  "dataType" => "id",
 								  "label" => $relationLabel,
 								  "created" => date("Y-m-d")
 								  );
 				
 				$ok = $predicateObj->createRecord($data);
+				
 				if($ok){
 					 $uri = self::predicateBaseURI.$newUUID;
 				}
