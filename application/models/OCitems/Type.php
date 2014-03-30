@@ -114,7 +114,8 @@ class OCitems_Type {
 	 
 	 
 	 function makeHashID($predicateUUID, $contentUUID){
-		  return sha1($predicateUUID." ".$contentUUID);
+		  $string = $predicateUUID." ".$contentUUID;
+		  return sha1($string);
 	 }
 	 
 	 
@@ -220,14 +221,16 @@ class OCitems_Type {
 		  if(!isset($data["contentUUID"])){
 				$data["contentUUID"] = false;
 		  }
-		  if($data["contentUUID"]){
+		  
+		  if(!$data["contentUUID"]){
 				$data["contentUUID"] = $this->getMakeContentStringUUID($data["label"], $data["projectUUID"], $data["sourceID"]);
-		  }
-		  if(strlen($data["label"]>=199)){
-				$data["label"] = $this->textSnippet($data["label"]);
 		  }
 		  
 		  $data["hashID"] = $this->makeHashID($data["predicateUUID"], $data["contentUUID"]);
+		  
+		  if(strlen($data["label"])>=199){
+				$data["label"] = $this->textSnippet($data["label"]);
+		  }
 	 
 		  foreach($data as $key => $value){
 				if(is_array($value)){
@@ -235,6 +238,7 @@ class OCitems_Type {
 					 die;
 				}
 		  }
+		  
 	 
 		  try{
 				$db->insert("oc_types", $data);
@@ -261,6 +265,9 @@ class OCitems_Type {
 				}
 				else{
 					 $actLen = $actLen - 1;
+					 if($actLen <= 20){
+						  $snippetDone = true;
+					 }
 				}
 		  }
 		  

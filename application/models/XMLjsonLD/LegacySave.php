@@ -141,7 +141,7 @@ class XMLjsonLD_LegacySave  {
 	 function toDoList($type){
 		  $db = $this->startDB();
 		  
-		  $sql = "SELECT * FROM oc_todo WHERE type = '$type' AND done = 0 LIMIT 0,2 ; ";
+		  $sql = "SELECT * FROM oc_todo WHERE type = '$type' AND done = 0; ";
 		  //echo $sql;
 		  //die;
 		  $result = $db->fetchAll($sql, 2);
@@ -253,7 +253,6 @@ class XMLjsonLD_LegacySave  {
 		  
 						  $this->assertionSort = 1;
 						  
-						  die;
 						  $this->saveContainmentData($jsonLDObj);
 						  $this->saveObservationData($jsonLDObj);
 						 
@@ -799,6 +798,9 @@ class XMLjsonLD_LegacySave  {
 				$data["created"] = date("Y-m-d H:i:s");
 				$data["content"] = $jsonString;
 				
+				/*
+				 * Don't save to the cache. this only should happen when something gets published live
+				 *
 				$dataCacheObj = new OCitems_DataCache;
 				$okCache = $dataCacheObj->createRecord($data);
 				unset($dataCacheObj);
@@ -807,6 +809,7 @@ class XMLjsonLD_LegacySave  {
 					 $errors[] = "Count not cache ".$LinkedDataItem->uuid;
 					 $this->noteErrors($errors);
 				}
+				*/
 		  }
 		  
 	 }
@@ -868,6 +871,9 @@ class XMLjsonLD_LegacySave  {
 				$projectUUID = $LinkedDataItem->projectUUID;
 				$published = $LinkedDataItem->published;
 				
+				//echo print_r($LinkedDataItem->observations);
+				//die;
+				
 				foreach($LinkedDataItem->observations as $obsNumKey => $observation){
 					 $obsNode = "#obs-".$obsNumKey;
 					 $sourceID = $observation["sourceID"];
@@ -876,8 +882,12 @@ class XMLjsonLD_LegacySave  {
 								foreach($observation["properties"] as $varURI => $actProps){
 									 $firstLoop = true;
 									 foreach($actProps as $actProperty){
+						  
 										  $actProperty = $this->savePropertyText($actProperty, $projectUUID);
+										  
 										  $this->saveProperty($varURI, $actProperty, $projectUUID);
+										  
+										  
 										  if($firstLoop){
 												$this->saveVarPredicate($varURI, $actProperty, $published, $projectUUID);
 										  }
@@ -887,7 +897,8 @@ class XMLjsonLD_LegacySave  {
 								}
 						  }//end case with am array of properties
 					 }//end case with properties
-							
+					 
+						
 					 if(isset($observation["notes"])){
 						  if(is_array($observation["notes"])){
 								foreach($observation["notes"] as $textContent){
@@ -972,7 +983,9 @@ class XMLjsonLD_LegacySave  {
 				}
 				else{
 					 if(isset($actProperty["type"])){
-						  $dataType = $actProperty["type"];
+						  if(strlen($actProperty["type"])>1){
+								$dataType = $actProperty["type"];
+						  }
 					 }
 				}
 				
@@ -999,8 +1012,11 @@ class XMLjsonLD_LegacySave  {
 				$propUUID = $actProperty["propUUID"];
 				$typeLabel = $actProperty["value"];
 				
+				
 				$ocTypeObj = new OCitems_Type;
 				$existUUID = $ocTypeObj->getByContent($typeLabel, $predicateUUID,  $projectUUID);
+				
+				
 				if(!$existUUID){
 					 
 					 $data = array("uuid" => $propUUID,
@@ -1011,7 +1027,7 @@ class XMLjsonLD_LegacySave  {
 										);
 					 
 					 $output = $ocTypeObj->createRecord($data);
-				
+					 
 				}
 				else{
 					 $this->registerUUIDchange($propUUID, $existUUID["uuid"], "property");

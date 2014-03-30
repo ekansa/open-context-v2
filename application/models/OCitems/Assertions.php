@@ -9,6 +9,7 @@ class OCitems_Assertions {
 	 public $contexts; //array of parent items
 	 public $recurseCount = 0;
 	 
+	 public $assertionsTab = "oc_assertions";
 	 const containsPredicate = "oc-gen:contains";
 	 
 	 const stringLiteral = "xsd:string"; 
@@ -34,7 +35,7 @@ class OCitems_Assertions {
 		  }
 		  
         $sql = 'SELECT *
-                FROM oc_assertions
+                FROM '.$this->assertionsTab.'
                 WHERE uuid = "'.$uuid.'"
 					 '.$visibilityCond.' 
 					 ORDER BY sort
@@ -67,7 +68,7 @@ class OCitems_Assertions {
 		  
 		  
         $sql = 'SELECT uuid AS parentUUID, subjectType, obsNode
-                FROM oc_assertions
+                FROM '.$this->assertionsTab.'
                 WHERE objectUUID = "'.$uuid.'" AND predicateUUID = "'.self::containsPredicate.'"
 					 '.$visibilityCond.'
 					 ORDER BY sort;
@@ -124,14 +125,14 @@ class OCitems_Assertions {
 	 //purge assertions that say something is contained within itself
 	 function cleanSpaceHierarchy(){
 		  $db = $this->startDB();
-		  $sql = 'DELETE FROM oc_assertions WHERE uuid = objectUUID AND predicateUUID = "'.self::containsPredicate.'"; ';
+		  $sql = 'DELETE FROM '.$this->assertionsTab.' WHERE uuid = objectUUID AND predicateUUID = "'.self::containsPredicate.'"; ';
 		  $db->query($sql);
 	 }
 	 
 	 //purge assertions that say something is contained within itself
 	 function cleanMissingPredicates(){
 		  $db = $this->startDB();
-		  $sql = 'DELETE FROM oc_assertions WHERE predicateUUID = ""; ';
+		  $sql = 'DELETE FROM '.$this->assertionsTab.' WHERE predicateUUID = ""; ';
 		  $db->query($sql);
 	 }
 	 
@@ -140,7 +141,7 @@ class OCitems_Assertions {
 	 function getByHashID($hashID){
 		  $output = false;
 		  $db = $this->startDB();
-		  $sql = "SELECT * FROM oc_assertions WHERE hashID = '$hashID' LIMIT 1; ";
+		  $sql = "SELECT * FROM '.$this->assertionsTab.' WHERE hashID = '$hashID' LIMIT 1; ";
 		  $result = $db->fetchAll($sql, 2);
 		  
         if($result){
@@ -167,7 +168,7 @@ class OCitems_Assertions {
 				}
 		  }
 		  
-		  $sql = "SELECT * FROM oc_assertions WHERE objectUUID = '$objectUUID' $predicateClause ";
+		  $sql = "SELECT * FROM '.$this->assertionsTab.' WHERE objectUUID = '$objectUUID' $predicateClause ";
 		  $result = $db->fetchAll($sql, 2);
 		  
         if($result){
@@ -186,7 +187,7 @@ class OCitems_Assertions {
 		  $ocGenObj = new OCitems_General;
 		  $predicateCond = $ocGenObj->makeORcondition($predicateUUIDs, "predicateUUID");
 		  
-		  $sql = "SELECT * FROM oc_assertions WHERE $predicateCond ";
+		  $sql = "SELECT * FROM '.$this->assertionsTab.' WHERE $predicateCond ";
 		  $result = $db->fetchAll($sql, 2);
 		  
         if($result){
@@ -294,7 +295,7 @@ class OCitems_Assertions {
 				
 				if($this->validateAssertionTypes($data["subjectType"], $data["objectType"])){
 					 try{
-						  $db->insert("oc_assertions", $data);
+						  $db->insert($this->assertionsTab, $data);
 						  $success = true;
 					 } catch (Exception $e) {
 						  //echo (string)$e;

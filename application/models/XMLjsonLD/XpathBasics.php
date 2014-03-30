@@ -48,7 +48,7 @@ class XMLjsonLD_XpathBasics  {
 					
 					 $LinkedDataItem = $this->XMLsubjectItemBasics($LinkedDataItem, $itemXML);
 					 $LinkedDataItem = $this->XMLtoContextData($LinkedDataItem, $itemXML);
-					 $LinkedDataItem = $this-> XMLtoChildren($LinkedDataItem, $itemXML);
+					 $LinkedDataItem = $this->XMLtoChildren($LinkedDataItem, $itemXML);
 				}
 				elseif(stristr($uri, "media") || stristr($uri, "documents")){
 					 $itemXML = simplexml_load_string($itemXMLstring);
@@ -583,17 +583,27 @@ class XMLjsonLD_XpathBasics  {
 					 $lon = (string)$geoNode;
 					 $lon = $lat + 0;
 				}
-				foreach ($itemXML->xpath("//oc:geo_reference/oc:metasource/oc:sourceID") as $geoNode) {
-					 $refUUID = (string)$geoNode;
+				if($itemXML->xpath("//oc:geo_reference/oc:metasource/oc:sourceID")){
+					 foreach ($itemXML->xpath("//oc:geo_reference/oc:metasource/oc:sourceID") as $geoNode) {
+						  $refUUID = (string)$geoNode;
+					 }
+				}
+				else{
+					 foreach ($itemXML->xpath("//oc:geo_reference/oc:metasource/oc:source_id") as $geoNode) {
+						  $refUUID = (string)$geoNode;
+					 }
+				}
+				
+				if($refUUID != false){
 					 $data = array("uuid" => $refUUID,
-							 "projectUUID" => $this->projectUUID,
-							 "ftype" => "point",
-							 "latitude" => $lat,
-							 "longitude" => $lon
-							 );
-					 
-					 $geoObj = new OCitems_Geodata;
-					 $geoObj->createRecord($data);
+								  "projectUUID" => $this->projectUUID,
+								  "ftype" => "point",
+								  "latitude" => $lat,
+								  "longitude" => $lon
+								  );
+						  
+						  $geoObj = new OCitems_Geodata;
+						  $geoObj->createRecord($data);
 				}
 				
 				if($refUUID != false && $lat != false && $lon != false){
@@ -626,8 +636,18 @@ class XMLjsonLD_XpathBasics  {
 					 $tEnd  = (string)$tNode;
 					 $tEnd  = $tEnd  + 0;
 				}
-				foreach ($itemXML->xpath("//oc:chrono/oc:metasource/oc:sourceID") as $tNode) {
-					 $refUUID = (string)$tNode;
+				if($itemXML->xpath("//oc:chrono/oc:metasource/oc:sourceID")){
+					 foreach ($itemXML->xpath("//oc:chrono/oc:metasource/oc:sourceID") as $tNode) {
+						  $refUUID = (string)$tNode;
+					 }
+				}
+				else{
+					 foreach ($itemXML->xpath("//oc:chrono/oc:metasource/oc:source_id") as $tNode) {
+						  $refUUID = (string)$tNode;
+					 }
+				}
+				
+				if($refUUID != false){
 					 $data = array("uuid" => $refUUID,
 							 "projectUUID" => $this->projectUUID,
 							 "startLC" => $tStart,
