@@ -341,7 +341,7 @@ class OCitems_Item {
 	 
 	 function addTypesJSON($JSON_LD, $typeURI){
 		  
-		  $JSON_LD["oc-gen:type"][] = array("@id" => $typeURI);
+		  $JSON_LD["@type"][] = array("@id" => $typeURI);
 		  
 		  return $JSON_LD;
 	 }
