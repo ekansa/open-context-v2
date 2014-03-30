@@ -13,6 +13,7 @@ class XMLjsonLD_LegacySave  {
 	 public $existingURIs = 0;
 	 public $errors;
 	 public $retrieveBaseSubjectURI;
+	 public $altBaseSubjectURI;
 	 public $retrieveBaseMediaURI;
 	 public $retrieveBaseDocURI;
 	 public $retrieveBasePersonURI;
@@ -141,7 +142,7 @@ class XMLjsonLD_LegacySave  {
 	 function toDoList($type){
 		  $db = $this->startDB();
 		  
-		  $sql = "SELECT * FROM oc_todo WHERE type = '$type' AND done = 0; ";
+		  $sql = "SELECT * FROM oc_todo WHERE type = '$type' AND done = 0 ; ";
 		  //echo $sql;
 		  //die;
 		  $result = $db->fetchAll($sql, 2);
@@ -206,10 +207,15 @@ class XMLjsonLD_LegacySave  {
 		  $existingURIs = $this->existingURIs;
 		  $errors = array();
 		  $itemURL = $this->retrieveBaseSubjectURI.$itemUUID.".xml";
+		  $altItemURL = $this->altBaseSubjectURI.$itemUUID.".xml";
 		  $output = false;
 		  if(!$this->checkItemExits($itemUUID)){
 				$db = $this->startDB();
 				@$xmlString = file_get_contents($itemURL);
+				if(!$xmlString){
+					 @$xmlString = file_get_contents($altItemURL);
+				}
+				
 				if($xmlString != false){
 					 
 					 /*
@@ -979,7 +985,7 @@ class XMLjsonLD_LegacySave  {
 				$varLabel = $actProperty["varLabel"];
 				$dataType = false;
 				if(isset($actProperty["id"])){
-					 $dataType = "uri";
+					 $dataType = "id";
 				}
 				else{
 					 if(isset($actProperty["type"])){
@@ -1073,7 +1079,7 @@ class XMLjsonLD_LegacySave  {
 				
 				if(isset($actProperty["id"])){
 					 $data["objectUUID"] = $actProperty["propUUID"];
-					 $data["objectType"] = "property";
+					 $data["objectType"] = "type";
 				}
 				elseif(isset($actProperty["xsd:string"])){
 					 if(!isset($actProperty["valueID"])){
