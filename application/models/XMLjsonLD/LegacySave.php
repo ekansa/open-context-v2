@@ -142,7 +142,7 @@ class XMLjsonLD_LegacySave  {
 	 function toDoList($type){
 		  $db = $this->startDB();
 		  
-		  $sql = "SELECT * FROM oc_todo WHERE type = '$type' AND done = 0 ; ";
+		  $sql = "SELECT * FROM oc_todo WHERE type = '$type' AND done = 0  ; ";
 		  //echo $sql;
 		  //die;
 		  $result = $db->fetchAll($sql, 2);

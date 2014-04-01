@@ -581,7 +581,7 @@ class XMLjsonLD_XpathBasics  {
 				}
 				foreach ($itemXML->xpath("//oc:geo_reference/oc:geo_long") as $geoNode) {
 					 $lon = (string)$geoNode;
-					 $lon = $lat + 0;
+					 $lon = $lon + 0;
 				}
 				if($itemXML->xpath("//oc:geo_reference/oc:metasource/oc:sourceID")){
 					 foreach ($itemXML->xpath("//oc:geo_reference/oc:metasource/oc:sourceID") as $geoNode) {
@@ -729,6 +729,7 @@ class XMLjsonLD_XpathBasics  {
 		  $properties = false;
 		  if($obsXMLnode->xpath($xpathPrefix."arch:properties/arch:property")) {
 				$properties = array();
+				$varUUID = false;
 				foreach($obsXMLnode->xpath($xpathPrefix."arch:properties/arch:property") as $propNode){
 					 $actProperty = array();
 					 $actProperty["varLabel"] = false;
@@ -736,8 +737,13 @@ class XMLjsonLD_XpathBasics  {
 					 $showStringLiteral = true;
 					 foreach($propNode->xpath("arch:variableID") as $xpathRes) {
 						  $varUUID = (string)$xpathRes;
-						  $varUUID = $this->idUpdate($varUUID);
-						  $varURI = self::predicateBaseURI.$varUUID;
+						  if(strlen($varUUID)>1){
+								$varUUID = $this->idUpdate($varUUID);
+								$varURI = self::predicateBaseURI.$varUUID;
+						  }
+						  else{
+								$varUUID = false;
+						  }
 					 }
 					 foreach($propNode->xpath("oc:propid") as $xpathRes) {
 						  $propID = (string)$xpathRes;
@@ -844,7 +850,9 @@ class XMLjsonLD_XpathBasics  {
 						  $actProperty["type"] = self::stringLiteral;
 					 }
 					 
-					 $properties[$varURI][] = $actProperty;
+					 if($varUUID != false){
+						  $properties[$varURI][] = $actProperty;
+					 }
 					 if(count($properties)>=3){
 						  //break;
 					 }
