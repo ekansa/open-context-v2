@@ -257,6 +257,10 @@
     <!-- uuid is a primary key, basis of opencontext URIs -->
     <field name="uuid" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     
+    <!-- uuidLabel is string for storing JSON encoded key value pairs of item uuid's and labels {uuid:label}, 
+    useful for Join replaces with other fields.  -->
+    <field name="uuidLabel" type="string" indexed="true" stored="false" required="true" multiValued="false" />
+    
     <!-- projectUUID is required, identifies the project owning the solr doc -->
     <field name="projectUUID" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     
