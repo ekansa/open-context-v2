@@ -142,7 +142,7 @@ class XMLjsonLD_LegacySave  {
 	 function toDoList($type){
 		  $db = $this->startDB();
 		  
-		  $sql = "SELECT * FROM oc_todo WHERE type = '$type' AND done = 0  ; ";
+		  $sql = "SELECT * FROM oc_todo WHERE type = '$type' AND done = -1  ; ";
 		  //echo $sql;
 		  //die;
 		  $result = $db->fetchAll($sql, 2);
@@ -218,7 +218,7 @@ class XMLjsonLD_LegacySave  {
 				
 				if($xmlString != false){
 					 
-					 /*
+					 
 					 $xmlString = str_replace('<?xml version="1.0"?>', '<?xml version="1.0" encoding="UTF-8" ?>', $xmlString);
 					 
 					 $xmlString = tidy_repair_string($xmlString,
@@ -227,7 +227,7 @@ class XMLjsonLD_LegacySave  {
 												'input-xml' => true,
 												'output-xml' => true 
 										  ));
-					 */
+					 
 					 @$itemXML = simplexml_load_string($xmlString);
 					 
 					 
@@ -342,7 +342,14 @@ class XMLjsonLD_LegacySave  {
 										  ));
 					 
 					 @$itemXML = simplexml_load_string($xmlString);
-					 
+					 */
+					 @$itemXML = simplexml_load_string($xmlString);
+					 if(!$itemXML ){
+						$xmlString  = iconv('UTF-8', 'UTF-8//IGNORE', $xmlString );
+						@$itemXML = simplexml_load_string($xmlString);
+					 }
+					
+					 /*
 					 if(!$itemXML){
 						  echo "here";
 						  $xmlString = tidy_repair_string($xmlString,
@@ -373,8 +380,7 @@ class XMLjsonLD_LegacySave  {
 						  $this->assertionSort = 1;
 						  $this->saveContainmentData($jsonLDObj);
 						  $this->saveObservationData($jsonLDObj);
-						  echo "here";
-						  die;
+						  
 						  if($this->changedUUIDs){
 								//UUIDs changed (removed redundant information), parse XML again with updated UUIDs
 								$this->changedUUIDs = false;
@@ -835,7 +841,7 @@ class XMLjsonLD_LegacySave  {
 		  $data["previewMimeURI"] = $LinkedDataItem->previewMimeURI;
 		  $data["previewURI"] = $LinkedDataItem->previewURI;
 		  $data["fullURI"] = $LinkedDataItem->fullURI;
-		  $data["fileSize"] = $LinkedDataItem->fileSize;
+		  $data["filesize"] = $LinkedDataItem->fileSize;
 		 
 		  $mediaFileObj->createRecord($data);
 	 }

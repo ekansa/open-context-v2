@@ -206,7 +206,7 @@ class XMLjsonLD_XpathBasics  {
 				$mediaItem->registerXPathNamespace("xhtml", OpenContext_OCConfig::get_namespace("xhtml"));
 				if($mediaItem->xpath("//arch:internalDocument/arch:string/xhtml:div")){
 					 foreach ($mediaItem->xpath("//arch:internalDocument/arch:string/xhtml:div") as $divNote) {
-						 $stringNote = $divNote->asXML();
+						 $docContent = $divNote->asXML();
 						 $LinkedDataItem->documentContents = $docContent; //add notes
 					 }
 				}

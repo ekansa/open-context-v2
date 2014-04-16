@@ -248,10 +248,10 @@ class LegacyController extends Zend_Controller_Action
 		  
 		  $legacySaveObj = new XMLjsonLD_LegacySave;
 		  $legacySaveObj->retrieveBaseSubjectURI = "http://opencontext/subjects/";
-		  $legacySaveObj->retrieveBaseMediaURI = "http://opencontext.org/media/";
-		  $legacySaveObj->retrieveBaseDocURI = "http://opencontext.org/documents/";
-		  $legacySaveObj->retrieveBasePersonURI = "http://opencontext.org/persons/";
-		  $legacySaveObj->retrieveBaseProjectURI = "http://opencontext.org/projects/";
+		  $legacySaveObj->retrieveBaseMediaURI = "http://opencontext/media/";
+		  $legacySaveObj->retrieveBaseDocURI = "http://opencontext/documents/";
+		  $legacySaveObj->retrieveBasePersonURI = "http://opencontext/persons/";
+		  $legacySaveObj->retrieveBaseProjectURI = "http://opencontext/projects/";
 		  
 		  $legacySaveObj->toDoList("subject");
 		  $output = array("done" => $legacySaveObj->doneURIs, "existing" => $legacySaveObj->existingURIs, "errors" => $legacySaveObj->errors);
