@@ -24,23 +24,23 @@ class OCitems_General {
 												 "skos" => "http://www.w3.org/2004/02/skos/core#"
 												 );
 	 
-	 public $typeURImappings = array("subjects" => "subject",
+	 public $typeURImappings = array("subjects" => "subjects",
 												"media" => "media",
-												"documents" => "document",
-												"projects" => "project",
-												"persons" => "person",
-												"types" => "type",
-												"predicates" => "predicate",
-												"tables" => "table"
+												"documents" => "documents",
+												"projects" => "projects",
+												"persons" => "persons",
+												"types" => "types",
+												"predicates" => "predicates",
+												"tables" => "tables"
 												);
 	 
-	 public $objectTypePredicateTypeMappings = array("subject" => "link",
-																	 "media" => "link",
-																	 "document" => "link",
-																	 "person" => "link",
-																	 "project" => "link",
-																	 "table" => "link",
-																	 "type" => "variable",
+	 public $objectTypePredicateTypeMappings = array("subjects" => "link",
+																	 "medias" => "link",
+																	 "documents" => "link",
+																	 "persons" => "link",
+																	 "projects" => "link",
+																	 "tables" => "link",
+																	 "types" => "variable",
 																	 "xsd:integer" => "variable",
 																	 "xsd:decimal" => "variable",
 																	 "xsd:double" => "variable",
@@ -55,17 +55,17 @@ class OCitems_General {
 	 const decimalLiteral = "xsd:double"; //numeric
 	 const booleanLiteral = "xsd:boolean"; //numeric
 	 const dateLiteral = "xsd:date";
-	 const typeObject = "type";
+	 const typeObject = "types";
 	 const idObject = "id"; //any uri identified object (for linking relations)
 	 
 	 //itemTypes for Assertions
-	 const subjectType = "subject";
+	 const subjectType = "subjects";
 	 const mediaType = "media";
-	 const personType = "person";
-	 const documentType = "document";
-	 const projectType = "project";
-	 const tableType = "table";
-	 const vocabularyType = "vocabulary";
+	 const personType = "persons";
+	 const documentType = "documents";
+	 const projectType = "projects";
+	 const tableType = "tables";
+	 const vocabularyType = "vocabularies";
 	 
 	 
 	 public $errors;
@@ -227,7 +227,7 @@ class OCitems_General {
 				
 				$keyOK = true;
 				$actInputValue = $this->checkExistsNonBlank($key, $inputArray);
-				if($valExpect["type"] == "OCitemType"){
+				if($valExpect["types"] == "OCitemType"){
 					 if(!in_array($actInputValue, $typeURImappings)){
 						  $this->noteError("Key: '$key' has value: '$actInputValue', not a valid OC item type.");
 						  $keyOK = false;

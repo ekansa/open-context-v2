@@ -17,7 +17,7 @@ class OCitems_Assertions {
 	 const decimalLiteral = "xsd:double"; //numeric
 	 const booleanLiteral = "xsd:boolean"; //numeric
 	 const dateLiteral = "xsd:date";
-	 const typeObject = "type";
+	 const typeObject = "types";
 	 
     //get data from database
     function getByUUID($uuid, $visibileOnly = true){
@@ -322,7 +322,7 @@ class OCitems_Assertions {
 	 
 	 
 	 
-	 //validate a subject type of an assertion
+	 //validate a subjects type of an assertion
 	 function validateSubjectType($subjectType){
 		  
 		  $ocGenObj = new OCitems_General;

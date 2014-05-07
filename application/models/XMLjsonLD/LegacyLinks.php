@@ -28,7 +28,7 @@ class XMLjsonLD_LegacyLinks  {
 					 $projectUUID = $row["fk_project_uuid"];
 					 $sourceID = $row["source_id"];
 					 $data = array("uuid" => $uuid,
-									 "subjectType" => "type",
+									 "subjectType" => "types",
 									 "projectUUID" => $projectUUID,
 									 "sourceID" => $sourceID,
 									 "predicateURI" => self::Pred_SKOScloseMatch ,
@@ -61,7 +61,7 @@ class XMLjsonLD_LegacyLinks  {
 					 $projectUUID = $row["fk_project_uuid"];
 					 $sourceID = $row["source_id"];
 					 $data = array("uuid" => $uuid,
-									 "subjectType" => "predicate",
+									 "subjectType" => "predicates",
 									 "projectUUID" => $projectUUID,
 									 "sourceID" => $sourceID,
 									 "predicateURI" => self::SKOScloseMatch,
@@ -94,7 +94,7 @@ class XMLjsonLD_LegacyLinks  {
 					 $projectUUID = $row["fk_project_uuid"];
 					 $sourceID = $row["source_id"];
 					 $data = array("uuid" => $uuid,
-									 "subjectType" => "predicate",
+									 "subjectType" => "predicates",
 									 "projectUUID" => $projectUUID,
 									 "sourceID" => $sourceID,
 									 "predicateURI" => self::Pred_isAbout,
@@ -127,7 +127,7 @@ class XMLjsonLD_LegacyLinks  {
 					 $projectUUID = $row["fk_project_uuid"];
 					 $sourceID = $row["source_id"];
 					 $data = array("uuid" => $uuid,
-									 "subjectType" => "predicate",
+									 "subjectType" => "predicates",
 									 "projectUUID" => $projectUUID,
 									 "sourceID" => $sourceID,
 									 "predicateURI" => self::Pred_SKOSrelated,
@@ -160,7 +160,7 @@ class XMLjsonLD_LegacyLinks  {
 					 $projectUUID = $row["fk_project_uuid"];
 					 $sourceID = $row["source_id"];
 					 $data = array("uuid" => $uuid,
-									 "subjectType" => "predicate",
+									 "subjectType" => "predicates",
 									 "projectUUID" => $projectUUID,
 									 "sourceID" => $sourceID,
 									 "predicateURI" => self::Pred_rdfsRange,

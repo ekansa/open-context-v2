@@ -32,7 +32,7 @@ class XMLjsonLD_LegacyGeo  {
 					 
 					 $data = array("uuid" =>  $uuid,
 							 "projectUUID" => $projectUUID,
-							 "itemType" => "subject",
+							 "itemType" => "subjects",
 							 "ftype" => "point",
 							 "latitude" => $lat,
 							 "longitude" => $lon,

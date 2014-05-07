@@ -15,11 +15,11 @@ class Links_linkEntity {
 	 public $vocabLabel;
 	 public $vocabAltLabel;
 	 
-	 public $expectedSchema = array("uri" => array("type" => "xsd:string", "blankOK" => false),
-											  "label" => array("type" => "xsd:string", "blankOK" => false),
-											  "altLabel" => array("type" => "xsd:string", "blankOK" => true),
-											  "vocabURI" => array("type" => "xsd:string", "blankOK" => false),
-											  "type" => array("type" => "xsd:string", "blankOK" => true)
+	 public $expectedSchema = array("uri" => array("types" => "xsd:string", "blankOK" => false),
+											  "label" => array("types" => "xsd:string", "blankOK" => false),
+											  "altLabel" => array("types" => "xsd:string", "blankOK" => true),
+											  "vocabURI" => array("types" => "xsd:string", "blankOK" => false),
+											  "types" => array("types" => "xsd:string", "blankOK" => true)
 											  );
 	 
 	 
@@ -132,7 +132,7 @@ class Links_linkEntity {
 								  "label" => $this->label,
 								  "altLabel" => $this->altLabel,
 								  "vocabURI" => $this->vocabURI,
-								  "type" => false
+								  "types" => false
 								  );	
 		  }
 		  

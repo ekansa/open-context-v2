@@ -28,7 +28,7 @@ class OCitems_Item {
 	 public $contributors;
 	 public $creators;
 	 
-	 //class, usually used with subject items
+	 //class, usually used with subjects items
 	 public $itemClassURI;  //any object URI of an RDF type predicate
 	 
 	 //media specific
@@ -47,7 +47,7 @@ class OCitems_Item {
 	 //documents specific
 	 public $documentContents;
 	 
-	 //person specific
+	 //persons specific
 	 public $surname; //person's last name
 	 public $givenName; //persons first name
 
@@ -273,7 +273,7 @@ class OCitems_Item {
 				$this->uri = $ocGenObj->generateItemURI($this->uuid, $this->itemType);
 				$this->published = $manifestObj->published;
 				$this->projectUUID = $manifestObj->projectUUID;
-				$this->projectURI = $ocGenObj->generateItemURI($this->projectUUID, "project");
+				$this->projectURI = $ocGenObj->generateItemURI($this->projectUUID, "projects");
 				
 				if(strlen($manifestObj->classURI)>1){
 					 $this->itemClassURI = $manifestObj->classURI;
@@ -282,7 +282,7 @@ class OCitems_Item {
 				$JSON_LD = array();
 				$JSON_LD["@context"] = array(
 					 "id" => "@id",
-					 "type" => "@type");
+					 "types" => "@type");
 				
 				//add standard namespaces
 				foreach($this->standardNamespaces as $abrevKey => $actURI){
@@ -321,8 +321,8 @@ class OCitems_Item {
 				$JSON_LD = $this->addSpaceOrTimeRefJSON($JSON_LD, false); //chronology reference
 				
 				$JSON_LD = $this->addMediaJSON($JSON_LD); //add links to media files, if of media type
-				$JSON_LD = $this->addDocumentJSON($JSON_LD); //add the document content
-				$JSON_LD = $this->addPersonJSON($JSON_LD); //adds person specific information
+				$JSON_LD = $this->addDocumentJSON($JSON_LD); //add the documents content
+				$JSON_LD = $this->addPersonJSON($JSON_LD); //adds persons specific information
 				$JSON_LD = $this->addDCpeopleJSON($JSON_LD); //add creators and contributors
 				$JSON_LD = $this->addStableIdentifiersJSON($JSON_LD); //add stable identifiers
 				
@@ -533,12 +533,12 @@ class OCitems_Item {
 								else{
 									 $actType = "@id";
 								}
-								$predicateURI = $ocGenObj->generateItemURI($row["predicateUUID"], "predicate");
+								$predicateURI = $ocGenObj->generateItemURI($row["predicateUUID"], "predicates");
 								if($ocGenObj->classifyPredicateTypeFromObjectType($row["objectType"]) == "variable"){
 									 if(!array_key_exists($predicateURI, $vars)){
 										  $actVarNumber = count($vars) + 1;
 										  $predicateShort = "var-".$actVarNumber;
-										  $vars[$predicateURI] = array("type" => $actType, "abrev" => $predicateShort, "uuid" => $row["predicateUUID"]);
+										  $vars[$predicateURI] = array("types" => $actType, "abrev" => $predicateShort, "uuid" => $row["predicateUUID"]);
 									 }
 									 else{
 										  $predicateShort = $vars[$predicateURI]["abrev"];
@@ -548,7 +548,7 @@ class OCitems_Item {
 									 if(!array_key_exists($predicateURI, $links)){
 										  $actLinkNumber = count($links) + 1;
 										  $predicateShort = "link-".$actLinkNumber;
-										  $links[$predicateURI] = array("type" => $actType, "abrev" => $predicateShort, "uuid" => $row["predicateUUID"]);
+										  $links[$predicateURI] = array("types" => $actType, "abrev" => $predicateShort, "uuid" => $row["predicateUUID"]);
 										  if($linkAnnotObj->DCcreatorCheck($row["predicateUUID"])){
 												$dcRels["creators"][] = $predicateURI;
 										  }
@@ -597,14 +597,14 @@ class OCitems_Item {
 					 foreach($vars as $predicateURIkey => $predArray){
 						  $assertedPredicates[$predicateURIkey] = $predArray;
 						  $predicateShort = $predArray["abrev"];
-						  $JSON_LD["@context"][$predicateShort] = array("@id" => $predicateURIkey, "@type" => $predArray["type"]);
+						  $JSON_LD["@context"][$predicateShort] = array("@id" => $predicateURIkey, "@type" => $predArray["types"]);
 					 }
 				}
 				if(count($links)>0){
 					 foreach($links as $predicateURIkey => $predArray){
 						  $assertedPredicates[$predicateURIkey] = $predArray;
 						  $predicateShort = $predArray["abrev"];
-						  $JSON_LD["@context"][$predicateShort] = array("@id" => $predicateURIkey, "@type" => $predArray["type"]);
+						  $JSON_LD["@context"][$predicateShort] = array("@id" => $predicateURIkey, "@type" => $predArray["types"]);
 					 }
 				}
 				if(count($assertedPredicates)>0){
@@ -667,10 +667,10 @@ class OCitems_Item {
 	 //adds Dublin Core creator / contributor relations
 	 
 	 
-	 //add document content
+	 //add documents content
 	 function addDocumentJSON($JSON_LD){
 		  
-		  if($this->itemType == "document"){
+		  if($this->itemType == "documents"){
 				$JSON_LD["@context"][self::foafPrefix] = self::foafBaseURI;
 				$docObj = new OCitems_Document;
 				$res = $docObj->getByUUID($this->uuid);
@@ -683,14 +683,14 @@ class OCitems_Item {
 	 
 	 
 	 
-	 //add some details about the person from the database, load in FOAF namespace
+	 //add some details about the persons from the database, load in FOAF namespace
 	 function addPersonJSON($JSON_LD){
 		  
-		  if($this->itemType == "person"){
+		  if($this->itemType == "persons"){
 				$persObj = new OCitems_Person;
 				$pres = $persObj->getByUUID($this->uuid);
 				if(is_array($pres)){
-					 $JSON_LD["type"][] = array("id" => $persObj->foafType);
+					 $JSON_LD["types"][] = array("id" => $persObj->foafType);
 					 $JSON_LD[self::Predicate_familyName] = $persObj->surname;
 					 $JSON_LD[self::Predicate_givenName] = $persObj->givenName;
 				}
@@ -745,7 +745,7 @@ class OCitems_Item {
 					 $JSON_LD["@context"]["geometry"] = "http://geovocab.org/geometry#geometry";
 					 $JSON_LD["@context"]["Point"] = "http://geovocab.org/geometry#Point";
 					 $JSON_LD["@context"]["Polygon"] = "http://geovocab.org/geometry#Polygon";
-					 $JSON_LD["type"] = "FeatureCollection";
+					 $JSON_LD["types"] = "FeatureCollection";
 					 $JSON_LD["features"]= $itemGeoFeatures;
 				}
 		  }
@@ -775,7 +775,7 @@ class OCitems_Item {
 				$activeFeatureNumber = count($itemGeoFeatures) + 1;
 				$itemGeoFeature = array();
 				$itemGeoFeature["id"] = self::nodePrefix_geoJSONfeature.$activeFeatureNumber;
-				$itemGeoFeature["type"] = "Feature";
+				$itemGeoFeature["types"] = "Feature";
 				$itemGeoFeature["geometry"] = $geometryFound;
 				$itemGeoFeature["geometry"]["id"] = self::nodePrefix_geoJSONgeometry.$activeFeatureNumber;
 				$itemGeoFeature["properties"] = $itemGeoFeature["properties"] = $this->geoJSONmakeProperties($geoSpace, "Polygon", $activeFeatureNumber);
@@ -808,8 +808,8 @@ class OCitems_Item {
 				$activeFeatureNumber = count($itemGeoFeatures) + 1;
 				$itemGeoFeature = array();
 				$itemGeoFeature["id"] = self::nodePrefix_geoJSONfeature.$activeFeatureNumber;
-				$itemGeoFeature["type"] = "Feature";
-				$itemGeoFeature["geometry"]["type"] = "Point";
+				$itemGeoFeature["types"] = "Feature";
+				$itemGeoFeature["geometry"]["types"] = "Point";
 				$itemGeoFeature["geometry"]["id"] = self::nodePrefix_geoJSONgeometry.$activeFeatureNumber;
 				$itemGeoFeature["geometry"]["coordinates"] = array($geoSpace["longitude"],
 																				$geoSpace["latitude"]);
@@ -831,8 +831,8 @@ class OCitems_Item {
 				//item has reduced precision geographic data
 				$itemGeoFeature = array();
 				$itemGeoFeature["id"] = self::nodePrefix_geoJSONfeature.$activeFeatureNumber;
-				$itemGeoFeature["type"] = "Feature";
-				$itemGeoFeature["geometry"]["type"] = "Polygon";
+				$itemGeoFeature["types"] = "Feature";
+				$itemGeoFeature["geometry"]["types"] = "Polygon";
 				$itemGeoFeature["geometry"]["id"] = self::nodePrefix_geoJSONgeometry.$activeFeatureNumber;
 				
 				$coordinateArray = array();
@@ -865,11 +865,11 @@ class OCitems_Item {
 		  $itemGeoProperties["id"] = self::nodePrefix_geoJSONproperties.$activeFeatureNumber;
 		  if($geoSpace["uuid"] != $this->uuid){
 				$itemGeoProperties[self::Predicate_geoPropRefType] = "inferred";
-				$sRes = $uriObj->lookupOCitem($geoSpace["uuid"], "subject");
+				$sRes = $uriObj->lookupOCitem($geoSpace["uuid"], "subjects");
 				if(is_array($sRes)){
 					 $itemGeoProperties[self::Predicate_locationRefLabel] = $sRes["label"];
 				}
-				$itemGeoProperties[self::Predicate_locationRef] = $ocGenObj->generateItemURI($geoSpace["uuid"], "subject");
+				$itemGeoProperties[self::Predicate_locationRef] = $ocGenObj->generateItemURI($geoSpace["uuid"], "subjects");
 		  }
 		  else{
 				$itemGeoProperties[self::Predicate_geoPropRefType] = "self";

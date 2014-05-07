@@ -1,7 +1,7 @@
 <?php
 
 
-/*this class creates subject items
+/*this class creates subjects items
 */
 class Importer_Subjects {
     
@@ -15,9 +15,9 @@ class Importer_Subjects {
 	 
 	 public $errors;
 	 
-	 public $expectedProcessSchema = array("sourceID" => array("type" => "xsd:string", "blankOK" => false),
-														"projectUUID" => array("type" => "xsd:string", "blankOK" => false),
-														  "startID" => array("type" => "xsd:integer", "blankOK" => false)
+	 public $expectedProcessSchema = array("sourceID" => array("types" => "xsd:string", "blankOK" => false),
+														"projectUUID" => array("types" => "xsd:string", "blankOK" => false),
+														  "startID" => array("types" => "xsd:integer", "blankOK" => false)
 													  );
 	 
 	 const blankPlaceHolder = "[BLANK]";

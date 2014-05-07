@@ -116,7 +116,7 @@ class OCitems_Manifest {
 	 
 	 
 	 
-	 //validate a subject type of an assertion
+	 //validate a subjects type of an assertion
 	 function validateItemType($itemType){
 		  
 		  $ocGenObj = new OCitems_General;

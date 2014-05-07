@@ -93,11 +93,11 @@ class infoURI {
 	 function lookupOCitem($uuid, $itemType){
 		  $output = false;
 		  
-		  if($itemType == "predicate"){
+		  if($itemType == "predicates"){
 				$predicateObj = new OCitems_Predicate;
 				$output = $predicateObj->getByUUID($uuid);
 		  }
-		  elseif($itemType == "type"){
+		  elseif($itemType == "types"){
 				$ocTypeObj = new OCitems_Type;
 				$output = $ocTypeObj->getByUUID($uuid);
 		  }

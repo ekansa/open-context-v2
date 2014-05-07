@@ -22,7 +22,7 @@ class OCitems_Type {
 	 public $content; //string content (for long properties)
     public $updated;
 	 
-	 const itemType = "type"; //open context itemtype
+	 const itemType = "types"; //open context itemtype
    
     //get data from database
     function getByUUID($uuid){

@@ -151,19 +151,19 @@ class XMLjsonLD_LegacySave  {
 				foreach($result as $row){
 					 $itemUUID = $row["uuid"];
 					 $currentDone = $this->doneURIs;
-					 if($type == "subject"){
+					 if($type == "subjects"){
 						  $this->addSubjectItem($itemUUID);
 					 }
 					 if($type == "media"){
 						  $this->addMediaItem($itemUUID);
 					 }
-					 if($type == "document"){
+					 if($type == "documents"){
 						  $this->addDocItem($itemUUID);
 					 }
-					 if($type == "person"){
+					 if($type == "persons"){
 						  $this->addPersonItem($itemUUID);
 					 }
-					 if($type == "project"){
+					 if($type == "projects"){
 						  $this->addProjectItem($itemUUID);
 					 }
 					 if($this->doneURIs > $currentDone){
@@ -187,7 +187,7 @@ class XMLjsonLD_LegacySave  {
 	 function addToDoList($itemUUID, $type){
 		  $db = $this->startDB();
 
-		  $data = array("uuid" => $itemUUID, "type" => $type, "done" => 0);
+		  $data = array("uuid" => $itemUUID, "types" => $type, "done" => 0);
 		  $success = false;
 		  try{
 				$db->insert("oc_todo", $data);
@@ -199,7 +199,7 @@ class XMLjsonLD_LegacySave  {
 		  return $success;
 	 }
 	 
-	 //add subject item
+	 //add subjects item
 	 function addSubjectItem($itemUUID){
 		 
 		  $this->changedUUIDs = false;
@@ -302,7 +302,7 @@ class XMLjsonLD_LegacySave  {
 				}
 		  
 				if(!$output){
-					 $this->addToDoList($itemUUID, "subject");
+					 $this->addToDoList($itemUUID, "subjects");
 				}
 				
 				$this->noteErrors($errors);
@@ -317,7 +317,7 @@ class XMLjsonLD_LegacySave  {
 	 }
 	 
 	 
-	 //add subject item
+	 //add subjects item
 	 function addMediaItem($itemUUID){
 		 
 		  $this->changedUUIDs = false;
@@ -528,7 +528,7 @@ class XMLjsonLD_LegacySave  {
 				}
 		  
 				if(!$output){
-					 $this->addToDoList($itemUUID, "document");
+					 $this->addToDoList($itemUUID, "documents");
 				}
 				
 				$this->noteErrors($errors);
@@ -637,7 +637,7 @@ class XMLjsonLD_LegacySave  {
 				}
 		  
 				if(!$output){
-					 $this->addToDoList($itemUUID, "person");
+					 $this->addToDoList($itemUUID, "persons");
 				}
 				
 				$this->noteErrors($errors);
@@ -751,7 +751,7 @@ class XMLjsonLD_LegacySave  {
 				}
 		  
 				if(!$output){
-					 $this->addToDoList($itemUUID, "project");
+					 $this->addToDoList($itemUUID, "projects");
 				}
 				
 				$this->noteErrors($errors);
@@ -791,10 +791,10 @@ class XMLjsonLD_LegacySave  {
 					 $this->mediaFileSave($LinkedDataItem); //save the media file.
 				}
 				if($LinkedDataItem->documentContents){
-					 $this->docFileSave($LinkedDataItem); //save the document contents
+					 $this->docFileSave($LinkedDataItem); //save the documents contents
 				}
-				if($LinkedDataItem->itemType == "person"){
-					 $this->personFileSave($LinkedDataItem); //save the document contents
+				if($LinkedDataItem->itemType == "persons"){
+					 $this->personFileSave($LinkedDataItem); //save the documents contents
 				}
 				$JSONld = $LinkedDataItem->makeJSON_LD();
 				/*
@@ -994,9 +994,9 @@ class XMLjsonLD_LegacySave  {
 					 $dataType = "id";
 				}
 				else{
-					 if(isset($actProperty["type"])){
-						  if(strlen($actProperty["type"])>1){
-								$dataType = $actProperty["type"];
+					 if(isset($actProperty["types"])){
+						  if(strlen($actProperty["types"])>1){
+								$dataType = $actProperty["types"];
 						  }
 					 }
 				}
@@ -1085,7 +1085,7 @@ class XMLjsonLD_LegacySave  {
 				
 				if(isset($actProperty["id"])){
 					 $data["objectUUID"] = $actProperty["propUUID"];
-					 $data["objectType"] = "type";
+					 $data["objectType"] = "types";
 				}
 				elseif(isset($actProperty["xsd:string"])){
 					 if(!isset($actProperty["valueID"])){
@@ -1095,10 +1095,10 @@ class XMLjsonLD_LegacySave  {
 						  $data["objectUUID"] = $actProperty["valueID"];
 					 }
 					
-					 $data["objectType"] = $actProperty["type"];
+					 $data["objectType"] = $actProperty["types"];
 				}
 				else{
-					 $data["objectType"] = $actProperty["type"];
+					 $data["objectType"] = $actProperty["types"];
 					 if(array_key_exists(self::booleanLiteral, $actProperty)){
 						  $data["dataNum"] = $actProperty[self::booleanLiteral];
 					 }
@@ -1211,7 +1211,7 @@ class XMLjsonLD_LegacySave  {
 	 //register change in UUIDs
 	 
 	 function saveProjectDC($LinkedDataItem){
-		  if($LinkedDataItem->itemType == "project"){
+		  if($LinkedDataItem->itemType == "projects"){
 				$linkAnnotObj = new Links_linkAnnotation;
 				if(is_array($LinkedDataItem->creators)){
 					 foreach($LinkedDataItem->creators as $pURI){
@@ -1241,7 +1241,7 @@ class XMLjsonLD_LegacySave  {
 	 
 	 function registerUUIDchange($oldUUID, $newUUID, $type){
 		  if($newUUID != false && $newUUID != $oldUUID){
-				$data = array("oldUUID" => $oldUUID, "newUUID" => $newUUID, "type" => $type);
+				$data = array("oldUUID" => $oldUUID, "newUUID" => $newUUID, "types" => $type);
 				$LegacyIDobj = new OCitems_LegacyIDs;
 				$new = $LegacyIDobj->createRecord($data);
 				if($new){

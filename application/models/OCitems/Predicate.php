@@ -31,7 +31,7 @@ class OCitems_Predicate {
 	 public $repo; //repository, used for keeping data in Github 
     public $viewCount;
    
-    const itemType = "predicate"; //Open Context itemtype
+    const itemType = "predicates"; //Open Context itemtype
    
 	 
 	

@@ -35,7 +35,7 @@ class OCitems_LegacyIDs {
             $output = $result[0];
 				$this->oldUUID = $oldUUID;
 				$this->newUUID = $result[0]["newUUID"];
-				$this->type = $result[0]["type"];
+				$this->type = $result[0]["types"];
 				$this->updated = $result[0]["updated"];
 		  }
         return $output;
@@ -59,7 +59,7 @@ class OCitems_LegacyIDs {
             $output = $result[0];
 				$this->oldUUID = $result[0]["oldUUID"];
 				$this->newUUID = $result[0]["newUUID"];
-				$this->type = $result[0]["type"];
+				$this->type = $result[0]["types"];
 				$this->updated = $result[0]["updated"];
 		  }
         return $output;

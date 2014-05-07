@@ -253,7 +253,7 @@ class LegacyController extends Zend_Controller_Action
 		  $legacySaveObj->retrieveBasePersonURI = "http://opencontext/persons/";
 		  $legacySaveObj->retrieveBaseProjectURI = "http://opencontext/projects/";
 		  
-		  $legacySaveObj->toDoList("subject");
+		  $legacySaveObj->toDoList("subjects");
 		  $output = array("done" => $legacySaveObj->doneURIs, "existing" => $legacySaveObj->existingURIs, "errors" => $legacySaveObj->errors);
 		  header('Content-Type: application/json; charset=utf8');
 		  echo json_encode($output,  JSON_PRETTY_PRINT);

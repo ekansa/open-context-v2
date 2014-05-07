@@ -9,7 +9,7 @@ class XMLjsonLD_XpathBasics  {
 	 public $db; //database connection object
 	 public $itemXML;
 	 
-	 public $projectUUID; //current project ID
+	 public $projectUUID; //current projects ID
 	 public $sourceID; //current sourceID
 	 
 	 public $dataInserts; //save data to the database
@@ -61,16 +61,16 @@ class XMLjsonLD_XpathBasics  {
 				}
 				elseif(stristr($uri, "projects")){
 					 $itemXML = simplexml_load_string($itemXMLstring);
-					 $itemXML->registerXPathNamespace("oc", OpenContext_OCConfig::get_namespace("oc", "project"));
-					 $itemXML->registerXPathNamespace("arch", OpenContext_OCConfig::get_namespace("arch", "project"));
+					 $itemXML->registerXPathNamespace("oc", OpenContext_OCConfig::get_namespace("oc", "projects"));
+					 $itemXML->registerXPathNamespace("arch", OpenContext_OCConfig::get_namespace("arch", "projects"));
 					 $itemXML->registerXPathNamespace("dc", OpenContext_OCConfig::get_namespace("dc"));
 					 $itemXML->registerXPathNamespace("gml", OpenContext_OCConfig::get_namespace("gml"));
 					 $LinkedDataItem = $this->XMLprojectItemBasics($LinkedDataItem, $itemXML);
 				}
 				elseif(stristr($uri, "persons")){
 					 $itemXML = simplexml_load_string($itemXMLstring);
-					 $itemXML->registerXPathNamespace("oc", OpenContext_OCConfig::get_namespace("oc", "person"));
-					 $itemXML->registerXPathNamespace("arch", OpenContext_OCConfig::get_namespace("arch", "person"));
+					 $itemXML->registerXPathNamespace("oc", OpenContext_OCConfig::get_namespace("oc", "persons"));
+					 $itemXML->registerXPathNamespace("arch", OpenContext_OCConfig::get_namespace("arch", "persons"));
 					 $itemXML->registerXPathNamespace("dc", OpenContext_OCConfig::get_namespace("dc"));
 					 $itemXML->registerXPathNamespace("gml", OpenContext_OCConfig::get_namespace("gml"));
 					 $LinkedDataItem = $this->XMLpersonItemBasics($LinkedDataItem, $itemXML);
@@ -202,7 +202,7 @@ class XMLjsonLD_XpathBasics  {
 
 		  //for documents / diaries
 		  if ($mediaItem->xpath("//arch:internalDocument/arch:string")) {
-				$LinkedDataItem->itemType = "document";
+				$LinkedDataItem->itemType = "documents";
 				$mediaItem->registerXPathNamespace("xhtml", OpenContext_OCConfig::get_namespace("xhtml"));
 				if($mediaItem->xpath("//arch:internalDocument/arch:string/xhtml:div")){
 					 foreach ($mediaItem->xpath("//arch:internalDocument/arch:string/xhtml:div") as $divNote) {
@@ -292,7 +292,7 @@ class XMLjsonLD_XpathBasics  {
 						  $stableID = (string)$stableID;
 						  $data = array("uuid" => $LinkedDataItem->uuid,
 											 "projectUUID" => $LinkedDataItem->projectUUID,
-											 "itemType" => "project",
+											 "itemType" => "projects",
 											 "stableID" => $stableID,
 											 "stableType" => $stableType
 											 );
@@ -304,8 +304,8 @@ class XMLjsonLD_XpathBasics  {
 	
 		  $DCobj = new Links_tempDC;
 		  foreach ($itemXML->xpath("//oc:metadata/dc:subject") as $subject) {
-				$subject = (string)$subject;
-				$subject = strtolower($subject);
+				$subjects = (string)$subject;
+				$subjects = strtolower($subject);
 				if(strstr($subject, ",")){
 					 $subjects = explode(",", $subject);
 				}
@@ -315,14 +315,14 @@ class XMLjsonLD_XpathBasics  {
 				foreach($subjects as $actSubject){
 					 $actSubject = trim($subject);
 					 if(strlen( $actSubject)>1){
-						  $data = array("term" =>  $actSubject, "type" => false, "uri" => false);
+						  $data = array("term" =>  $actSubject, "types" => false, "uri" => false);
 						  $DCobj->createRecord($data);
 					 }
 				}
 		  }
 		  foreach ($itemXML->xpath("//oc:metadata/dc:coverage") as $subject) {
-				$subject = (string)$subject;
-				$subject = strtolower($subject);
+				$subjects = (string)$subject;
+				$subjects = strtolower($subject);
 				if(strstr($subject, ",")){
 					 $subjects = explode(",", $subject);
 				}
@@ -332,7 +332,7 @@ class XMLjsonLD_XpathBasics  {
 				foreach($subjects as $actSubject){
 					 $actSubject = trim($subject);
 					 if(strlen( $actSubject)>1){
-						  $data = array("term" =>  $actSubject, "type" => false, "uri" => false);
+						  $data = array("term" =>  $actSubject, "types" => false, "uri" => false);
 						  $DCobj->createRecord($data);
 					 }
 				}
@@ -345,7 +345,7 @@ class XMLjsonLD_XpathBasics  {
 
 	
 	/*
-	This function gets information from person items
+	This function gets information from persons items
 	*/
 	function XMLpersonItemBasics($LinkedDataItem, $itemXML){
 		
@@ -403,7 +403,7 @@ class XMLjsonLD_XpathBasics  {
 					 
 					 $data = array("uuid" => $LinkedDataItem->uuid,
 										"projectUUID" => $LinkedDataItem->projectUUID,
-										"itemType" => "person",
+										"itemType" => "persons",
 										"stableID" => $stableID,
 										"stableType" => "orcid"
 										);
@@ -733,7 +733,7 @@ class XMLjsonLD_XpathBasics  {
 				foreach($obsXMLnode->xpath($xpathPrefix."arch:properties/arch:property") as $propNode){
 					 $actProperty = array();
 					 $actProperty["varLabel"] = false;
-					 $actProperty["type"] = false;
+					 $actProperty["types"] = false;
 					 $showStringLiteral = true;
 					 foreach($propNode->xpath("arch:variableID") as $xpathRes) {
 						  $varUUID = (string)$xpathRes;
@@ -776,7 +776,7 @@ class XMLjsonLD_XpathBasics  {
 								$intVal = (string)$xpathRes;
 								if(is_numeric($value)){
 									 $actProperty[self::integerLiteral] = $intVal + 0;
-									 $actProperty["type"] = self::integerLiteral;
+									 $actProperty["types"] = self::integerLiteral;
 									 $varType = "integer";
 									 $showStringLiteral = false;
 								}
@@ -787,7 +787,7 @@ class XMLjsonLD_XpathBasics  {
 								$decVal = (string)$xpathRes;
 								if(is_numeric($value)){
 									 $actProperty[self::decimalLiteral] = $decVal + 0;
-									 $actProperty["type"] = self::decimalLiteral;
+									 $actProperty["types"] = self::decimalLiteral;
 									 $varType = "decimal";
 									 $showStringLiteral = false;
 								}
@@ -798,7 +798,7 @@ class XMLjsonLD_XpathBasics  {
 						  foreach($propNode->xpath("arch:date") as $xpathRes) {
 								$dateVal = (string)$xpathRes;
 								$actProperty[self::dateLiteral] = $dateVal;
-								$actProperty["type"] = self::dateLiteral;
+								$actProperty["types"] = self::dateLiteral;
 						  }
 					 }
 					 
@@ -827,7 +827,7 @@ class XMLjsonLD_XpathBasics  {
 						  if($calendardTest){
 								$valueDate = date("Y-m-d", strtotime($cal_test_string));
 								$actProperty[self::dateLiteral] = $valueDate;
-								$actProperty["type"] = self::dateLiteral;
+								$actProperty["types"] = self::dateLiteral;
 								$showStringLiteral = false;
 						  }
 					 }
@@ -835,19 +835,19 @@ class XMLjsonLD_XpathBasics  {
 						  $boolVal = strtolower($value);
 						  if($boolVal == "yes" || $boolVal == "true" || $boolVal == "1"){
 								$actProperty[self::booleanLiteral] = true;
-								$actProperty["type"] = self::booleanLiteral;
+								$actProperty["types"] = self::booleanLiteral;
 								$showStringLiteral = false;
 						  }
 						  else{
 								$actProperty[self::booleanLiteral] = false;
-								$actProperty["type"] = self::booleanLiteral;
+								$actProperty["types"] = self::booleanLiteral;
 								$showStringLiteral = false;
 						  }
 					 }
 					 
 					 if($showStringLiteral){
 						  $actProperty[self::stringLiteral] = $value;
-						  $actProperty["type"] = self::stringLiteral;
+						  $actProperty["types"] = self::stringLiteral;
 					 }
 					 
 					 if($varUUID != false){

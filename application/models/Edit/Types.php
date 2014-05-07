@@ -14,7 +14,7 @@ class Edit_Types  {
 	 const decimalLiteral = "xsd:double"; //numeric
 	 const booleanLiteral = "xsd:boolean"; //numeric
 	 const dateLiteral = "xsd:date";
-	 const typeObject = "type";
+	 const typeObject = "types";
 	 
 	 //converts types into string values for a given predicate
 	 function convertTypePredicateToString($predicateUUID, $useTypeNoteAsString = false){

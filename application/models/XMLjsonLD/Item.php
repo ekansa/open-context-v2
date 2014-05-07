@@ -21,7 +21,7 @@ class XMLjsonLD_Item  {
 	 public $contributors;
 	 public $creators;
 	 
-	 //class, usually used with subject items
+	 //class, usually used with subjects items
 	 public $itemClassURI;  //any object URI of an RDF type predicate
 	 
 	 //media specific
@@ -40,7 +40,7 @@ class XMLjsonLD_Item  {
 	 //documents specific
 	 public $documentContents;
 	 
-	 //person specific
+	 //persons specific
 	 public $surname; //person's last name
 	 public $givenName; //persons first name
 	 public $foafType = "foaf:Person"; 
@@ -63,7 +63,7 @@ class XMLjsonLD_Item  {
 		  $JSON_LD = array();
 		  
 		  $JSON_LD["@context"] = array(
-				"type" => "@type",
+				"types" => "@type",
 				"id" => "@id",
 				"rdfs" => "http://www.w3.org/2000/01/rdf-schema#",
 				"dc-elems" => "http://purl.org/dc/elements/1.1/",
@@ -159,7 +159,7 @@ class XMLjsonLD_Item  {
 												$actType = "@id";
 										  }
 										  else{
-												$actType = $values["type"];
+												$actType = $values["types"];
 										  }
 										  /*
 										  if(!$actType){
@@ -171,7 +171,7 @@ class XMLjsonLD_Item  {
 										  
 										  if(!array_key_exists($varURI, $vars)){
 												$actVarNumber = count($vars) + 1;
-												$vars[$varURI] = array("type" => $actType, "abrev" => "var-".$actVarNumber);
+												$vars[$varURI] = array("types" => $actType, "abrev" => "var-".$actVarNumber);
 										  }
 									 }
 								}
@@ -179,7 +179,7 @@ class XMLjsonLD_Item  {
 								foreach($vars as $varURI => $varArray){
 									 $abrev = $varArray["abrev"];
 									 $JSON_LD["@context"][$abrev] = array("@id" => $varURI,
-																						"@type" => $varArray["type"]);
+																						"@type" => $varArray["types"]);
 								
 								}
 								
@@ -192,7 +192,7 @@ class XMLjsonLD_Item  {
 												$outputValue = array("id" => $values["id"]);
 										  }
 										  else{
-												$actType = $values["type"];
+												$actType = $values["types"];
 												$outputValue = $values[$actType];
 										  }
 										  
@@ -214,14 +214,14 @@ class XMLjsonLD_Item  {
 								foreach($observation["links"] as $predicateKey => $objectURIs){
 									 if(!array_key_exists($predicateKey, $links)){
 										  $actLinkNumber = count($links) + 1;
-										  $links[$predicateKey] = array("type" => "@id", "abrev" => "link-".$actLinkNumber);
+										  $links[$predicateKey] = array("types" => "@id", "abrev" => "link-".$actLinkNumber);
 									 }
 								}
 								
 								foreach($links as $predicateKey => $linkArray){
 									 $abrev = $linkArray["abrev"];
 									 $JSON_LD["@context"][$abrev] = array("@id" => $predicateKey,
-																						"@type" => $linkArray["type"]);
+																						"@type" => $linkArray["types"]);
 								}
 								
 								foreach($observation["links"] as $predicateKey => $objectURIs){
@@ -238,7 +238,7 @@ class XMLjsonLD_Item  {
 				}
 		  }
 		 
-		  if($this->itemType == "subject"){
+		  if($this->itemType == "subjects"){
 				if(is_array($this->geospace)){
 					 $geospace = $this->geospace;
 					 $JSON_LD["oc-gen:locationRef"][] = array("id" => $geospace["refURI"]);
@@ -290,7 +290,7 @@ class XMLjsonLD_Item  {
 				$JSON_LD["oc-gen:has-content"] = $this->documentContents;
 		  }
 		  
-		  if($this->itemType == "person"){
+		  if($this->itemType == "persons"){
 				$JSON_LD["@context"]["foaf"] = "http://xmlns.com/foaf/spec/";
 				$JSON_LD["rdfs:type"][] = array("id" => $this->foafType);
 				$JSON_LD["foaf:familyName"] = $this->surname;

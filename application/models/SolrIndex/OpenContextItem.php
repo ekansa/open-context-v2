@@ -9,7 +9,7 @@ it needs to be updated for Solr 4 and a revised Solr Schema
 */
 class SolrIndex_OpenContextItem {
     
-    public $itemUUID; //single item id main document id.
+    public $itemUUID; //single item id main documents id.
     public $itemLabel; //item lable
     public $labelSort; //item label sort order
     public $documentType; //singe item, string
@@ -60,7 +60,7 @@ class SolrIndex_OpenContextItem {
 		      "timeEnd" => latest Date
 		      "timeSpan" => earlydate :: latedate,
 		      "chronoSet" => chrono tag set label,
-		      "chronoTagger" => name of person making chronotag)
+		      "chronoTagger" => name of persons making chronotag)
     
     earlydate :: latedate can be parsed to make more general facets.
     */
@@ -587,7 +587,7 @@ class SolrIndex_OpenContextItem {
 		  }
 		
 		  $actProp = array("value" => $value,
-			  "type" => $type,
+			  "types" => $type,
 			  "path" => $parentPath,
 			  "hashPath" => $hashPath,
 			  "setType" => $setType,
@@ -658,7 +658,7 @@ class SolrIndex_OpenContextItem {
 		//first create a root property for the link relationship
 		$path = "linkRel";
 		$linkProp = array("value" => $relURI,
-				"type" => "linkRel",
+				"types" => "linkRel",
 				"path" => $path,
 				"hashPath" => "top_lrel",
 				"parentArray" => false
@@ -676,7 +676,7 @@ class SolrIndex_OpenContextItem {
 		//first create a root property for the link relationship
 		$path = $targURI;
 		$linkProp = array("value" => $relURI,
-				"type" => "linkRel",
+				"types" => "linkRel",
 				"path" => $path,
 				"hashPath" => sha1($path)."_lrel",
 				"parentArray" => array(0=>$targURI)
@@ -696,7 +696,7 @@ class SolrIndex_OpenContextItem {
 		//next create a root property for the target URI
 		$path = "linkEnt";
 		$linkProp = array("value" => $targURI,
-				"type" => "linkEnt",
+				"types" => "linkEnt",
 				"path" => $path,
 				"hashPath" => "top_lent",
 				"parentArray" => false
@@ -716,7 +716,7 @@ class SolrIndex_OpenContextItem {
 		//next create a root property for the target URI
 		$path = $relURI;
 		$linkProp = array("value" => $targURI,
-			"type" => "linkEnt",
+			"types" => "linkEnt",
 			"path" => $path,
 			"hashPath" => sha1($path)."_lent",
 			"parentArray" => array(0=>$relURI)
@@ -897,7 +897,7 @@ class SolrIndex_OpenContextItem {
     
     
     /*
-    This function makes a solr document for a generic Open Context item 
+    This function makes a solr documents for a generic Open Context item 
      
     
     */
@@ -943,7 +943,7 @@ class SolrIndex_OpenContextItem {
 		  
 		  $solrDocument->project_name = $this->projectName;
 		  $solrDocument->project_id = $this->projectUUID;
-		  $solrDocument->item_type = $this->documentType; //type of document (spatial, media, etc.)
+		  $solrDocument->item_type = $this->documentType; //type of documents (spatial, media, etc.)
 		  
 		  
 		  /*
@@ -1157,7 +1157,7 @@ class SolrIndex_OpenContextItem {
 		  }
 		  if(is_array($this->subjects)){
 				foreach($this->subjects as $subject){
-					 $solrDocument->setMultiValue("subject", $subject);
+					 $solrDocument->setMultiValue("subjects", $subject);
 				}
 		  }
 		  if($this->license != false){

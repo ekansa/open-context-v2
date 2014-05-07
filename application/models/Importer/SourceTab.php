@@ -11,7 +11,7 @@ class Importer_SourceTab {
 	 public $projectUUID;
 	 public $label;
 	 public $filename;
-	 public $rootUUID; //uuid of the root subject item
+	 public $rootUUID; //uuid of the root subjects item
 	 public $licenseURI; //uri for the copyright license
 	 public $note;
 	 public $updated;

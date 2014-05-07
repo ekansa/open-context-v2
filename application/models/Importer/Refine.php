@@ -17,8 +17,8 @@ class Importer_Refine  {
 	 const sourceIDprefix = "zref_";
 	 
 	 public $expectedLoadFieldSchema = array(
-											  "projectUUID" => array("type" => "xsd:string", "blankOK" => false),
-											  "refineProjectID" => array("type" => "xsd:string", "blankOK" => true)
+											  "projectUUID" => array("types" => "xsd:string", "blankOK" => false),
+											  "refineProjectID" => array("types" => "xsd:string", "blankOK" => true)
 											  );
 	 
 	 
@@ -105,7 +105,7 @@ class Importer_Refine  {
 		  $output = false;
 		  $this->projectUUID = $requestParams["projectUUID"];
 		  $this->refineProjectID = $requestParams["refineProjectID"];
-		  $model = $this->getModelData(); //gets the project model (schema) from Refine
+		  $model = $this->getModelData(); //gets the projects model (schema) from Refine
 		  if(is_array($model)){
 				$this->sourceID = $this->refineProjectIDtoSourceID($this->refineProjectID);
 				$fieldsObj = new Importer_Fields;
@@ -176,7 +176,7 @@ class Importer_Refine  {
 	 
 	 
 	 
-	 //convert an open-context source ID to a Refine project ID
+	 //convert an open-context source ID to a Refine projects ID
 	 function sourceIDtoRefineProjectID($sourceID){
 		  $output = false;  
 		  if(strstr($sourceID, self::sourceIDprefix)){
@@ -185,7 +185,7 @@ class Importer_Refine  {
 		  return $output;
 	 }
 	 
-	 //convert a Refine project ID to an Open Context sourceID
+	 //convert a Refine projects ID to an Open Context sourceID
 	 function refineProjectIDtoSourceID($refineProjectID){
 		  return self::sourceIDprefix.$refineProjectID;
 	 }

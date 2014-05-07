@@ -19,7 +19,7 @@ class Links_linkAnnotation {
 	 public $sourceID;
 	 public $predicateURI;
 	 public $objectURI;
-	 public $creatorUUID; // itentifier of a person responsible for making the annotation
+	 public $creatorUUID; // itentifier of a persons responsible for making the annotation
 	 public $updated;
 	 
 	 public $lookUpLabels = true; //look up the labels to the linked entities
@@ -28,17 +28,17 @@ class Links_linkAnnotation {
 	 const DCtermsCreator = "http://purl.org/dc/terms/creator";
 	 const DCtermsContributor = "http://purl.org/dc/terms/contributor";
 	 
-	 public $expectedSchema = array("uuid" => array("type" => "xsd:string", "blankOK" => false),
-											  "subjectType" => array("type" => "OCitemType", "blankOK" => false),
-											  "projectUUID" => array("type" => "xsd:string", "blankOK" => false),
-											  "sourceID" => array("type" => "xsd:string", "blankOK" => true),
-											  "predicateURI" => array("type" => "xsd:string", "blankOK" => false),
-											  "objectURI" => array("type" => "xsd:string", "blankOK" => false),
-											  "creatorUUID" => array("type" => "xsd:string", "blankOK" => true)
+	 public $expectedSchema = array("uuid" => array("types" => "xsd:string", "blankOK" => false),
+											  "subjectType" => array("types" => "OCitemType", "blankOK" => false),
+											  "projectUUID" => array("types" => "xsd:string", "blankOK" => false),
+											  "sourceID" => array("types" => "xsd:string", "blankOK" => true),
+											  "predicateURI" => array("types" => "xsd:string", "blankOK" => false),
+											  "objectURI" => array("types" => "xsd:string", "blankOK" => false),
+											  "creatorUUID" => array("types" => "xsd:string", "blankOK" => true)
 											  );
 	 
-	 public $expectedDeleteSchema = array("uuid" => array("type" => "xsd:string", "blankOK" => false),
-													  "hashID" => array("type" => "xsd:string", "blankOK" => false));
+	 public $expectedDeleteSchema = array("uuid" => array("types" => "xsd:string", "blankOK" => false),
+													  "hashID" => array("types" => "xsd:string", "blankOK" => false));
 	 
 	  //get data from database
     function getByUUID($uuid, $predicateURI = false, $objectURI = false){
@@ -172,7 +172,7 @@ class Links_linkAnnotation {
 				$predData = $predicateObj->getByLabel($relationLabel, $projectUUIDs, "link");
 				if(is_array($predData)){
 					 $data = array("uuid" => $predicateObj->uuid,
-										"subjectType" => "predicate",
+										"subjectType" => "predicates",
 										"projectUUID" => $predicateObj->projectUUID,
 										"sourceID" => $predicateObj->sourceID,
 										"predicateURI" => self::SKOScloseMatch,
@@ -203,7 +203,7 @@ class Links_linkAnnotation {
 				$predData = $predicateObj->getByLabel($relationLabel, $projectUUIDs, "link");
 				if(is_array($predData)){
 					 $data = array("uuid" => $predicateObj->uuid,
-										"subjectType" => "predicate",
+										"subjectType" => "predicates",
 										"projectUUID" => $predicateObj->projectUUID,
 										"sourceID" => $predicateObj->sourceID,
 										"predicateURI" => self::SKOScloseMatch,
