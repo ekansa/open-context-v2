@@ -18,7 +18,7 @@ class OCitems_Manifest {
 	 public $repo;
 	 public $classURI;
 	 public $label;
-	 public $desPropUUID; //UUID for the descriptive labeling property
+	 public $desPredicateUUID; //UUID for the descriptive labeling property
 	 public $views;
 	 public $indexed;
 	 public $vcontrol;
@@ -52,7 +52,7 @@ class OCitems_Manifest {
 				$this->repo = $result[0]["repo"];
 				$this->classURI = $result[0]["classURI"];
 				$this->label = $result[0]["label"];
-				$this->desPropUUID = $result[0]["desPropUUID"];
+				$this->desPredicateUUID = $result[0]["desPredicateUUID"];
 				$this->views = $result[0]["views"];
 				$this->indexed = $result[0]["indexed"];
 				$this->vcontrol = $result[0]["vcontrol"];
